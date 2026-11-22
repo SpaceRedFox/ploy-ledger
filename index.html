@@ -35,8 +35,8 @@
             * Tab 1: "➕ บันทึกรายการ" (Default) -> Step 1: Date (with Today shortcut), Step 2: Main Category, Step 3: Sub-Category, Step 4: Amount + Quick-Add, Step 5: Note.
             * Tab 2: "📅 Daily" -> Pay-Cycle toggle, KPIs, 4-category stacked bar, filter pills & history.
             * Tab 3: "📊 Dashboard" -> Annual KPIs, 12-month bar chart, 12-month table with auto CURRENT highlight & click drill-down.
-       4. NET BALANCE CONDITIONAL TEXT COLOR RULES (LOCKED):
-          - Net Balance > 5,000.00 THB (> 500000 satang)        -> Black text
+       4. NET BALANCE CONDITIONAL TEXT COLOR RULES:
+          - Net Balance > 5,000.00 THB (> 500000 satang)        -> Black text (Day) / Grey text (Night)
           - Net Balance < 0.00 THB (< 0 satang)                -> Red text
           - Net Balance >= 0.00 THB and <= 5,000.00 THB        -> Orange text
        ============================================================================ */
@@ -112,8 +112,8 @@
       --accent-sky: #38BDF8;
       --accent-sky-text: #090D13;
 
-      /* Net Balance Conditional Text Colors */
-      --net-black: #000000;
+      /* Net Balance Conditional Text Colors (Adjusted to Grey for Night Mode) */
+      --net-black: #9BA6B4;
       --net-red: #FB7185;
       --net-orange: #FB923C;
 
@@ -585,7 +585,6 @@
     /* Net Balance Conditional Text Color Only (No Card Box Changes) */
     .net-bal-black {
       color: var(--net-black) !important;
-      text-shadow: 0 0 1px rgba(255, 255, 255, 0.35);
     }
     .net-bal-red { color: var(--net-red) !important; }
     .net-bal-orange { color: var(--net-orange) !important; }
@@ -1067,10 +1066,10 @@
     </nav>
 
     <!-- ======================================================================
-         TAB 1: ➕ บันทึกรายการ (DEFAULT ON LOAD - DATE FIRST)
+         TAB 1: ➕ บันทึกรายการ (DEFAULT ON LOAD - FULL WIDTH MATCHING TOP CARD)
          ====================================================================== -->
     <main id="tabEntry">
-      <div class="pixel-box pixel-rivets" style="padding: 16px; max-width: 680px; margin: 0 auto;">
+      <div class="pixel-box pixel-rivets" style="padding: 16px; width: 100%;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
           <h2 id="entryFormTitle" style="margin: 0; font-size: 18px; font-weight: 800; color: var(--accent-gold);">
             ➕ บันทึกรายการใหม่
@@ -1509,8 +1508,8 @@
     }
 
     /**
-     * NET BALANCE CONDITIONAL TEXT COLOR RULES (LOCKED IN SPEC v1.0.4):
-     * 1. > 5,000.00 THB (> 500000 satang)        -> Black (.net-bal-black)
+     * NET BALANCE CONDITIONAL TEXT COLOR RULES:
+     * 1. > 5,000.00 THB (> 500000 satang)        -> Black (Day) / Grey (Night) (.net-bal-black)
      * 2. < 0.00 THB (< 0 satang)                -> Red (.net-bal-red)
      * 3. >= 0.00 THB and <= 5,000.00 THB        -> Orange (.net-bal-orange)
      */
