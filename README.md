@@ -2,7 +2,7 @@
 
 A single-file, offline-first personal income and expense tracker built with a **Classic 16-Bit Retro Pixel** aesthetic. Designed specifically around real-world salary cycles rather than rigid calendar months.
 
-🔗 **Live Demo:** [https://SpaceRedFox.github.io/ploy-ledger/](https://SpaceRedFox.github.io/ploy-ledger/)
+🔗 **Live Demo:** [https://spaceredfox.github.io/ploy-ledger/](https://spaceredfox.github.io/ploy-ledger/)
 
 ---
 
