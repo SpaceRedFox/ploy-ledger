@@ -1,113 +1,114 @@
 <!DOCTYPE html>
-<html lang="th" data-theme="dark">
+<html lang="th" data-theme="day">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0D1117" id="metaThemeColor" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="PLOY'S LEDGER" />
-  <title>PLOY'S LEDGER // 16-Bit Retro Edition v1.0.3</title>
+  <meta name="theme-color" content="#F4F1EA" />
+  <title>PLOY'S LEDGER // 16-Bit Retro Edition</title>
 
-  <!-- Typography: JetBrains Mono (16px Base for iOS Anti-Zoom & High Legibility) -->
+  <!-- Typography: JetBrains Mono (Required for Thai & English) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
     /* ============================================================================
-       MASTER SPECIFICATION LOCK (SRS v1.0.2 - IMMUTABLE CORE RULES)
+       MASTER SPECIFICATION LOCK — PLOY'S LEDGER (SRS v1.0.4)
        ============================================================================
-       1. EXACT TAXONOMY LOCK (4 Main Categories, 25 Exact Sub-Categories):
-          - Income (5): ["Salary", "Bonus", "Dividend", "Interest", "Others"]
-          - Savings (5): ["Retirement_PVD", "Emergency_Cash", "Emergency_AOTCOOP", "Travel", "Investment"]
-          - Fixed_Expense (6): ["WHT", "Life/Health Insurance", "Car Insurance", "Condo Maintenance Fee", "Personal Trainer", "Debt Repayment"]
-          - Variable_Expense (9): ["Food & Beverage", "Non Food", "Utilities", "Gasoline", "Subscription", "Credit Card Installment", "Books & Education", "Bread-Making", "Others"]
-       2. STRICT 2-MODE THEME SYSTEM:
-          - Only 2 explicit modes: "DAY" (16-Bit Pastel) and "NIGHT" (16-Bit Modern Black, zero purple).
-          - Initial default on first visit (when no saved theme_mode exists): 06:00-17:59 = "DAY", 18:00-05:59 = "NIGHT".
-          - Header button toggles directly between "☀️ Day" and "🌙 Night" in 1 tap.
-       3. DATA SCHEMA & DUAL PAY-CYCLE ENGINE:
-          - LocalStorage keys: `pixel_ledger_txs_v1` & `pixel_ledger_cfg_v1` (`schema_version: "1.0.0"`).
-          - Integer satang (`amount_satang = Math.round(thb * 100)`), ISO date `YYYY-MM-DD`, UI date `22 Nov 2026`.
-          - 26TH PAY CYCLE (Sat/Sun adjusted backward to Friday, counts toward next month) & CALENDAR (1-31).
-          - 3 Tabs:
-            * Tab 1: "➕ บันทึกรายการ" (Default) -> Step 1: Date (with Today shortcut), Step 2: Main Category, Step 3: Sub-Category, Step 4: Amount + Quick-Add, Step 5: Note.
-            * Tab 2: "📅 Daily" -> Pay-Cycle toggle, KPIs, 4-category stacked bar, filter pills & history.
-            * Tab 3: "📊 Dashboard" -> Annual KPIs, 12-month bar chart, 12-month table with auto CURRENT highlight & click drill-down.
+       1. APP IDENTITY:
+          - App Name: PLOY'S LEDGER
+          - Aesthetic: Classic 16-Bit Gaming Retro Pixelate (0px crisp edges, hard shadows)
+          - Themes (2 Modes Only): Day Mode (Pastel) & Night Mode (Modern Black, NO purple)
+          - Font: JetBrains Mono (16px base for mobile ergonomics & anti-zoom)
+       2. LOCKED TAXONOMY (4 Main Categories & 25 Sub-Categories):
+          - Income: Salary, Bonus, Dividend, Interest, Others
+          - Savings: Retirement_PVD, Emergency_Cash, Emergency_AOTCOOP, Travel, Investment
+          - Fixed_Expense: WHT, Life/Health Insurance, Car Insurance, Condo Maintenance Fee, Personal Trainer, Debt Repayment
+          - Variable_Expense: Food & Beverage, Non Food, Utilities, Gasoline, Subscription, Credit Card Installment, Books & Education, Bread-Making, Others
+       3. DATA PRECISION & FORMAT:
+          - Currency: THB stored as exact integer satang (`amount_satang = Math.round(thb * 100)`)
+          - Date Display Format: Short English Month ("22 Nov 2026")
+       4. NET BALANCE COLOR RULES (LOCKED):
+          - Net Balance > 5,000.00 THB (> 500000 satang)        -> Black (#0F172A in Day / #F8FAFC legible black-contrast in Night)
+          - Net Balance < 0.00 THB (< 0 satang)                -> Red (#DC2626 in Day / #F87171 in Night)
+          - Net Balance >= 0.00 THB and <= 5,000.00 THB        -> Orange (#EA580C in Day / #FB923C in Night)
+       5. NAVIGATION & VIEWS (3 TABS):
+          - Tab 1 (Default): ➕ บันทึกรายการ (Order: 1. Date -> 2. Main Cat -> 3. Sub Cat -> 4. Amount -> 5. Note)
+          - Tab 2: 📅 Daily (Dual Pay-Cycle: 26th Pay Cycle w/ Weekend-to-Friday Adjustment vs Calendar 1-31)
+          - Tab 3: 📊 Dashboard (Annual Summary, 12-Month Bar Chart, Current/Selected Month Highlight, 2x2 Sub-Category Drill-Down)
+       6. DATA PORTABILITY & SECURITY:
+          - Local-First (`localStorage`), Export CSV (UTF-8 BOM), Copy TSV for Google Sheets, Export/Import JSON w/ Schema Validation, 4-6 Digit PIN Lock (SHA-256)
        ============================================================================ */
 
-    :root, [data-theme="light"] {
-      /* Day Mode: Warm Cream & Crisp Pastel 16-Bit Retro */
-      --bg-base: #F7F4EB;
+    :root,
+    [data-theme="day"] {
+      --bg-canvas: #F4F1EA;
       --bg-grid: rgba(30, 41, 59, 0.06);
-      --bg-panel: #FFFDF8;
-      --bg-panel-alt: #EFECE1;
+      --bg-card: #FFFDF9;
+      --bg-subtle: #EAE5D9;
       --bg-input: #FFFFFF;
-      --border-outer: #1E2430;
-      --border-inner: #8C95A6;
-      --highlight: #FFFFFF;
-      --shadow-hard: #1E2430;
+      --border-main: #1E293B;
+      --border-muted: #94A3B8;
+      --shadow-hard: #1E293B;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-inverse: #FFFFFF;
 
-      --text-main: #18202C;
-      --text-muted: #475569;
-      --text-dim: #64748B;
-
-      /* Category Palette (Day) */
-      --cat-income: #0D9488;
-      --cat-income-bg: #CCFBF1;
-      --cat-savings: #0284C7;
+      /* Pastel 16-Bit Category Accents */
+      --cat-income: #15803D;
+      --cat-income-bg: #DCFCE7;
+      --cat-savings: #0369A1;
       --cat-savings-bg: #E0F2FE;
-      --cat-fixed: #D97706;
+      --cat-fixed: #B45309;
       --cat-fixed-bg: #FEF3C7;
-      --cat-variable: #E11D48;
+      --cat-variable: #BE123C;
       --cat-variable-bg: #FFE4E6;
 
-      --accent-gold: #EAB308;
-      --accent-gold-text: #18202C;
-      --accent-sky: #0284C7;
-      --accent-sky-text: #FFFFFF;
+      /* Net Balance Conditional Colors (Day Mode) */
+      --net-black: #0F172A;
+      --net-red: #DC2626;
+      --net-orange: #EA580C;
 
-      --row-current-bg: rgba(13, 148, 136, 0.12);
-      --row-selected-bg: rgba(234, 179, 8, 0.24);
+      --accent-primary: #0284C7;
+      --accent-primary-text: #FFFFFF;
+      --highlight-row: #FEF9C3;
     }
 
-    [data-theme="dark"] {
-      /* Night Mode: Modern Obsidian & Slate 16-Bit Retro (Zero Purple) */
-      --bg-base: #0D1117;
-      --bg-grid: rgba(148, 163, 184, 0.05);
-      --bg-panel: #161B22;
-      --bg-panel-alt: #21262D;
-      --bg-input: #090D13;
-      --border-outer: #010409;
-      --border-inner: #3B4452;
-      --highlight: #2D3542;
-      --shadow-hard: #010409;
+    [data-theme="night"] {
+      --bg-canvas: #090A0F;
+      --bg-grid: rgba(255, 255, 255, 0.04);
+      --bg-card: #12151E;
+      --bg-subtle: #1B202E;
+      --bg-input: #0D1017;
+      --border-main: #475569;
+      --border-muted: #334155;
+      --shadow-hard: #000000;
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-inverse: #090A0F;
 
-      --text-main: #E6EDF3;
-      --text-muted: #9BA6B4;
-      --text-dim: #6E7681;
-
-      /* Category Palette (Night - High-contrast Pastel-Neon on Obsidian) */
-      --cat-income: #34D399;
-      --cat-income-bg: rgba(52, 211, 153, 0.15);
+      /* Modern Black High-Contrast Category Accents (No Purple) */
+      --cat-income: #4ADE80;
+      --cat-income-bg: rgba(74, 222, 128, 0.14);
       --cat-savings: #38BDF8;
-      --cat-savings-bg: rgba(56, 189, 248, 0.15);
+      --cat-savings-bg: rgba(56, 189, 248, 0.14);
       --cat-fixed: #FBBF24;
-      --cat-fixed-bg: rgba(251, 191, 36, 0.15);
+      --cat-fixed-bg: rgba(251, 191, 36, 0.14);
       --cat-variable: #FB7185;
-      --cat-variable-bg: rgba(251, 113, 133, 0.15);
+      --cat-variable-bg: rgba(251, 113, 133, 0.14);
 
-      --accent-gold: #FBBF24;
-      --accent-gold-text: #0D1117;
-      --accent-sky: #38BDF8;
-      --accent-sky-text: #090D13;
+      /* Net Balance Conditional Colors (Night Mode) */
+      --net-black: #F8FAFC;
+      --net-red: #F87171;
+      --net-orange: #FB923C;
 
-      --row-current-bg: rgba(52, 211, 153, 0.13);
-      --row-selected-bg: rgba(251, 191, 36, 0.20);
+      --accent-primary: #38BDF8;
+      --accent-primary-text: #090A0F;
+      --highlight-row: rgba(56, 189, 248, 0.14);
     }
 
-    /* Strict 0px Pixelate Geometry */
     * {
       box-sizing: border-box;
       border-radius: 0px !important;
@@ -117,16 +118,16 @@
     html, body {
       margin: 0;
       padding: 0;
-      min-height: 100vh;
-      background-color: var(--bg-base);
+      background-color: var(--bg-canvas);
       background-image:
         linear-gradient(to right, var(--bg-grid) 1px, transparent 1px),
         linear-gradient(to bottom, var(--bg-grid) 1px, transparent 1px);
       background-size: 16px 16px;
-      color: var(--text-main);
+      color: var(--text-primary);
       font-family: 'JetBrains Mono', monospace;
       font-size: 16px;
       line-height: 1.5;
+      min-height: 100vh;
       overflow-x: hidden;
     }
 
@@ -138,422 +139,282 @@
       display: none !important;
     }
 
-    /* 16-Bit RPG Window Container */
+    /* 16-Bit Pixel Frames & Buttons */
     .pixel-box {
-      background: var(--bg-panel);
-      border: 3px solid var(--border-outer);
-      box-shadow:
-        inset 0 0 0 2px var(--border-inner),
-        inset 0 0 0 4px var(--highlight),
-        4px 4px 0px var(--shadow-hard);
-      position: relative;
+      background: var(--bg-card);
+      border: 3px solid var(--border-main);
+      box-shadow: 4px 4px 0px var(--shadow-hard);
+      padding: 16px;
     }
 
     .pixel-subbox {
-      background: var(--bg-panel-alt);
-      border: 2px solid var(--border-outer);
-      box-shadow: inset 2px 2px 0px var(--highlight);
+      background: var(--bg-subtle);
+      border: 2px solid var(--border-main);
+      padding: 12px;
     }
 
-    /* Corner Rivets */
-    .pixel-rivets::before,
-    .pixel-rivets::after {
-      content: "";
-      position: absolute;
-      width: 5px;
-      height: 5px;
-      background: var(--accent-gold);
-      top: 6px;
-      pointer-events: none;
-    }
-    .pixel-rivets::before { left: 6px; }
-    .pixel-rivets::after { right: 6px; }
-
-    /* Tactile 16-Bit Buttons (Minimum 44x44px Touch Target) */
     .pixel-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
       min-height: 46px;
-      min-width: 46px;
       padding: 10px 14px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 15px;
       font-weight: 700;
-      color: var(--text-main);
-      background: var(--bg-panel-alt);
-      border: 3px solid var(--border-outer);
-      box-shadow:
-        inset -2px -2px 0px rgba(0, 0, 0, 0.25),
-        inset 2px 2px 0px var(--highlight),
-        4px 4px 0px var(--shadow-hard);
+      color: var(--text-primary);
+      background: var(--bg-card);
+      border: 3px solid var(--border-main);
+      box-shadow: 3px 3px 0px var(--shadow-hard);
       cursor: pointer;
       user-select: none;
-      text-decoration: none;
-      transition: transform 0.04s steps(1);
+      text-align: center;
+      transition: transform 0.05s steps(1);
     }
 
     .pixel-btn:active {
       transform: translate(2px, 2px);
-      box-shadow:
-        inset 2px 2px 0px rgba(0, 0, 0, 0.3),
-        2px 2px 0px var(--shadow-hard);
+      box-shadow: 1px 1px 0px var(--shadow-hard);
     }
 
-    .pixel-btn-gold {
-      background: var(--accent-gold);
-      color: var(--accent-gold-text);
-      box-shadow:
-        inset -2px -2px 0px rgba(0, 0, 0, 0.25),
-        inset 2px 2px 0px rgba(255, 255, 255, 0.45),
-        4px 4px 0px var(--shadow-hard);
+    .pixel-btn-primary {
+      background: var(--accent-primary);
+      color: var(--accent-primary-text);
     }
 
-    .pixel-btn-sky {
-      background: var(--accent-sky);
-      color: var(--accent-sky-text);
+    .pixel-btn-sm {
+      min-height: 44px;
+      padding: 8px 12px;
+      font-size: 14px;
+      border-width: 2px;
+      box-shadow: 2px 2px 0px var(--shadow-hard);
     }
 
-    .pixel-btn-danger {
-      background: #E11D48;
-      color: #FFFFFF;
-    }
-
-    /* Form Controls (16px font to prevent iOS Safari Auto-Zoom, >= 48px height) */
-    .pixel-label {
-      display: block;
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .pixel-input, .pixel-select {
+    .pixel-input,
+    .pixel-select {
       width: 100%;
       min-height: 48px;
       padding: 10px 12px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 16px;
       font-weight: 600;
-      color: var(--text-main);
+      color: var(--text-primary);
       background: var(--bg-input);
-      border: 3px solid var(--border-outer);
-      box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.22);
+      border: 3px solid var(--border-main);
       outline: none;
     }
 
-    .pixel-input:focus, .pixel-select:focus {
-      border-color: var(--accent-gold);
-      box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.22), 0 0 0 2px var(--accent-gold);
+    .pixel-input:focus,
+    .pixel-select:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px var(--accent-primary);
     }
 
-    /* App Container */
+    .field-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    /* App Layout */
     .app-shell {
-      max-width: 1040px;
+      max-width: 960px;
       margin: 0 auto;
-      padding: 12px 12px 96px;
+      padding: 12px 12px 92px;
     }
 
-    @media (min-width: 768px) {
-      .app-shell {
-        padding: 18px 18px 36px;
-      }
-    }
-
-    /* Top Header HUD */
+    /* Top Header */
     .top-header {
-      padding: 12px 14px;
-      margin-bottom: 12px;
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
+      margin-bottom: 14px;
+      padding: 12px 14px;
     }
 
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      min-width: 0;
     }
 
-    .pixel-emblem {
-      width: 46px;
-      height: 46px;
-      background: var(--bg-panel-alt);
-      border: 2px solid var(--border-outer);
-      box-shadow: inset 0 0 0 2px var(--accent-gold);
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      border: 2px solid var(--border-main);
+      background: var(--cat-fixed-bg);
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
     }
 
     .brand-title {
       font-size: 18px;
       font-weight: 800;
-      margin: 0;
+      letter-spacing: -0.02em;
       line-height: 1.2;
-      color: var(--accent-gold);
     }
 
     .brand-sub {
       font-size: 12px;
-      color: var(--text-muted);
-      font-weight: 700;
-      margin-top: 2px;
+      color: var(--text-secondary);
+      font-weight: 600;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-shrink: 0;
     }
 
-    /* Desktop Top Navigation (3 Tabs) */
+    /* Navigation Tabs */
     .desktop-tabs {
       display: none;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    @media (min-width: 768px) {
-      .desktop-tabs {
-        display: grid;
-      }
+      margin-bottom: 16px;
     }
 
     .desktop-tabs .pixel-btn.active {
-      background: var(--accent-gold);
-      color: var(--accent-gold-text);
+      background: var(--accent-primary);
+      color: var(--accent-primary-text);
     }
 
-    /* Mobile Thumb-Zone Bottom Dock (3 Tabs) */
-    .mobile-dock {
+    .mobile-bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      z-index: 400;
-      background: var(--bg-panel);
-      border-top: 3px solid var(--border-outer);
-      box-shadow: 0 -2px 0 var(--border-inner);
+      z-index: 500;
+      background: var(--bg-card);
+      border-top: 3px solid var(--border-main);
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      padding: 5px;
-      gap: 5px;
+      padding: 6px;
+      gap: 6px;
     }
 
-    @media (min-width: 768px) {
-      .mobile-dock {
-        display: none;
-      }
-    }
-
-    .dock-btn {
-      min-height: 58px;
-      background: var(--bg-panel-alt);
-      border: 2px solid var(--border-outer);
-      color: var(--text-muted);
+    .mobile-tab-btn {
+      min-height: 52px;
+      border: 2px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
       font-family: 'JetBrains Mono', monospace;
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 700;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 2px;
       cursor: pointer;
-      padding: 4px;
     }
 
-    .dock-btn.active {
-      background: var(--accent-gold);
-      color: var(--accent-gold-text);
-      box-shadow: inset 2px 2px 0px rgba(255, 255, 255, 0.45);
+    .mobile-tab-btn.active {
+      background: var(--bg-subtle);
+      border-color: var(--border-main);
+      color: var(--text-primary);
+      box-shadow: 2px 2px 0px var(--shadow-hard);
     }
 
-    /* 4 Main Category Selector Cards (Tab 1 Entry) */
-    .cat-cards-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-
-    @media (min-width: 640px) {
-      .cat-cards-grid {
-        grid-template-columns: repeat(4, 1fr);
+    @media (min-width: 768px) {
+      .desktop-tabs {
+        display: grid;
+      }
+      .mobile-bottom-nav {
+        display: none;
+      }
+      .app-shell {
+        padding-bottom: 32px;
       }
     }
 
-    .cat-card-btn {
-      min-height: 68px;
-      padding: 10px 8px;
-      background: var(--bg-panel-alt);
-      border: 3px solid var(--border-outer);
-      box-shadow: 3px 3px 0px var(--shadow-hard);
-      color: var(--text-main);
+    /* Main Category Selector Grid */
+    .cat-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .cat-choice {
+      min-height: 54px;
+      padding: 10px;
+      border: 3px solid var(--border-main);
+      background: var(--bg-card);
+      color: var(--text-primary);
       font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 800;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      text-align: center;
+      gap: 2px;
+      box-shadow: 2px 2px 0px var(--shadow-hard);
     }
 
-    .cat-card-btn .cat-en {
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    .cat-card-btn .cat-th {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-
-    .cat-card-btn.selected[data-cat="Income"] {
+    .cat-choice[data-cat="Income"].selected {
       background: var(--cat-income-bg);
-      border-color: var(--cat-income);
       color: var(--cat-income);
+      border-color: var(--cat-income);
     }
-    .cat-card-btn.selected[data-cat="Savings"] {
+    .cat-choice[data-cat="Savings"].selected {
       background: var(--cat-savings-bg);
-      border-color: var(--cat-savings);
       color: var(--cat-savings);
+      border-color: var(--cat-savings);
     }
-    .cat-card-btn.selected[data-cat="Fixed_Expense"] {
+    .cat-choice[data-cat="Fixed_Expense"].selected {
       background: var(--cat-fixed-bg);
-      border-color: var(--cat-fixed);
       color: var(--cat-fixed);
+      border-color: var(--cat-fixed);
     }
-    .cat-card-btn.selected[data-cat="Variable_Expense"] {
+    .cat-choice[data-cat="Variable_Expense"].selected {
       background: var(--cat-variable-bg);
-      border-color: var(--cat-variable);
       color: var(--cat-variable);
-    }
-    .cat-card-btn.selected .cat-th {
-      color: inherit;
+      border-color: var(--cat-variable);
     }
 
-    /* Quick-Add Amount Pills */
-    .quick-add-grid {
+    /* Quick Amount Chips */
+    .quick-chips {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 6px;
       margin-top: 8px;
     }
 
-    .quick-add-grid .pixel-btn {
-      padding: 6px 4px;
-      font-size: 13px;
-      min-height: 44px;
-    }
-
-    /* Dual Pay-Cycle Control Bar */
-    .cycle-bar {
-      padding: 12px;
-      margin-bottom: 12px;
-      display: flex;
-      flex-direction: column;
+    /* KPI Summary Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 10px;
+      margin-bottom: 14px;
     }
 
-    @media (min-width: 768px) {
-      .cycle-bar {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-      }
-    }
-
-    .cycle-mode-switch {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-
-    .cycle-nav-group {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-    }
-
-    .cycle-display {
-      flex: 1;
-      text-align: center;
-      padding: 6px 10px;
-      min-width: 185px;
-    }
-
-    .cycle-title {
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--accent-gold);
-    }
-
-    .cycle-dates {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
-
-    /* KPI Summary Grids (4 Cards for Daily, 5 Cards for Dashboard) */
-    .kpi-grid-4 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    @media (min-width: 768px) {
-      .kpi-grid-4 {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-
-    .kpi-grid-5 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    @media (min-width: 768px) {
-      .kpi-grid-5 {
+    @media (min-width: 720px) {
+      .kpi-grid {
         grid-template-columns: repeat(5, 1fr);
       }
     }
 
     .kpi-card {
-      padding: 12px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .kpi-card-wide {
-      grid-column: span 2;
-    }
-
-    @media (min-width: 768px) {
-      .kpi-card-wide {
-        grid-column: span 1;
-      }
+      padding: 12px;
+      border: 2px solid var(--border-main);
+      background: var(--bg-subtle);
     }
 
     .kpi-label {
       font-size: 12px;
-      font-weight: 800;
-      color: var(--text-muted);
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
     }
 
     .kpi-value {
@@ -562,208 +423,103 @@
       word-break: break-word;
     }
 
-    /* Category Text & Badges */
-    .c-income { color: var(--cat-income); }
-    .c-savings { color: var(--cat-savings); }
-    .c-fixed { color: var(--cat-fixed); }
-    .c-variable { color: var(--cat-variable); }
-
-    .badge-cat {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px 7px;
-      font-size: 12px;
-      font-weight: 800;
-      border: 2px solid var(--border-outer);
-      white-space: nowrap;
+    /* Net Balance Conditional Color Classes */
+    .net-bal-black {
+      color: var(--net-black) !important;
     }
-    .badge-Income { background: var(--cat-income-bg); color: var(--cat-income); border-color: var(--cat-income); }
-    .badge-Savings { background: var(--cat-savings-bg); color: var(--cat-savings); border-color: var(--cat-savings); }
-    .badge-Fixed_Expense { background: var(--cat-fixed-bg); color: var(--cat-fixed); border-color: var(--cat-fixed); }
-    .badge-Variable_Expense { background: var(--cat-variable-bg); color: var(--cat-variable); border-color: var(--cat-variable); }
+    .net-bal-red {
+      color: var(--net-red) !important;
+    }
+    .net-bal-orange {
+      color: var(--net-orange) !important;
+    }
 
-    /* Proportional Stacked Bar & Progress Bars */
-    .stacked-bar-track {
-      display: flex;
+    /* Segmented Ratio Bar */
+    .ratio-track {
+      height: 18px;
       width: 100%;
-      height: 22px;
+      border: 2px solid var(--border-main);
       background: var(--bg-input);
-      border: 3px solid var(--border-outer);
+      display: flex;
       overflow: hidden;
     }
 
-    .stacked-seg {
-      height: 100%;
-      transition: width 0.2s steps(6);
-      background-image: repeating-linear-gradient(
-        90deg,
-        transparent 0px,
-        transparent 8px,
-        rgba(0, 0, 0, 0.22) 8px,
-        rgba(0, 0, 0, 0.22) 10px
-      );
-    }
-
-    .sub-bar-track {
-      width: 100%;
-      height: 14px;
-      background: var(--bg-input);
-      border: 2px solid var(--border-outer);
-      padding: 1px;
-    }
-
-    .sub-bar-fill {
-      height: 100%;
-      background-image: repeating-linear-gradient(
-        90deg,
-        transparent 0px,
-        transparent 8px,
-        rgba(0, 0, 0, 0.25) 8px,
-        rgba(0, 0, 0, 0.25) 10px
-      );
-    }
-
-    /* Filter Pills Row */
-    .filter-pills-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
-
-    .filter-pill-btn {
-      min-height: 44px;
-      padding: 6px 10px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      font-weight: 800;
-      background: var(--bg-panel-alt);
-      border: 2px solid var(--border-outer);
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-
-    .filter-pill-btn.active {
-      background: var(--accent-gold);
-      color: var(--accent-gold-text);
-      box-shadow: 2px 2px 0px var(--shadow-hard);
-    }
-
-    /* Transaction History List */
+    /* Transaction List Item */
     .tx-item {
-      padding: 12px;
-      border-bottom: 2px dashed var(--border-inner);
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
-      gap: 10px;
+      gap: 12px;
+      padding: 12px;
+      border-bottom: 2px dashed var(--border-muted);
     }
 
     .tx-item:last-child {
       border-bottom: none;
     }
 
-    .tx-meta {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .tx-subcat {
-      font-size: 16px;
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 12px;
       font-weight: 800;
-      color: var(--text-main);
-      word-break: break-word;
+      border: 2px solid var(--border-main);
     }
 
-    .tx-note {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 3px;
-      word-break: break-word;
-    }
+    .badge-Income { background: var(--cat-income-bg); color: var(--cat-income); }
+    .badge-Savings { background: var(--cat-savings-bg); color: var(--cat-savings); }
+    .badge-Fixed_Expense { background: var(--cat-fixed-bg); color: var(--cat-fixed); }
+    .badge-Variable_Expense { background: var(--cat-variable-bg); color: var(--cat-variable); }
 
-    .tx-right {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .tx-actions {
-      display: flex;
-      gap: 6px;
-    }
-
-    .icon-action-btn {
-      min-width: 44px;
-      min-height: 44px;
-      padding: 6px;
-      background: var(--bg-panel);
-      border: 2px solid var(--border-outer);
-      box-shadow: 2px 2px 0px var(--shadow-hard);
-      color: var(--text-main);
-      font-size: 15px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .icon-action-btn:active {
-      transform: translate(1px, 1px);
-      box-shadow: 1px 1px 0px var(--shadow-hard);
-    }
-
-    /* Dashboard 12-Month Chart & Interactive Table */
-    .annual-chart-scroll {
+    /* Dashboard 12-Month Bar Chart */
+    .chart-scroll {
       overflow-x: auto;
-      padding-bottom: 6px;
+      padding-bottom: 8px;
     }
 
-    .annual-bars-grid {
+    .chart-grid-12 {
       display: grid;
-      grid-template-columns: repeat(12, minmax(60px, 1fr));
-      gap: 6px;
+      grid-template-columns: repeat(12, minmax(56px, 1fr));
+      gap: 8px;
+      align-items: end;
       height: 190px;
       padding: 14px 8px 0;
       background: var(--bg-input);
-      border: 2px solid var(--border-outer);
-      align-items: end;
+      border: 2px solid var(--border-main);
     }
 
-    .annual-col {
+    .chart-col {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
       height: 100%;
+      justify-content: flex-end;
       cursor: pointer;
       padding: 2px;
-      border: 2px solid transparent;
     }
 
-    .annual-col.is-selected {
-      background: var(--row-selected-bg);
-      border-color: var(--accent-gold);
+    .chart-col.selected-col {
+      background: var(--highlight-row);
+      outline: 2px solid var(--accent-primary);
     }
 
-    .annual-bar-group {
+    .chart-bars {
       display: flex;
       align-items: flex-end;
-      gap: 2px;
-      height: 142px;
+      gap: 4px;
+      height: 140px;
     }
 
-    .abar {
-      width: 10px;
+    .bar-seg {
+      width: 14px;
+      border: 1.5px solid var(--border-main);
       min-height: 2px;
-      border: 1px solid var(--border-outer);
     }
 
-    .table-scroll {
+    /* Dashboard Table */
+    .table-wrap {
       overflow-x: auto;
-      border: 2px solid var(--border-outer);
+      border: 2px solid var(--border-main);
     }
 
     table.pixel-table {
@@ -774,16 +530,16 @@
 
     table.pixel-table th,
     table.pixel-table td {
-      padding: 10px 10px;
-      border: 1px solid var(--border-inner);
+      padding: 10px 12px;
+      border: 1px solid var(--border-muted);
       text-align: right;
       white-space: nowrap;
     }
 
     table.pixel-table th {
-      background: var(--bg-panel-alt);
+      background: var(--bg-subtle);
       font-weight: 800;
-      color: var(--accent-gold);
+      text-align: center;
     }
 
     table.pixel-table th:first-child,
@@ -791,42 +547,20 @@
       text-align: left;
       position: sticky;
       left: 0;
-      background: var(--bg-panel);
+      background: var(--bg-card);
       font-weight: 800;
       z-index: 2;
     }
 
-    table.pixel-table tbody tr.month-row {
+    table.pixel-table tr.row-highlight td {
+      background: var(--highlight-row) !important;
+    }
+
+    table.pixel-table tbody tr {
       cursor: pointer;
     }
 
-    table.pixel-table tbody tr.month-row:hover td {
-      background: var(--bg-panel-alt);
-    }
-
-    table.pixel-table tbody tr.is-current td {
-      background: var(--row-current-bg) !important;
-    }
-
-    table.pixel-table tbody tr.is-selected td {
-      background: var(--row-selected-bg) !important;
-      border-top: 2px solid var(--accent-gold);
-      border-bottom: 2px solid var(--accent-gold);
-    }
-
-    .badge-current {
-      display: inline-block;
-      margin-left: 6px;
-      padding: 1px 5px;
-      font-size: 10px;
-      font-weight: 800;
-      background: var(--cat-income);
-      color: #090D13;
-      border: 1px solid var(--border-outer);
-      vertical-align: middle;
-    }
-
-    /* Symmetrical 2x2 Drill-Down Grid (1 col on narrow mobile < 520px, 2x2 on tablet/desktop) */
+    /* Symmetric 2x2 Sub-Category Drill-Down Grid */
     .drilldown-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -839,1683 +573,1294 @@
       }
     }
 
-    /* Modals & PIN Lock Overlay */
-    .modal-overlay {
+    /* Modal */
+    .modal-backdrop {
       position: fixed;
       inset: 0;
-      z-index: 900;
-      background: rgba(0, 0, 0, 0.84);
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.78);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 14px;
+      padding: 16px;
     }
 
     .modal-card {
       width: 100%;
       max-width: 480px;
-      padding: 18px;
-      max-height: 92vh;
+      max-height: 90vh;
       overflow-y: auto;
-    }
-
-    .pin-dots-row {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin: 14px 0;
-    }
-
-    .pin-box-dot {
-      width: 24px;
-      height: 24px;
-      border: 2px solid var(--border-outer);
-      background: var(--bg-input);
-    }
-
-    .pin-box-dot.active {
-      background: var(--accent-gold);
-      box-shadow: inset 0 0 0 2px var(--bg-panel);
-    }
-
-    .pin-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      max-width: 270px;
-      margin: 0 auto;
-    }
-
-    .pin-key {
-      min-height: 50px;
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    /* Toast Banner */
-    .pixel-toast {
-      position: fixed;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1200;
-      padding: 12px 16px;
-      background: var(--bg-panel);
-      border: 3px solid var(--accent-gold);
-      box-shadow: 4px 4px 0px var(--shadow-hard);
-      font-size: 14px;
-      font-weight: 800;
-      max-width: 92vw;
-      text-align: center;
     }
   </style>
 </head>
 <body>
-
-  <!-- ========================================================================
-       PIN LOCK SCREEN OVERLAY (SHA-256)
-       ======================================================================== -->
-  <div id="pinLockOverlay" class="modal-overlay hidden" style="z-index: 1500;">
-    <div class="pixel-box pixel-rivets modal-card" style="text-align: center;">
-      <div style="font-size: 32px; margin-bottom: 6px;">🔒</div>
-      <h2 style="margin: 0 0 4px; font-size: 18px; font-weight: 800; color: var(--accent-gold);">PLOY'S LEDGER LOCKED</h2>
-      <p style="margin: 0; font-size: 14px; color: var(--text-muted);">กรุณากรอกรหัส PIN 4–6 หลักเพื่อเข้าใช้งาน</p>
-
-      <div class="pin-dots-row" id="unlockPinDots"></div>
-      <div id="unlockPinError" style="min-height: 22px; font-size: 13px; font-weight: 700; color: var(--cat-variable); margin-bottom: 8px;"></div>
-      <div class="pin-grid" id="unlockPinPad"></div>
+  <!-- PIN Lock Overlay -->
+  <div id="pinLockOverlay" class="modal-backdrop hidden">
+    <div class="pixel-box modal-card" style="text-align:center;">
+      <div style="font-size:20px; font-weight:800; margin-bottom:6px;">🔒 PLOY'S LEDGER LOCKED</div>
+      <div style="font-size:14px; color:var(--text-secondary); margin-bottom:14px;">กรุณากรอกรหัส PIN 4–6 หลักเพื่อเข้าใช้งาน</div>
+      <input type="password" id="unlockPinInput" class="pixel-input tabular" maxlength="6" inputmode="numeric" placeholder="••••" style="text-align:center; font-size:22px; letter-spacing:8px; margin-bottom:10px;" />
+      <div id="unlockPinError" style="font-size:14px; color:var(--net-red); font-weight:700; min-height:22px; margin-bottom:10px;"></div>
+      <button type="button" class="pixel-btn pixel-btn-primary" style="width:100%;" id="btnUnlockSubmit">ปลดล็อกเข้าสู่ระบบ</button>
     </div>
   </div>
 
-  <!-- ========================================================================
-       DELETE CONFIRMATION MODAL
-       ======================================================================== -->
-  <div id="confirmModal" class="modal-overlay hidden">
-    <div class="pixel-box pixel-rivets modal-card">
-      <h3 style="margin: 0 0 8px; font-size: 17px; font-weight: 800; color: var(--cat-variable);">⚠️ ยืนยันการลบรายการ</h3>
-      <p id="confirmMessage" style="margin: 0 0 16px; font-size: 15px; color: var(--text-main);"></p>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+  <!-- Confirmation Dialog Modal -->
+  <div id="confirmModal" class="modal-backdrop hidden">
+    <div class="pixel-box modal-card">
+      <div style="font-size:18px; font-weight:800; margin-bottom:8px;" id="confirmTitle">ยืนยันการทำรายการ</div>
+      <div style="font-size:15px; color:var(--text-secondary); margin-bottom:16px;" id="confirmMessage">คุณต้องการดำเนินการนี้ใช่หรือไม่?</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
         <button type="button" class="pixel-btn" id="btnConfirmCancel">ยกเลิก</button>
-        <button type="button" class="pixel-btn pixel-btn-danger" id="btnConfirmOk">ลบรายการ</button>
+        <button type="button" class="pixel-btn" style="background:var(--cat-variable-bg); color:var(--cat-variable);" id="btnConfirmOk">ยืนยันลบ</button>
       </div>
     </div>
   </div>
 
-  <!-- ========================================================================
-       SECURITY & DATA PORTABILITY MODAL
-       ======================================================================== -->
-  <div id="dataModal" class="modal-overlay hidden">
-    <div class="pixel-box pixel-rivets modal-card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--accent-gold);">💾 สำรองข้อมูล &amp; PIN</h3>
-        <button type="button" class="pixel-btn" id="btnCloseDataModal" style="min-width: 44px; padding: 6px 10px;">✕</button>
+  <!-- Data & Security Modal -->
+  <div id="toolsModal" class="modal-backdrop hidden">
+    <div class="pixel-box modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div style="font-size:18px; font-weight:800;">💾 สำรองข้อมูล &amp; PIN</div>
+        <button type="button" class="pixel-btn pixel-btn-sm" id="btnCloseTools">✕ ปิด</button>
       </div>
 
-      <!-- Export & Google Sheets -->
-      <div class="pixel-subbox" style="padding: 12px; margin-bottom: 12px;">
-        <div class="pixel-label" style="color: var(--cat-income);">📊 ส่งออกข้อมูล (CSV / GOOGLE SHEETS)</div>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <button type="button" class="pixel-btn pixel-btn-gold" id="btnExportCsv">⬇️ ดาวน์โหลดไฟล์ .CSV (UTF-8 BOM)</button>
-          <button type="button" class="pixel-btn" id="btnCopyTsv">📋 คัดลอก TSV วางใน Google Sheets</button>
+      <!-- Export Section -->
+      <div class="pixel-subbox" style="margin-bottom:12px;">
+        <div style="font-weight:800; margin-bottom:8px;">1. ส่งออกข้อมูล (Export)</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+          <button type="button" class="pixel-btn pixel-btn-sm" id="btnExportCsv">📄 Export .CSV</button>
+          <button type="button" class="pixel-btn pixel-btn-sm" id="btnCopySheets">📋 Copy ลง Sheets</button>
+        </div>
+        <button type="button" class="pixel-btn pixel-btn-sm pixel-btn-primary" style="width:100%;" id="btnExportJson">💾 Backup .JSON (ทั้งระบบ)</button>
+      </div>
+
+      <!-- Import Section -->
+      <div class="pixel-subbox" style="margin-bottom:12px;">
+        <div style="font-weight:800; margin-bottom:8px;">2. กู้คืนข้อมูล (Restore .JSON)</div>
+        <label class="pixel-btn pixel-btn-sm" style="width:100%; cursor:pointer;">
+          📂 เลือกไฟล์ .JSON (Schema Validation)
+          <input type="file" id="importJsonInput" accept=".json" class="hidden" />
+        </label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+          <button type="button" class="pixel-btn pixel-btn-sm" id="btnLoadDemo">✨ โหลดข้อมูลตัวอย่าง</button>
+          <button type="button" class="pixel-btn pixel-btn-sm" style="color:var(--net-red);" id="btnClearAllData">🗑️ ล้างข้อมูลทั้งหมด</button>
         </div>
       </div>
 
-      <!-- JSON Backup & Restore -->
-      <div class="pixel-subbox" style="padding: 12px; margin-bottom: 12px;">
-        <div class="pixel-label" style="color: var(--cat-savings);">💾 สำรอง &amp; กู้คืนไฟล์ JSON (SCHEMA v1.0.0)</div>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <button type="button" class="pixel-btn pixel-btn-sky" id="btnExportJson">💾 Export JSON Backup</button>
-          <label class="pixel-btn" style="cursor: pointer;">
-            📂 Import JSON Backup
-            <input type="file" id="importJsonInput" accept=".json,application/json" class="hidden" />
-          </label>
-          <button type="button" class="pixel-btn" id="btnLoadDemoData">🧪 โหลดข้อมูลตัวอย่าง (Demo Data)</button>
+      <!-- PIN Security Section -->
+      <div class="pixel-subbox">
+        <div style="font-weight:800; margin-bottom:8px;">3. รหัสผ่านเข้าแอป (PIN 4–6 หลัก)</div>
+        <div style="display:flex; gap:8px;">
+          <input type="password" id="setPinInput" class="pixel-input tabular" maxlength="6" inputmode="numeric" placeholder="เลข 4-6 หลัก" />
+          <button type="button" class="pixel-btn pixel-btn-sm pixel-btn-primary" id="btnSavePin">ตั้งรหัส</button>
+          <button type="button" class="pixel-btn pixel-btn-sm" id="btnRemovePin">ปิด PIN</button>
         </div>
       </div>
 
-      <!-- PIN Lock (SHA-256) -->
-      <div class="pixel-subbox" style="padding: 12px;">
-        <div class="pixel-label" style="color: var(--accent-gold);">🔐 ระบบล็อกรหัสผ่าน PIN (SHA-256)</div>
-        <div id="pinStatusText" style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text-muted);">
-          สถานะ: ยังไม่ได้เปิดใช้งาน PIN
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <input type="password" id="setupPinInput" class="pixel-input tabular" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="รหัส 4-6 หลัก" />
-          <button type="button" class="pixel-btn pixel-btn-gold" id="btnSetPin">ตั้ง PIN</button>
-        </div>
-        <button type="button" class="pixel-btn pixel-btn-danger hidden" id="btnDisablePin" style="width: 100%; margin-top: 8px;">
-          ปลดล็อก PIN ถาวร
-        </button>
-      </div>
+      <div id="toolsFeedback" style="margin-top:10px; font-size:14px; font-weight:700; color:var(--cat-income);"></div>
     </div>
   </div>
 
-  <!-- ========================================================================
-       TOAST NOTIFICATION
-       ======================================================================== -->
-  <div id="toastBanner" class="pixel-toast hidden"></div>
-
-  <!-- ========================================================================
-       MAIN APPLICATION SHELL
-       ======================================================================== -->
+  <!-- Main App Shell -->
   <div class="app-shell">
-
-    <!-- Top Header HUD -->
-    <header class="pixel-box pixel-rivets top-header">
+    <!-- Top Header -->
+    <header class="pixel-box top-header">
       <div class="brand-group">
-        <div class="pixel-emblem" aria-hidden="true">
-          <!-- Classic 16-Bit Pigtails Girl Emblem -->
+        <div class="brand-icon" aria-hidden="true">
+          <!-- 16-Bit Pixel Girl with Pigtails -->
           <svg width="32" height="32" viewBox="0 0 16 16" shape-rendering="crispEdges">
-            <rect x="1" y="4" width="2" height="6" fill="#4A2E1B"/>
-            <rect x="13" y="4" width="2" height="6" fill="#4A2E1B"/>
-            <rect x="2" y="4" width="1" height="1" fill="#FB7185"/>
-            <rect x="13" y="4" width="1" height="1" fill="#FB7185"/>
-            <rect x="4" y="1" width="8" height="2" fill="#4A2E1B"/>
-            <rect x="3" y="3" width="10" height="2" fill="#4A2E1B"/>
-            <rect x="5" y="4" width="2" height="1" fill="#4A2E1B"/>
-            <rect x="9" y="4" width="2" height="1" fill="#4A2E1B"/>
+            <rect x="2" y="4" width="2" height="5" fill="#1E293B"/>
+            <rect x="12" y="4" width="2" height="5" fill="#1E293B"/>
+            <rect x="4" y="2" width="8" height="3" fill="#1E293B"/>
             <rect x="4" y="5" width="8" height="7" fill="#FDE68A"/>
-            <rect x="5" y="7" width="1" height="2" fill="#18202C"/>
-            <rect x="10" y="7" width="1" height="2" fill="#18202C"/>
-            <rect x="4" y="9" width="2" height="1" fill="#FDA4AF"/>
-            <rect x="10" y="9" width="2" height="1" fill="#FDA4AF"/>
+            <rect x="5" y="7" width="2" height="2" fill="#0F172A"/>
+            <rect x="9" y="7" width="2" height="2" fill="#0F172A"/>
+            <rect x="4" y="9" width="2" height="1" fill="#FB7185"/>
+            <rect x="10" y="9" width="2" height="1" fill="#FB7185"/>
             <rect x="7" y="10" width="2" height="1" fill="#E11D48"/>
-            <rect x="4" y="12" width="8" height="3" fill="#38BDF8"/>
-            <rect x="6" y="12" width="4" height="1" fill="#FFFFFF"/>
+            <rect x="5" y="12" width="6" height="3" fill="#38BDF8"/>
           </svg>
         </div>
         <div>
-          <h1 class="brand-title">PLOY'S LEDGER</h1>
-          <div class="brand-sub">16-BIT RETRO • SRS v1.0.3</div>
+          <div class="brand-title">PLOY'S LEDGER</div>
+          <div class="brand-sub">16-BIT RETRO // v1.0.4</div>
         </div>
       </div>
 
       <div class="header-actions">
-        <button type="button" class="pixel-btn" id="btnThemeToggle" title="สลับธีม Day / Night">🌙 Night</button>
-        <button type="button" class="pixel-btn" id="btnOpenDataModal" title="สำรองข้อมูล & ตั้งรหัส PIN">💾</button>
-        <button type="button" class="pixel-btn hidden" id="btnQuickLock" title="ล็อกหน้าจอทันที">🔒</button>
+        <button type="button" class="pixel-btn pixel-btn-sm" id="btnThemeToggle">☀️ Day</button>
+        <button type="button" class="pixel-btn pixel-btn-sm" id="btnOpenTools" aria-label="สำรองข้อมูลและตั้งค่า">💾</button>
       </div>
     </header>
 
-    <!-- Desktop Top Navigation (3 Tabs) -->
+    <!-- Desktop 3-Tab Navigation -->
     <nav class="desktop-tabs" id="desktopNav">
       <button type="button" class="pixel-btn active" data-tab="entry">➕ บันทึกรายการ</button>
       <button type="button" class="pixel-btn" data-tab="daily">📅 Daily</button>
       <button type="button" class="pixel-btn" data-tab="dashboard">📊 Dashboard</button>
     </nav>
 
-    <!-- ======================================================================
-         TAB 1: ➕ บันทึกรายการ (DEFAULT ON LOAD - DATE FIRST)
-         ====================================================================== -->
-    <main id="tabEntry">
-      <div class="pixel-box pixel-rivets" style="padding: 16px; max-width: 680px; margin: 0 auto;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <h2 id="entryFormTitle" style="margin: 0; font-size: 18px; font-weight: 800; color: var(--accent-gold);">
-            ➕ บันทึกรายการใหม่
-          </h2>
-          <span id="entryEditBadge" class="badge-cat badge-Fixed_Expense hidden">โหมดแก้ไข</span>
+    <!-- ====================================================================
+         TAB 1 (DEFAULT): ➕ บันทึกรายการ (Quick Entry Form)
+         ==================================================================== -->
+    <main id="viewEntry">
+      <div class="pixel-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <div style="font-size:18px; font-weight:800;" id="entryFormHeading">➕ บันทึกรายการใหม่</div>
+          <span class="badge" id="entryDatePreviewBadge">22 Nov 2026</span>
         </div>
 
-        <form id="txForm" novalidate>
-          <input type="hidden" id="txId" value="" />
-          <input type="hidden" id="txMainCat" value="Variable_Expense" />
+        <form id="txForm">
+          <input type="hidden" id="txEditId" value="" />
 
-          <!-- STEP 1 (FIRST FIELD): Date Picker + Today Quick Reset + English Short Date Preview -->
-          <div style="margin-bottom: 16px;">
-            <label class="pixel-label" for="txDate">1. วันที่ทำรายการ (TRANSACTION DATE)</label>
-            <div style="display: flex; gap: 8px; align-items: stretch;">
-              <input type="date" id="txDate" class="pixel-input tabular" required style="flex: 1;" />
-              <button type="button" class="pixel-btn" id="btnSetToday" title="เลือกวันที่ปัจจุบัน">Today</button>
+          <!-- Step 1: Transaction Date FIRST -->
+          <div style="margin-bottom:14px;">
+            <label class="field-label" for="txDate">1. วันที่ทำรายการ (Transaction Date)</label>
+            <div style="display:flex; gap:8px;">
+              <input type="date" id="txDate" class="pixel-input" required />
+              <button type="button" class="pixel-btn pixel-btn-sm" id="btnSetToday" style="flex-shrink:0;">Today</button>
             </div>
-            <div id="txDatePreview" style="font-size: 13px; font-weight: 700; color: var(--accent-gold); margin-top: 5px;"></div>
           </div>
 
-          <!-- STEP 2: 4 Main Category Cards -->
-          <div class="pixel-label">2. เลือกหมวดหมู่หลัก (MAIN CATEGORY)</div>
-          <div class="cat-cards-grid" id="mainCatCards">
-            <button type="button" class="cat-card-btn" data-cat="Income">
-              <span class="cat-en">Income</span>
-              <span class="cat-th">รายรับ</span>
-            </button>
-            <button type="button" class="cat-card-btn" data-cat="Savings">
-              <span class="cat-en">Savings</span>
-              <span class="cat-th">ออม / ลงทุน</span>
-            </button>
-            <button type="button" class="cat-card-btn" data-cat="Fixed_Expense">
-              <span class="cat-en">Fixed_Expense</span>
-              <span class="cat-th">รายจ่ายคงที่</span>
-            </button>
-            <button type="button" class="cat-card-btn selected" data-cat="Variable_Expense">
-              <span class="cat-en">Variable_Expense</span>
-              <span class="cat-th">รายจ่ายผันแปร</span>
-            </button>
+          <!-- Step 2: Main Category (4 Locked Categories) -->
+          <div style="margin-bottom:14px;">
+            <label class="field-label">2. หมวดหมู่หลัก (Main Category)</label>
+            <div class="cat-grid-4" id="mainCategoryGrid">
+              <button type="button" class="cat-choice" data-cat="Income">
+                <span>💰 Income</span>
+                <span style="font-size:12px; font-weight:600;">รายรับ</span>
+              </button>
+              <button type="button" class="cat-choice" data-cat="Savings">
+                <span>🏦 Savings</span>
+                <span style="font-size:12px; font-weight:600;">เงินออม/ลงทุน</span>
+              </button>
+              <button type="button" class="cat-choice" data-cat="Fixed_Expense">
+                <span>📌 Fixed_Expense</span>
+                <span style="font-size:12px; font-weight:600;">รายจ่ายคงที่</span>
+              </button>
+              <button type="button" class="cat-choice selected" data-cat="Variable_Expense">
+                <span>🛒 Variable_Expense</span>
+                <span style="font-size:12px; font-weight:600;">รายจ่ายผันแปร</span>
+              </button>
+            </div>
+            <input type="hidden" id="txMainCat" value="Variable_Expense" />
           </div>
 
-          <!-- STEP 3: Dynamic Sub-Category Dropdown -->
-          <div style="margin-bottom: 14px;">
-            <label class="pixel-label" for="txSubCat">3. หมวดหมู่ย่อย (SUB-CATEGORY)</label>
+          <!-- Step 3: Dynamic Sub-Category (25 Locked Options) -->
+          <div style="margin-bottom:14px;">
+            <label class="field-label" for="txSubCat">3. หมวดหมู่ย่อย (Sub-Category)</label>
             <select id="txSubCat" class="pixel-select" required></select>
           </div>
 
-          <!-- STEP 4: Hero Amount Input + Quick-Add Buttons -->
-          <div style="margin-bottom: 14px;">
-            <label class="pixel-label" for="txAmount">4. จำนวนเงิน (THB)</label>
-            <input
-              type="number"
-              id="txAmount"
-              class="pixel-input tabular"
-              inputmode="decimal"
-              step="0.01"
-              min="0.01"
-              placeholder="0.00"
-              required
-              style="font-size: 24px; font-weight: 800; min-height: 56px;"
-            />
-            <div class="quick-add-grid">
-              <button type="button" class="pixel-btn" data-add="50">+50</button>
-              <button type="button" class="pixel-btn" data-add="100">+100</button>
-              <button type="button" class="pixel-btn" data-add="500">+500</button>
-              <button type="button" class="pixel-btn" data-add="1000">+1,000</button>
-              <button type="button" class="pixel-btn pixel-btn-danger" id="btnClearAmount">Clear</button>
+          <!-- Step 4: Amount in THB (Stored as Integer Satang) -->
+          <div style="margin-bottom:14px;">
+            <label class="field-label" for="txAmount">4. จำนวนเงิน (THB)</label>
+            <input type="number" id="txAmount" class="pixel-input tabular" step="0.01" min="0.01" placeholder="0.00" style="font-size:22px;" required />
+            <div class="quick-chips">
+              <button type="button" class="pixel-btn pixel-btn-sm" data-add="50">+50</button>
+              <button type="button" class="pixel-btn pixel-btn-sm" data-add="100">+100</button>
+              <button type="button" class="pixel-btn pixel-btn-sm" data-add="500">+500</button>
+              <button type="button" class="pixel-btn pixel-btn-sm" data-add="1000">+1K</button>
+              <button type="button" class="pixel-btn pixel-btn-sm" id="btnClearAmount">Clear</button>
             </div>
           </div>
 
-          <!-- STEP 5: Optional Note -->
-          <div style="margin-bottom: 18px;">
-            <label class="pixel-label" for="txNote">5. บันทึกช่วยจำ (NOTE - ไม่บังคับ)</label>
-            <input type="text" id="txNote" class="pixel-input" maxlength="140" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)..." />
+          <!-- Step 5: Optional Note -->
+          <div style="margin-bottom:16px;">
+            <label class="field-label" for="txNote">5. บันทึกช่วยจำ (Note - ไม่บังคับ)</label>
+            <input type="text" id="txNote" class="pixel-input" placeholder="รายละเอียดเพิ่มเติม..." />
           </div>
 
-          <!-- Submit / Cancel Edit -->
-          <div style="display: flex; gap: 10px;">
-            <button type="submit" class="pixel-btn pixel-btn-gold" id="btnSubmitTx" style="flex: 1; min-height: 54px; font-size: 16px;">
+          <div style="display:flex; gap:10px;">
+            <button type="submit" class="pixel-btn pixel-btn-primary" style="flex:1; min-height:52px; font-size:17px;" id="btnSubmitTx">
               💾 บันทึกรายการ
             </button>
-            <button type="button" class="pixel-btn hidden" id="btnCancelEdit" style="min-height: 54px;">
-              ยกเลิก
-            </button>
+            <button type="button" class="pixel-btn hidden" id="btnCancelEdit">ยกเลิกแก้ไข</button>
           </div>
         </form>
+
+        <div id="entryToast" class="hidden" style="margin-top:12px; padding:10px; border:2px solid var(--cat-income); background:var(--cat-income-bg); color:var(--cat-income); font-weight:700; text-align:center;"></div>
       </div>
     </main>
 
-    <!-- ======================================================================
-         TAB 2: 📅 Daily (PAY-CYCLE KPIs, STACKED BAR, FILTER PILLS & HISTORY)
-         ====================================================================== -->
-    <section id="tabDaily" class="hidden">
-      <!-- Dual Pay-Cycle Controller -->
-      <div class="pixel-box cycle-bar">
-        <div>
-          <div class="pixel-label" style="margin-bottom: 5px;">โหมดรอบบัญชี (PAY-CYCLE)</div>
-          <div class="cycle-mode-switch">
-            <button type="button" class="pixel-btn pixel-btn-gold" id="btnDailyModeCustom">26TH PAY CYCLE</button>
-            <button type="button" class="pixel-btn" id="btnDailyModeCalendar">CALENDAR (1-31)</button>
+    <!-- ====================================================================
+         TAB 2: 📅 Daily (Pay-Cycle & Transaction History)
+         ==================================================================== -->
+    <section id="viewDaily" class="hidden">
+      <div class="pixel-box" style="margin-bottom:14px;">
+        <!-- Cycle Mode Toggle & Period Navigator -->
+        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px;">
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="pixel-btn pixel-btn-sm pixel-btn-primary" id="btnCycleCustom">26TH PAY CYCLE</button>
+            <button type="button" class="pixel-btn pixel-btn-sm" id="btnCycleCalendar">CALENDAR (1-31)</button>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button type="button" class="pixel-btn pixel-btn-sm" id="btnPrevPeriod">◀</button>
+            <div style="font-weight:800; min-width:110px; text-align:center;" id="periodLabel">Nov 2026</div>
+            <button type="button" class="pixel-btn pixel-btn-sm" id="btnNextPeriod">▶</button>
           </div>
         </div>
 
-        <div class="cycle-nav-group">
-          <button type="button" class="pixel-btn" id="btnPrevCycle" aria-label="รอบก่อนหน้า">◀</button>
-          <div class="pixel-subbox cycle-display">
-            <div class="cycle-title" id="dailyCycleTitle">Nov 2026 Cycle</div>
-            <div class="cycle-dates tabular" id="dailyCycleRange">26 Oct 2026 - 25 Nov 2026</div>
+        <div style="font-size:13px; color:var(--text-secondary); font-weight:700; margin-bottom:12px;" id="periodRangeText">
+          ช่วงวันที่: 26 Oct 2026 – 25 Nov 2026
+        </div>
+
+        <!-- 5 KPI Cards (With Conditional Net Balance Color) -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Income (รายรับ)</div>
+            <div class="kpi-value tabular" style="color:var(--cat-income);" id="dailyKpiIncome">฿0.00</div>
           </div>
-          <button type="button" class="pixel-btn" id="btnNextCycle" aria-label="รอบถัดไป">▶</button>
-          <button type="button" class="pixel-btn" id="btnCurrentCycle" title="กลับมารอบปัจจุบัน">TODAY</button>
+          <div class="kpi-card">
+            <div class="kpi-label">Savings (ออม)</div>
+            <div class="kpi-value tabular" style="color:var(--cat-savings);" id="dailyKpiSavings">฿0.00</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Fixed_Expense</div>
+            <div class="kpi-value tabular" style="color:var(--cat-fixed);" id="dailyKpiFixed">฿0.00</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Variable_Expense</div>
+            <div class="kpi-value tabular" style="color:var(--cat-variable);" id="dailyKpiVariable">฿0.00</div>
+          </div>
+          <div class="kpi-card" style="grid-column: span 2 / auto;">
+            <div class="kpi-label">Net Balance (คงเหลือสุทธิ)</div>
+            <div class="kpi-value tabular" id="dailyKpiNet">฿0.00</div>
+          </div>
         </div>
+
+        <!-- Visual Allocation Bar -->
+        <div class="ratio-track" id="dailyRatioBar"></div>
       </div>
 
-      <!-- 4 KPI Cards (Income, Savings, Expenses [Fixed + Variable], Net Cashflow) -->
-      <div class="kpi-grid-4">
-        <div class="pixel-box kpi-card">
-          <div class="kpi-label">INCOME</div>
-          <div class="kpi-value tabular c-income" id="dailyKpiIncome">฿0.00</div>
-        </div>
-        <div class="pixel-box kpi-card">
-          <div class="kpi-label">SAVINGS</div>
-          <div class="kpi-value tabular c-savings" id="dailyKpiSavings">฿0.00</div>
-        </div>
-        <div class="pixel-box kpi-card">
-          <div class="kpi-label">EXPENSES (FIXED + VAR)</div>
-          <div class="kpi-value tabular c-variable" id="dailyKpiExpenses">฿0.00</div>
-        </div>
-        <div class="pixel-box kpi-card">
-          <div class="kpi-label">NET CASHFLOW</div>
-          <div class="kpi-value tabular" id="dailyKpiNet" style="color: var(--accent-gold);">฿0.00</div>
-        </div>
-      </div>
-
-      <!-- 4-Category Proportional Stacked Bar & Legend -->
-      <div class="pixel-box" style="padding: 14px; margin-bottom: 12px;">
-        <div style="font-size: 14px; font-weight: 800; color: var(--accent-gold); margin-bottom: 8px;">
-          📊 สัดส่วนกระแสเงินสด 4 หมวดหมู่หลักในรอบนี้
-        </div>
-        <div class="stacked-bar-track" id="dailyStackedBar"></div>
-        <div id="dailyStackedLegend" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin-top: 10px;"></div>
-      </div>
-
-      <!-- Chronological Transaction History with Filter Pills -->
-      <div class="pixel-box" style="padding: 14px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <h2 style="margin: 0; font-size: 16px; font-weight: 800;">
-            📜 รายการในรอบนี้ (<span id="dailyTxCount" class="tabular">0</span>)
-          </h2>
+      <!-- Transaction List & Filter -->
+      <div class="pixel-box">
+        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px;">
+          <div style="font-size:17px; font-weight:800;">📜 ประวัติรายการในรอบนี้ (<span id="dailyTxCount">0</span>)</div>
+          <select id="dailyCatFilter" class="pixel-select" style="width:auto; min-height:44px; font-size:14px;">
+            <option value="ALL">ทุกหมวดหมู่ (All)</option>
+            <option value="Income">Income</option>
+            <option value="Savings">Savings</option>
+            <option value="Fixed_Expense">Fixed_Expense</option>
+            <option value="Variable_Expense">Variable_Expense</option>
+          </select>
         </div>
 
-        <div class="filter-pills-row" id="dailyFilterPills">
-          <button type="button" class="filter-pill-btn active" data-filter="ALL">ALL</button>
-          <button type="button" class="filter-pill-btn" data-filter="Income">Income</button>
-          <button type="button" class="filter-pill-btn" data-filter="Savings">Savings</button>
-          <button type="button" class="filter-pill-btn" data-filter="Fixed_Expense">Fixed_Expense</button>
-          <button type="button" class="filter-pill-btn" data-filter="Variable_Expense">Variable_Expense</button>
-        </div>
-
-        <div id="dailyTxList" class="pixel-subbox" style="max-height: 540px; overflow-y: auto;"></div>
+        <div id="dailyTxList" class="pixel-subbox" style="padding:0;"></div>
       </div>
     </section>
 
-    <!-- ======================================================================
-         TAB 3: 📊 Dashboard (ANNUAL & MONTHLY TRENDS + INTERACTIVE DRILL-DOWN)
-         ====================================================================== -->
-    <section id="tabDashboard" class="hidden">
-      <!-- Top Controls: Year Selector & Pay-Cycle vs Calendar Toggle -->
-      <div class="pixel-box cycle-bar">
-        <div>
-          <div class="pixel-label" style="margin-bottom: 5px;">เกณฑ์สรุปข้อมูลรายเดือน</div>
-          <div class="cycle-mode-switch">
-            <button type="button" class="pixel-btn pixel-btn-gold" id="btnDashModeCustom">26TH PAY CYCLE</button>
-            <button type="button" class="pixel-btn" id="btnDashModeCalendar">CALENDAR (1-31)</button>
+    <!-- ====================================================================
+         TAB 3: 📊 Dashboard (Annual Summary, 12-Month Trend & 2x2 Drilldown)
+         ==================================================================== -->
+    <section id="viewDashboard" class="hidden">
+      <div class="pixel-box" style="margin-bottom:14px;">
+        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px;">
+          <div style="font-size:18px; font-weight:800;">📊 สรุปภาพรวมทั้งปี &amp; แนวโน้ม</div>
+          <div style="display:flex; gap:8px;">
+            <select id="dashYearSelect" class="pixel-select" style="width:auto; min-height:44px; font-size:14px;"></select>
+            <select id="dashCycleSelect" class="pixel-select" style="width:auto; min-height:44px; font-size:14px;">
+              <option value="CUSTOM">26th Pay Cycle</option>
+              <option value="CALENDAR">Calendar (1-31)</option>
+            </select>
           </div>
         </div>
 
-        <div class="cycle-nav-group">
-          <button type="button" class="pixel-btn" id="btnDashPrevYear" aria-label="ปีก่อนหน้า">◀</button>
-          <div class="pixel-subbox cycle-display">
-            <div class="cycle-title tabular" id="dashYearTitle">YEAR 2026</div>
-            <div class="cycle-dates" id="dashYearSub">JAN – DEC OVERVIEW</div>
+        <!-- Annual KPI Cards (With Conditional Net Balance Color) -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">รายรับทั้งปี</div>
+            <div class="kpi-value tabular" style="color:var(--cat-income);" id="dashYearIncome">฿0</div>
           </div>
-          <button type="button" class="pixel-btn" id="btnDashNextYear" aria-label="ปีถัดไป">▶</button>
+          <div class="kpi-card">
+            <div class="kpi-label">เงินออมทั้งปี</div>
+            <div class="kpi-value tabular" style="color:var(--cat-savings);" id="dashYearSavings">฿0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">รายจ่ายคงที่ทั้งปี</div>
+            <div class="kpi-value tabular" style="color:var(--cat-fixed);" id="dashYearFixed">฿0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">รายจ่ายผันแปรทั้งปี</div>
+            <div class="kpi-value tabular" style="color:var(--cat-variable);" id="dashYearVariable">฿0</div>
+          </div>
+          <div class="kpi-card" style="grid-column: span 2 / auto;">
+            <div class="kpi-label">Net Balance ทั้งปี</div>
+            <div class="kpi-value tabular" id="dashYearNet">฿0</div>
+          </div>
+        </div>
+
+        <!-- 12-Month Comparison Bar Chart -->
+        <div class="chart-scroll">
+          <div class="chart-grid-12" id="dashBarChart"></div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin-top:10px; font-size:13px; font-weight:700;">
+          <span>■ <span style="color:var(--cat-income);">Income</span></span>
+          <span>■ <span style="color:var(--cat-savings);">Savings</span></span>
+          <span>■ <span style="color:var(--cat-fixed);">Fixed</span></span>
+          <span>■ <span style="color:var(--cat-variable);">Variable</span></span>
         </div>
       </div>
 
-      <!-- Annual KPI Summary (5 Cards) -->
-      <div class="kpi-grid-5">
-        <div class="pixel-box kpi-card">
-          <div class="kpi-label">TOTAL INCOME</div>
-          <div class="kpi-value tabular c-income" id="dashKpiIncome">฿0.00</div>
-        </div>
-        <div class="pixel-box kpi-card">
-          <div class="kpi-label">TOTAL SAVINGS</div>
-          <div class="kpi-value tabular c-savings" id="dashKpiSavings">฿0.00</div>
-        </div>
-        <div class="pixel-box kpi-card">
-          <div class="kpi-label">FIXED EXPENSE</div>
-          <div class="kpi-value tabular c-fixed" id="dashKpiFixed">฿0.00</div>
-        </div>
-        <div class="pixel-box kpi-card">
-          <div class="kpi-label">VARIABLE EXPENSE</div>
-          <div class="kpi-value tabular c-variable" id="dashKpiVariable">฿0.00</div>
-        </div>
-        <div class="pixel-box kpi-card kpi-card-wide">
-          <div class="kpi-label">NET BALANCE</div>
-          <div class="kpi-value tabular" id="dashKpiNet" style="color: var(--accent-gold);">฿0.00</div>
-        </div>
-      </div>
-
-      <!-- 12-Month Bar Chart -->
-      <div class="pixel-box" style="padding: 14px; margin-bottom: 12px;">
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 8px;">
-          <span style="font-size: 15px; font-weight: 800; color: var(--accent-gold);">📈 กราฟเปรียบเทียบ 12 เดือน (คลิกแท่งเดือนเพื่อดูรายละเอียด)</span>
-        </div>
-        <div class="annual-chart-scroll">
-          <div class="annual-bars-grid" id="dashBarsGrid"></div>
-        </div>
-        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 10px; font-size: 13px; font-weight: 800;">
-          <span class="c-income">■ Income</span>
-          <span class="c-savings">■ Savings</span>
-          <span class="c-fixed">■ Fixed_Expense</span>
-          <span class="c-variable">■ Variable_Expense</span>
-        </div>
-      </div>
-
-      <!-- Interactive 12-Month Breakdown Table -->
-      <div class="pixel-box" style="padding: 14px; margin-bottom: 12px;">
-        <div style="font-size: 15px; font-weight: 800; margin-bottom: 8px;">
-          📋 ตารางสรุปรายเดือน (คลิกแถวเดือนที่ต้องการเจาะลึก)
-        </div>
-        <div class="table-scroll">
+      <!-- 12-Month Breakdown Table -->
+      <div class="pixel-box" style="margin-bottom:14px;">
+        <div style="font-size:16px; font-weight:800; margin-bottom:10px;">📋 ตารางสรุปรายเดือน (คลิกแถวเพื่อเจาะลึก)</div>
+        <div class="table-wrap">
           <table class="pixel-table">
             <thead>
               <tr>
-                <th>MONTH</th>
-                <th>INCOME</th>
-                <th>SAVINGS</th>
-                <th>FIXED_EXP</th>
-                <th>VARIABLE_EXP</th>
-                <th>NET BALANCE</th>
+                <th>Month</th>
+                <th>Income</th>
+                <th>Savings</th>
+                <th>Fixed</th>
+                <th>Variable</th>
+                <th>Net Balance</th>
               </tr>
             </thead>
-            <tbody id="dashTableBody" class="tabular"></tbody>
+            <tbody id="dashMonthTableBody"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- Selected Month Sub-Category Drill-Down Panel -->
-      <div class="pixel-box pixel-rivets" style="padding: 14px;">
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px;">
-          <h3 id="drilldownTitle" style="margin: 0; font-size: 16px; font-weight: 800; color: var(--accent-gold);">
-            🔍 เจาะลึกหมวดหมู่ย่อย: Nov 2026
-          </h3>
-          <span id="drilldownDateRange" class="tabular" style="font-size: 13px; font-weight: 700; color: var(--text-muted);"></span>
+      <!-- Symmetric 2x2 Sub-Category Drill-Down -->
+      <div class="pixel-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div style="font-size:16px; font-weight:800;">🔍 เจาะลึกหมวดหมู่ย่อย: <span id="drillMonthTitle" style="color:var(--accent-primary);">Nov 2026</span></div>
         </div>
-        <div id="drilldownGrid" class="drilldown-grid"></div>
+        <div class="drilldown-grid" id="dashDrilldownGrid"></div>
       </div>
     </section>
-
   </div>
 
-  <!-- ========================================================================
-       MOBILE BOTTOM DOCK (3 TABS - THUMB ZONE)
-       ======================================================================== -->
-  <nav class="mobile-dock" id="mobileNav">
-    <button type="button" class="dock-btn active" data-tab="entry">
-      <span style="font-size: 18px;">➕</span>
+  <!-- Mobile Bottom 3-Tab Dock -->
+  <nav class="mobile-bottom-nav" id="mobileNav">
+    <button type="button" class="mobile-tab-btn active" data-tab="entry">
+      <span style="font-size:18px;">➕</span>
       <span>บันทึกรายการ</span>
     </button>
-    <button type="button" class="dock-btn" data-tab="daily">
-      <span style="font-size: 18px;">📅</span>
+    <button type="button" class="mobile-tab-btn" data-tab="daily">
+      <span style="font-size:18px;">📅</span>
       <span>Daily</span>
     </button>
-    <button type="button" class="dock-btn" data-tab="dashboard">
-      <span style="font-size: 18px;">📊</span>
+    <button type="button" class="mobile-tab-btn" data-tab="dashboard">
+      <span style="font-size:18px;">📊</span>
       <span>Dashboard</span>
     </button>
   </nav>
 
   <script>
-    /* ==========================================================================
-       1. LOCKED SCHEMA & TAXONOMY CONSTANTS (SRS v1.0.2 - 4 MAIN, 25 EXACT SUB)
-       ========================================================================== */
-    const TX_STORAGE_KEY = 'pixel_ledger_txs_v1';
-    const CFG_STORAGE_KEY = 'pixel_ledger_cfg_v1';
+    (function () {
+      "use strict";
 
-    const TAXONOMY = Object.freeze({
-      Income: Object.freeze([
-        'Salary',
-        'Bonus',
-        'Dividend',
-        'Interest',
-        'Others'
-      ]),
-      Savings: Object.freeze([
-        'Retirement_PVD',
-        'Emergency_Cash',
-        'Emergency_AOTCOOP',
-        'Travel',
-        'Investment'
-      ]),
-      Fixed_Expense: Object.freeze([
-        'WHT',
-        'Life/Health Insurance',
-        'Car Insurance',
-        'Condo Maintenance Fee',
-        'Personal Trainer',
-        'Debt Repayment'
-      ]),
-      Variable_Expense: Object.freeze([
-        'Food & Beverage',
-        'Non Food',
-        'Utilities',
-        'Gasoline',
-        'Subscription',
-        'Credit Card Installment',
-        'Books & Education',
-        'Bread-Making',
-        'Others'
-      ])
-    });
+      /* ==========================================================================
+         1. LOCKED DATA SCHEMA & TAXONOMY (SRS v1.0.4)
+         ========================================================================== */
+      const STORAGE_TXS_KEY = "pixel_ledger_txs_v1";
+      const STORAGE_CFG_KEY = "pixel_ledger_cfg_v1";
 
-    const MAIN_CATEGORIES = Object.keys(TAXONOMY);
-    const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const TAXONOMY = {
+        Income: ["Salary", "Bonus", "Dividend", "Interest", "Others"],
+        Savings: ["Retirement_PVD", "Emergency_Cash", "Emergency_AOTCOOP", "Travel", "Investment"],
+        Fixed_Expense: ["WHT", "Life/Health Insurance", "Car Insurance", "Condo Maintenance Fee", "Personal Trainer", "Debt Repayment"],
+        Variable_Expense: ["Food & Beverage", "Non Food", "Utilities", "Gasoline", "Subscription", "Credit Card Installment", "Books & Education", "Bread-Making", "Others"]
+      };
 
-    /* ==========================================================================
-       2. STATE INITIALIZATION & STORAGE PERSISTENCE
-       ========================================================================== */
-    function getInitialTimeBasedTheme() {
-      const h = new Date().getHours();
-      return (h >= 6 && h < 18) ? 'DAY' : 'NIGHT';
-    }
+      const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-    function defaultSettings() {
-      return {
-        schema_version: '1.0.0',
-        currency: 'THB',
-        cycleMode: 'CUSTOM', // 'CUSTOM' (26th Pay Cycle) | 'CALENDAR' (1-31)
+      let transactions = [];
+      let config = {
+        schema_version: "1.0.4",
+        currency: "THB",
+        cycle_mode: "CUSTOM", // "CUSTOM" | "CALENDAR"
         pay_cycle_day: 26,
         adjust_weekend: true,
-        theme: getInitialTimeBasedTheme(), // Strictly 'DAY' or 'NIGHT'
-        pinHash: null
+        theme: null, // "day" | "night"
+        pin_hash: null
       };
-    }
 
-    function loadSettings() {
-      try {
-        const raw = localStorage.getItem(CFG_STORAGE_KEY);
-        if (!raw) return defaultSettings();
-        const parsed = JSON.parse(raw);
+      // Active UI State
+      const now = new Date();
+      let activeTab = "entry";
+      let viewPeriodYear = now.getFullYear();
+      let viewPeriodMonth = now.getMonth(); // 0-11
+      let dashSelectedYear = now.getFullYear();
+      let dashSelectedMonth = now.getMonth(); // 0-11
+      let pendingConfirmCallback = null;
 
-        // Migrate any legacy property names smoothly
-        const legacyTheme = parsed.theme || parsed.theme_mode;
-        const normalizedTheme = (legacyTheme === 'DAY' || legacyTheme === 'NIGHT')
-          ? legacyTheme
-          : getInitialTimeBasedTheme();
-
-        const legacyCycle = parsed.cycleMode || parsed.cycle_mode;
-        const normalizedCycle = (legacyCycle === 'CUSTOM' || legacyCycle === 'CALENDAR')
-          ? legacyCycle
-          : 'CUSTOM';
-
-        const legacyPin = parsed.pinHash !== undefined ? parsed.pinHash : (parsed.pin_hash || null);
-
-        return {
-          ...defaultSettings(),
-          ...parsed,
-          schema_version: '1.0.0',
-          theme: normalizedTheme,
-          cycleMode: normalizedCycle,
-          pinHash: legacyPin
-        };
-      } catch (e) {
-        return defaultSettings();
+      /* ==========================================================================
+         2. PRECISION, DATE & NET BALANCE COLOR HELPERS
+         ========================================================================== */
+      function toSatang(thbValue) {
+        const num = parseFloat(thbValue);
+        if (isNaN(num)) return 0;
+        return Math.round(num * 100);
       }
-    }
 
-    function loadTransactions() {
-      try {
-        const raw = localStorage.getItem(TX_STORAGE_KEY);
-        if (!raw) return [];
-        const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed)) return [];
-        return parsed.filter(tx =>
-          tx &&
-          typeof tx.id === 'string' &&
-          typeof tx.date === 'string' &&
-          /^\d{4}-\d{2}-\d{2}$/.test(tx.date) &&
-          MAIN_CATEGORIES.includes(tx.main_category) &&
-          TAXONOMY[tx.main_category].includes(tx.sub_category) &&
-          Number.isInteger(tx.amount_satang) &&
-          tx.amount_satang > 0
-        );
-      } catch (e) {
-        return [];
+      function formatTHB(satang, showDecimals = true) {
+        const sign = satang < 0 ? "-" : "";
+        const absVal = Math.abs(satang) / 100;
+        const formatted = absVal.toLocaleString("en-US", {
+          minimumFractionDigits: showDecimals ? 2 : 0,
+          maximumFractionDigits: showDecimals ? 2 : 0
+        });
+        return `${sign}฿${formatted}`;
       }
-    }
 
-    let settings = loadSettings();
-    let transactions = loadTransactions();
-
-    function saveSettings() {
-      try {
-        localStorage.setItem(CFG_STORAGE_KEY, JSON.stringify(settings));
-      } catch (e) {
-        showToast('⚠️ ไม่สามารถบันทึกการตั้งค่าได้');
+      /**
+       * NET BALANCE COLOR RULES (LOCKED IN SPEC v1.0.4):
+       * 1. > 5,000.00 THB (> 500000 satang)        -> Black (net-bal-black)
+       * 2. < 0.00 THB (< 0 satang)                -> Red (net-bal-red)
+       * 3. >= 0.00 THB and <= 5,000.00 THB        -> Orange (net-bal-orange)
+       */
+      function getNetBalanceColorClass(netSatang) {
+        if (netSatang > 500000) return "net-bal-black";
+        if (netSatang < 0) return "net-bal-red";
+        return "net-bal-orange";
       }
-    }
 
-    function saveTransactions() {
-      try {
-        localStorage.setItem(TX_STORAGE_KEY, JSON.stringify(transactions));
-      } catch (e) {
-        showToast('⚠️ ไม่สามารถบันทึกรายการได้');
+      function applyNetBalanceStyle(el, netSatang) {
+        if (!el) return;
+        el.classList.remove("net-bal-black", "net-bal-red", "net-bal-orange");
+        el.classList.add(getNetBalanceColorClass(netSatang));
       }
-    }
 
-    /* ==========================================================================
-       3. PRECISION SATANG & SHORT ENGLISH DATE HELPERS
-       ========================================================================== */
-    function toSatang(val) {
-      const num = parseFloat(val);
-      if (isNaN(num) || num <= 0) return 0;
-      return Math.round((num + Number.EPSILON) * 100);
-    }
-
-    function formatTHB(satang) {
-      const isNeg = satang < 0;
-      const absSt = Math.abs(Math.round(satang));
-      const baht = Math.floor(absSt / 100);
-      const st = String(absSt % 100).padStart(2, '0');
-      return `${isNeg ? '-' : ''}฿${baht.toLocaleString('en-US')}.${st}`;
-    }
-
-    function formatShortDate(dateInput) {
-      let y, m, d;
-      if (typeof dateInput === 'string') {
-        const parts = dateInput.split('-').map(Number);
-        y = parts[0];
-        m = parts[1] - 1;
-        d = parts[2];
-      } else {
-        y = dateInput.getFullYear();
-        m = dateInput.getMonth();
-        d = dateInput.getDate();
+      function toISODate(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+        const d = String(dateObj.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
       }
-      return `${d} ${SHORT_MONTHS[m]} ${y}`;
-    }
 
-    function toISODate(dateObj) {
-      const y = dateObj.getFullYear();
-      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const d = String(dateObj.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
-    }
-
-    function parseLocalDate(isoStr) {
-      const [y, m, d] = isoStr.split('-').map(Number);
-      return new Date(y, m - 1, d, 12, 0, 0);
-    }
-
-    /* ==========================================================================
-       4. DUAL PAY-CYCLE ENGINE (26TH PAY CYCLE + WEEKEND ADJUSTMENT & CALENDAR)
-       ========================================================================== */
-    function getCustomCycleStart(targetYear, targetMonthIndex) {
-      let startYear = targetYear;
-      let startMonth = targetMonthIndex - 1;
-      if (startMonth < 0) {
-        startMonth = 11;
-        startYear -= 1;
+      function parseISODate(isoStr) {
+        const [y, m, d] = isoStr.split("-").map(Number);
+        return new Date(y, m - 1, d);
       }
-      const payday = new Date(startYear, startMonth, settings.pay_cycle_day || 26, 12, 0, 0);
-      if (settings.adjust_weekend) {
-        const dow = payday.getDay(); // 0 = Sun, 6 = Sat
-        if (dow === 6) payday.setDate(payday.getDate() - 1); // Saturday -> Friday
-        else if (dow === 0) payday.setDate(payday.getDate() - 2); // Sunday -> Friday
-      }
-      return payday;
-    }
 
-    function getPeriodBounds(year, monthIndex, mode) {
-      if (mode === 'CALENDAR') {
-        const start = new Date(year, monthIndex, 1, 12, 0, 0);
-        const end = new Date(year, monthIndex + 1, 0, 12, 0, 0);
-        return {
-          startISO: toISODate(start),
-          endISO: toISODate(end),
-          label: `${SHORT_MONTHS[monthIndex]} ${year} (Calendar)`,
-          rangeText: `${formatShortDate(start)} - ${formatShortDate(end)}`
-        };
-      } else {
-        const start = getCustomCycleStart(year, monthIndex);
-        let nextY = year;
-        let nextM = monthIndex + 1;
-        if (nextM > 11) {
-          nextM = 0;
-          nextY += 1;
+      function formatDisplayDate(isoStr) {
+        if (!isoStr || !/^\d{4}-\d{2}-\d{2}$/.test(isoStr)) return isoStr;
+        const [y, m, d] = isoStr.split("-").map(Number);
+        return `${d} ${SHORT_MONTHS[m - 1]} ${y}`;
+      }
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      /* ==========================================================================
+         3. DUAL PAY-CYCLE ENGINE (26TH PAY CYCLE + WEEKEND ADJUSTMENT)
+         ========================================================================== */
+      function getAdjustedPayDate(year, monthIndex, day = 26) {
+        const dt = new Date(year, monthIndex, day);
+        if (config.adjust_weekend) {
+          const dow = dt.getDay(); // 0 = Sun, 6 = Sat
+          if (dow === 6) dt.setDate(dt.getDate() - 1); // Sat -> Fri
+          else if (dow === 0) dt.setDate(dt.getDate() - 2); // Sun -> Fri
         }
-        const nextStart = getCustomCycleStart(nextY, nextM);
-        const end = new Date(nextStart.getFullYear(), nextStart.getMonth(), nextStart.getDate() - 1, 12, 0, 0);
-        return {
-          startISO: toISODate(start),
-          endISO: toISODate(end),
-          label: `${SHORT_MONTHS[monthIndex]} ${year} Cycle`,
-          rangeText: `${formatShortDate(start)} - ${formatShortDate(end)}`
-        };
+        return dt;
       }
-    }
 
-    function resolvePeriodForDate(dateObj, mode) {
-      const y = dateObj.getFullYear();
-      const m = dateObj.getMonth();
-      if (mode === 'CALENDAR') {
-        return { year: y, monthIndex: m };
-      }
-      const iso = toISODate(dateObj);
-      const curBounds = getPeriodBounds(y, m, 'CUSTOM');
-      if (iso >= curBounds.startISO && iso <= curBounds.endISO) {
-        return { year: y, monthIndex: m };
-      }
-      let nextY = y;
-      let nextM = m + 1;
-      if (nextM > 11) {
-        nextM = 0;
-        nextY += 1;
-      }
-      const nextBounds = getPeriodBounds(nextY, nextM, 'CUSTOM');
-      if (iso >= nextBounds.startISO && iso <= nextBounds.endISO) {
-        return { year: nextY, monthIndex: nextM };
-      }
-      return { year: y, monthIndex: m };
-    }
-
-    function getTransactionsInPeriod(year, monthIndex, mode) {
-      const bounds = getPeriodBounds(year, monthIndex, mode);
-      return transactions
-        .filter(tx => tx.date >= bounds.startISO && tx.date <= bounds.endISO)
-        .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
-    }
-
-    function summarizeTransactions(txList) {
-      let income = 0, savings = 0, fixed = 0, variable = 0;
-      txList.forEach(tx => {
-        if (tx.main_category === 'Income') income += tx.amount_satang;
-        else if (tx.main_category === 'Savings') savings += tx.amount_satang;
-        else if (tx.main_category === 'Fixed_Expense') fixed += tx.amount_satang;
-        else if (tx.main_category === 'Variable_Expense') variable += tx.amount_satang;
-      });
-      const expenses = fixed + variable;
-      const net = income - savings - expenses;
-      return { income, savings, fixed, variable, expenses, net };
-    }
-
-    /* ==========================================================================
-       5. STRICT 2-MODE THEME ENGINE (DAY / NIGHT) & SECURITY PIN (SHA-256)
-       ========================================================================== */
-    function applyTheme() {
-      const isDay = settings.theme === 'DAY';
-      const effectiveAttr = isDay ? 'light' : 'dark';
-      const btn = document.getElementById('btnThemeToggle');
-
-      btn.textContent = isDay ? '☀️ Day' : '🌙 Night';
-
-      document.documentElement.setAttribute('data-theme', effectiveAttr);
-      document.getElementById('metaThemeColor').setAttribute('content', isDay ? '#F7F4EB' : '#0D1117');
-    }
-
-    function toggleTheme() {
-      settings.theme = (settings.theme === 'DAY') ? 'NIGHT' : 'DAY';
-      saveSettings();
-      applyTheme();
-    }
-
-    async function sha256Pin(pin) {
-      const data = new TextEncoder().encode('PIXEL_LEDGER_V1_' + pin);
-      const buf = await crypto.subtle.digest('SHA-256', data);
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    let isUnlocked = false;
-    let pinBuffer = '';
-
-    function refreshPinUI() {
-      const hasPin = Boolean(settings.pinHash);
-      document.getElementById('btnQuickLock').classList.toggle('hidden', !hasPin);
-      document.getElementById('btnDisablePin').classList.toggle('hidden', !hasPin);
-      const statusEl = document.getElementById('pinStatusText');
-      if (hasPin) {
-        statusEl.textContent = 'สถานะ: เปิดใช้งาน PIN Lock แล้ว (SHA-256)';
-        statusEl.style.color = 'var(--cat-income)';
-        if (!isUnlocked) {
-          openPinOverlay();
+      function getPeriodRange(year, monthIndex, mode) {
+        if (mode === "CALENDAR") {
+          const start = new Date(year, monthIndex, 1);
+          const end = new Date(year, monthIndex + 1, 0);
+          return { start, end };
         }
-      } else {
-        statusEl.textContent = 'สถานะ: ยังไม่ได้เปิดใช้งาน PIN';
-        statusEl.style.color = 'var(--text-muted)';
-        document.getElementById('pinLockOverlay').classList.add('hidden');
+        // CUSTOM 26TH PAY CYCLE:
+        // Period labeled "Nov 2026" starts on adjusted 26 Oct 2026 and ends 1 day before adjusted 26 Nov 2026
+        const prevMonthYear = monthIndex === 0 ? year - 1 : year;
+        const prevMonthIdx = monthIndex === 0 ? 11 : monthIndex - 1;
+        const start = getAdjustedPayDate(prevMonthYear, prevMonthIdx, config.pay_cycle_day);
+        const nextCycleStart = getAdjustedPayDate(year, monthIndex, config.pay_cycle_day);
+        const end = new Date(nextCycleStart);
+        end.setDate(end.getDate() - 1);
+        return { start, end };
       }
-    }
 
-    function openPinOverlay() {
-      isUnlocked = false;
-      pinBuffer = '';
-      document.getElementById('unlockPinError').textContent = '';
-      renderPinDots();
-      document.getElementById('pinLockOverlay').classList.remove('hidden');
-    }
-
-    function renderPinDots() {
-      const wrap = document.getElementById('unlockPinDots');
-      wrap.innerHTML = '';
-      for (let i = 0; i < 6; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'pin-box-dot' + (i < pinBuffer.length ? ' active' : '');
-        wrap.appendChild(dot);
+      function detectInitialPeriod() {
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = today.getMonth();
+        if (config.cycle_mode === "CUSTOM") {
+          const thisMonthCycleStart = getAdjustedPayDate(y, m, config.pay_cycle_day);
+          if (today >= thisMonthCycleStart) {
+            viewPeriodYear = m === 11 ? y + 1 : y;
+            viewPeriodMonth = m === 11 ? 0 : m + 1;
+          } else {
+            viewPeriodYear = y;
+            viewPeriodMonth = m;
+          }
+        } else {
+          viewPeriodYear = y;
+          viewPeriodMonth = m;
+        }
+        dashSelectedYear = viewPeriodYear;
+        dashSelectedMonth = viewPeriodMonth;
       }
-    }
 
-    function initPinPad() {
-      const pad = document.getElementById('unlockPinPad');
-      const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'DEL', '0', 'OK'];
-      pad.innerHTML = '';
-      keys.forEach(k => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'pixel-btn pin-key' + (k === 'OK' ? ' pixel-btn-gold' : '');
-        btn.textContent = k;
-        btn.addEventListener('click', async () => {
-          document.getElementById('unlockPinError').textContent = '';
-          if (k === 'DEL') {
-            pinBuffer = pinBuffer.slice(0, -1);
-            renderPinDots();
-            return;
+      function filterTransactionsByRange(start, end) {
+        const sStr = toISODate(start);
+        const eStr = toISODate(end);
+        return transactions.filter((tx) => tx.date >= sStr && tx.date <= eStr);
+      }
+
+      /* ==========================================================================
+         4. STORAGE, SCHEMA VALIDATION & CRYPTO PIN
+         ========================================================================== */
+      function loadState() {
+        try {
+          const rawCfg = localStorage.getItem(STORAGE_CFG_KEY);
+          if (rawCfg) {
+            const parsedCfg = JSON.parse(rawCfg);
+            config = { ...config, ...parsedCfg };
           }
-          if (k === 'OK') {
-            await checkPinMatch(true);
-            return;
+          if (config.theme !== "day" && config.theme !== "night") {
+            const hr = new Date().getHours();
+            config.theme = hr >= 6 && hr < 18 ? "day" : "night";
           }
-          if (pinBuffer.length < 6) {
-            pinBuffer += k;
-            renderPinDots();
-            if (pinBuffer.length >= 4) {
-              await checkPinMatch(false);
+
+          const rawTxs = localStorage.getItem(STORAGE_TXS_KEY);
+          if (rawTxs) {
+            const parsedTxs = JSON.parse(rawTxs);
+            if (Array.isArray(parsedTxs)) {
+              transactions = parsedTxs.filter(isValidTransaction);
             }
           }
-        });
-        pad.appendChild(btn);
-      });
-    }
-
-    async function checkPinMatch(showErr) {
-      if (pinBuffer.length < 4) {
-        if (showErr) document.getElementById('unlockPinError').textContent = 'กรุณากรอก PIN 4–6 หลัก';
-        return;
-      }
-      const hashed = await sha256Pin(pinBuffer);
-      if (hashed === settings.pinHash) {
-        isUnlocked = true;
-        document.getElementById('pinLockOverlay').classList.add('hidden');
-        showToast('🔓 ปลดล็อกเรียบร้อย');
-      } else if (showErr) {
-        document.getElementById('unlockPinError').textContent = 'รหัส PIN ไม่ถูกต้อง';
-        pinBuffer = '';
-        renderPinDots();
-      }
-    }
-
-    /* ==========================================================================
-       6. NAVIGATION & VIEW CONTROLLERS (3 TABS)
-       ========================================================================== */
-    let activeTab = 'entry';
-    let dailyPeriod = resolvePeriodForDate(new Date(), settings.cycleMode);
-    let dailyCategoryFilter = 'ALL';
-    let dashYear = dailyPeriod.year;
-    let dashSelectedMonth = dailyPeriod.monthIndex;
-
-    function switchTab(tabName) {
-      activeTab = tabName;
-      document.getElementById('tabEntry').classList.toggle('hidden', tabName !== 'entry');
-      document.getElementById('tabDaily').classList.toggle('hidden', tabName !== 'daily');
-      document.getElementById('tabDashboard').classList.toggle('hidden', tabName !== 'dashboard');
-
-      document.querySelectorAll('#desktopNav .pixel-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tabName);
-      });
-      document.querySelectorAll('#mobileNav .dock-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tabName);
-      });
-
-      if (tabName === 'daily') renderDailyTab();
-      if (tabName === 'dashboard') renderDashboardTab();
-    }
-
-    function showToast(msg) {
-      const el = document.getElementById('toastBanner');
-      el.textContent = msg;
-      el.classList.remove('hidden');
-      clearTimeout(el._timer);
-      el._timer = setTimeout(() => el.classList.add('hidden'), 2800);
-    }
-
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
-
-    /* ==========================================================================
-       7. TAB 1: ENTRY FORM LOGIC (STEP 1: DATE FIRST)
-       ========================================================================== */
-    function selectMainCategory(cat, selectedSub = null) {
-      document.getElementById('txMainCat').value = cat;
-      document.querySelectorAll('#mainCatCards .cat-card-btn').forEach(btn => {
-        btn.classList.toggle('selected', btn.dataset.cat === cat);
-      });
-
-      const subSelect = document.getElementById('txSubCat');
-      const subs = TAXONOMY[cat] || [];
-      subSelect.innerHTML = '';
-      subs.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s;
-        opt.textContent = s;
-        if (selectedSub && selectedSub === s) opt.selected = true;
-        subSelect.appendChild(opt);
-      });
-    }
-
-    function updateEntryDatePreview() {
-      const val = document.getElementById('txDate').value;
-      const el = document.getElementById('txDatePreview');
-      if (val && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
-        el.textContent = `วันที่แสดงผล: ${formatShortDate(val)}`;
-      } else {
-        el.textContent = '';
-      }
-    }
-
-    function resetEntryForm() {
-      document.getElementById('txId').value = '';
-      document.getElementById('txDate').value = toISODate(new Date());
-      updateEntryDatePreview();
-      document.getElementById('txAmount').value = '';
-      document.getElementById('txNote').value = '';
-      document.getElementById('entryFormTitle').textContent = '➕ บันทึกรายการใหม่';
-      document.getElementById('entryEditBadge').classList.add('hidden');
-      document.getElementById('btnSubmitTx').textContent = '💾 บันทึกรายการ';
-      document.getElementById('btnCancelEdit').classList.add('hidden');
-    }
-
-    function handleEntrySubmit(e) {
-      e.preventDefault();
-      const editId = document.getElementById('txId').value.trim();
-      const dateVal = document.getElementById('txDate').value;
-      const mainCat = document.getElementById('txMainCat').value;
-      const subCat = document.getElementById('txSubCat').value;
-      const satang = toSatang(document.getElementById('txAmount').value);
-      const noteVal = document.getElementById('txNote').value.trim();
-
-      if (!dateVal || !/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
-        showToast('⚠️ กรุณาระบุวันที่ให้ถูกต้อง');
-        return;
-      }
-      if (!MAIN_CATEGORIES.includes(mainCat) || !TAXONOMY[mainCat].includes(subCat)) {
-        showToast('⚠️ หมวดหมู่ไม่ถูกต้อง');
-        return;
-      }
-      if (satang <= 0) {
-        showToast('⚠️ กรุณากรอกจำนวนเงินมากกว่า 0.00 บาท');
-        return;
-      }
-
-      if (editId) {
-        const idx = transactions.findIndex(t => t.id === editId);
-        if (idx !== -1) {
-          transactions[idx] = {
-            id: editId,
-            date: dateVal,
-            main_category: mainCat,
-            sub_category: subCat,
-            amount_satang: satang,
-            note: noteVal
-          };
-          showToast('✅ อัปเดตรายการเรียบร้อย');
+        } catch (err) {
+          console.error("Failed to load state:", err);
         }
-      } else {
-        const compactDate = dateVal.replace(/-/g, '');
-        const newTx = {
-          id: `tx_${compactDate}_${Date.now()}`,
-          date: dateVal,
-          main_category: mainCat,
-          sub_category: subCat,
-          amount_satang: satang,
-          note: noteVal
-        };
-        transactions.push(newTx);
-        showToast(`✅ บันทึก ${subCat} (${formatTHB(satang)}) แล้ว`);
       }
 
-      dailyPeriod = resolvePeriodForDate(parseLocalDate(dateVal), settings.cycleMode);
-      dashYear = dailyPeriod.year;
-      dashSelectedMonth = dailyPeriod.monthIndex;
+      function saveState() {
+        localStorage.setItem(STORAGE_CFG_KEY, JSON.stringify(config));
+        localStorage.setItem(STORAGE_TXS_KEY, JSON.stringify(transactions));
+      }
 
-      saveTransactions();
-      resetEntryForm();
-      switchTab('daily');
-    }
+      function isValidTransaction(tx) {
+        if (!tx || typeof tx !== "object") return false;
+        if (typeof tx.id !== "string" || !tx.id) return false;
+        if (typeof tx.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(tx.date)) return false;
+        if (!TAXONOMY[tx.main_category]) return false;
+        if (!TAXONOMY[tx.main_category].includes(tx.sub_category)) return false;
+        if (!Number.isInteger(tx.amount_satang) || tx.amount_satang < 0) return false;
+        return true;
+      }
 
-    function startEditTx(txId) {
-      const tx = transactions.find(t => t.id === txId);
-      if (!tx) return;
+      async function sha256Hex(text) {
+        const msgBuffer = new TextEncoder().encode(text);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+      }
 
-      document.getElementById('txId').value = tx.id;
-      document.getElementById('txDate').value = tx.date;
-      updateEntryDatePreview();
-      selectMainCategory(tx.main_category, tx.sub_category);
-      document.getElementById('txAmount').value = (tx.amount_satang / 100).toFixed(2);
-      document.getElementById('txNote').value = tx.note || '';
-
-      document.getElementById('entryFormTitle').textContent = '✏️ แก้ไขรายการ';
-      document.getElementById('entryEditBadge').classList.remove('hidden');
-      document.getElementById('btnSubmitTx').textContent = '💾 บันทึกการแก้ไข';
-      document.getElementById('btnCancelEdit').classList.remove('hidden');
-
-      switchTab('entry');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    /* ==========================================================================
-       8. TAB 2: DAILY SUMMARY & HISTORY RENDERER
-       ========================================================================== */
-    let pendingDeleteId = null;
-
-    function renderDailyTab() {
-      const mode = settings.cycleMode;
-      document.getElementById('btnDailyModeCustom').classList.toggle('pixel-btn-gold', mode === 'CUSTOM');
-      document.getElementById('btnDailyModeCalendar').classList.toggle('pixel-btn-gold', mode === 'CALENDAR');
-
-      const bounds = getPeriodBounds(dailyPeriod.year, dailyPeriod.monthIndex, mode);
-      document.getElementById('dailyCycleTitle').textContent = bounds.label;
-      document.getElementById('dailyCycleRange').textContent = bounds.rangeText;
-
-      const txs = getTransactionsInPeriod(dailyPeriod.year, dailyPeriod.monthIndex, mode);
-      const totals = summarizeTransactions(txs);
-
-      document.getElementById('dailyKpiIncome').textContent = formatTHB(totals.income);
-      document.getElementById('dailyKpiSavings').textContent = formatTHB(totals.savings);
-      document.getElementById('dailyKpiExpenses').textContent = formatTHB(totals.expenses);
-
-      const netEl = document.getElementById('dailyKpiNet');
-      netEl.textContent = formatTHB(totals.net);
-      netEl.style.color = totals.net >= 0 ? 'var(--accent-gold)' : 'var(--cat-variable)';
-
-      // Proportional Stacked Bar for 4 Categories
-      const totalVolume = totals.income + totals.savings + totals.fixed + totals.variable;
-      const segments = [
-        { label: 'Income', val: totals.income, color: 'var(--cat-income)' },
-        { label: 'Savings', val: totals.savings, color: 'var(--cat-savings)' },
-        { label: 'Fixed_Expense', val: totals.fixed, color: 'var(--cat-fixed)' },
-        { label: 'Variable_Expense', val: totals.variable, color: 'var(--cat-variable)' }
-      ];
-
-      const stackedBar = document.getElementById('dailyStackedBar');
-      const stackedLegend = document.getElementById('dailyStackedLegend');
-      stackedBar.innerHTML = '';
-      stackedLegend.innerHTML = '';
-
-      segments.forEach(seg => {
-        const pct = totalVolume > 0 ? (seg.val / totalVolume) * 100 : 0;
-        if (pct > 0) {
-          const div = document.createElement('div');
-          div.className = 'stacked-seg';
-          div.style.width = `${pct}%`;
-          div.style.backgroundColor = seg.color;
-          div.title = `${seg.label}: ${formatTHB(seg.val)} (${pct.toFixed(1)}%)`;
-          stackedBar.appendChild(div);
+      /* ==========================================================================
+         5. THEME & NAVIGATION CONTROLLERS
+         ========================================================================== */
+      function applyTheme(themeName) {
+        config.theme = themeName === "night" ? "night" : "day";
+        document.documentElement.setAttribute("data-theme", config.theme);
+        const btn = document.getElementById("btnThemeToggle");
+        btn.textContent = config.theme === "day" ? "☀️ Day" : "🌙 Night";
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) {
+          metaTheme.setAttribute("content", config.theme === "day" ? "#F4F1EA" : "#090A0F");
         }
-
-        const item = document.createElement('div');
-        item.className = 'pixel-subbox';
-        item.style.padding = '8px 10px';
-        item.style.display = 'flex';
-        item.style.justifyContent = 'space-between';
-        item.style.alignItems = 'center';
-        item.style.gap = '6px';
-        item.innerHTML = `
-          <span style="font-size: 13px; font-weight: 800; color: ${seg.color};">■ ${seg.label}</span>
-          <span class="tabular" style="font-size: 13px; font-weight: 700;">${formatTHB(seg.val)} (${pct.toFixed(0)}%)</span>
-        `;
-        stackedLegend.appendChild(item);
-      });
-
-      // Update Filter Pills Active State
-      document.querySelectorAll('#dailyFilterPills .filter-pill-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.filter === dailyCategoryFilter);
-      });
-
-      // Filtered Transaction List
-      const filtered = dailyCategoryFilter === 'ALL' ? txs : txs.filter(t => t.main_category === dailyCategoryFilter);
-      document.getElementById('dailyTxCount').textContent = filtered.length;
-
-      const listEl = document.getElementById('dailyTxList');
-      if (filtered.length === 0) {
-        listEl.innerHTML = `
-          <div style="padding: 28px 14px; text-align: center; color: var(--text-muted);">
-            <div style="font-size: 28px; margin-bottom: 6px;">📭</div>
-            <div style="font-weight: 800;">ไม่มีรายการในรอบบัญชีนี้</div>
-            <div style="font-size: 13px; margin-top: 4px;">กดแท็บ "➕ บันทึกรายการ" เพื่อเพิ่มข้อมูล</div>
-          </div>
-        `;
-        return;
+        saveState();
       }
 
-      listEl.innerHTML = '';
-      filtered.forEach(tx => {
-        const row = document.createElement('div');
-        row.className = 'tx-item';
+      function switchTab(tabName) {
+        activeTab = tabName;
+        document.getElementById("viewEntry").classList.toggle("hidden", tabName !== "entry");
+        document.getElementById("viewDaily").classList.toggle("hidden", tabName !== "daily");
+        document.getElementById("viewDashboard").classList.toggle("hidden", tabName !== "dashboard");
 
-        let amtColor = 'c-variable';
-        let sign = '-';
-        if (tx.main_category === 'Income') { amtColor = 'c-income'; sign = '+'; }
-        else if (tx.main_category === 'Savings') { amtColor = 'c-savings'; sign = '★ '; }
-        else if (tx.main_category === 'Fixed_Expense') { amtColor = 'c-fixed'; sign = '-'; }
-
-        const noteHtml = tx.note ? `<div class="tx-note">📝 ${escapeHtml(tx.note)}</div>` : '';
-
-        row.innerHTML = `
-          <div class="tx-meta">
-            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 5px;">
-              <span class="badge-cat badge-${tx.main_category}">${tx.main_category}</span>
-              <span class="tabular" style="font-size: 13px; font-weight: 700; color: var(--text-muted);">${formatShortDate(tx.date)}</span>
-            </div>
-            <div class="tx-subcat">${escapeHtml(tx.sub_category)}</div>
-            ${noteHtml}
-          </div>
-          <div class="tx-right">
-            <div class="tabular ${amtColor}" style="font-size: 17px; font-weight: 800;">
-              ${sign}${formatTHB(tx.amount_satang)}
-            </div>
-            <div class="tx-actions">
-              <button type="button" class="icon-action-btn" data-edit="${tx.id}" title="แก้ไข">✏️</button>
-              <button type="button" class="icon-action-btn" data-del="${tx.id}" title="ลบ" style="color: var(--cat-variable);">🗑️</button>
-            </div>
-          </div>
-        `;
-        listEl.appendChild(row);
-      });
-
-      listEl.querySelectorAll('[data-edit]').forEach(btn => {
-        btn.addEventListener('click', () => startEditTx(btn.dataset.edit));
-      });
-      listEl.querySelectorAll('[data-del]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tx = transactions.find(t => t.id === btn.dataset.del);
-          if (!tx) return;
-          pendingDeleteId = tx.id;
-          document.getElementById('confirmMessage').textContent =
-            `ต้องการลบ "${tx.sub_category}" จำนวน ${formatTHB(tx.amount_satang)} (${formatShortDate(tx.date)}) ใช่หรือไม่?`;
-          document.getElementById('confirmModal').classList.remove('hidden');
+        document.querySelectorAll("#desktopNav .pixel-btn").forEach((b) => {
+          b.classList.toggle("active", b.dataset.tab === tabName);
         });
-      });
-    }
-
-    /* ==========================================================================
-       9. TAB 3: DASHBOARD (ANNUAL & MONTHLY TRENDS + AUTO CURRENT & CLICK DRILL-DOWN)
-       ========================================================================== */
-    function renderDashboardTab() {
-      const mode = settings.cycleMode;
-      document.getElementById('btnDashModeCustom').classList.toggle('pixel-btn-gold', mode === 'CUSTOM');
-      document.getElementById('btnDashModeCalendar').classList.toggle('pixel-btn-gold', mode === 'CALENDAR');
-
-      document.getElementById('dashYearTitle').textContent = `YEAR ${dashYear}`;
-      document.getElementById('dashYearSub').textContent = mode === 'CUSTOM'
-        ? '26TH PAY CYCLE (JAN – DEC)'
-        : 'CALENDAR MONTH (JAN – DEC)';
-
-      const currentRealPeriod = resolvePeriodForDate(new Date(), mode);
-      const monthlyData = [];
-      let maxBar = 100;
-
-      for (let m = 0; m < 12; m++) {
-        const mTxs = getTransactionsInPeriod(dashYear, m, mode);
-        const sum = summarizeTransactions(mTxs);
-        monthlyData.push({
-          monthIndex: m,
-          label: SHORT_MONTHS[m],
-          txs: mTxs,
-          ...sum
+        document.querySelectorAll("#mobileNav .mobile-tab-btn").forEach((b) => {
+          b.classList.toggle("active", b.dataset.tab === tabName);
         });
-        maxBar = Math.max(maxBar, sum.income, sum.savings, sum.fixed, sum.variable);
+
+        if (tabName === "daily") renderDailyView();
+        if (tabName === "dashboard") renderDashboardView();
       }
 
-      const annual = monthlyData.reduce((acc, cur) => {
-        acc.income += cur.income;
-        acc.savings += cur.savings;
-        acc.fixed += cur.fixed;
-        acc.variable += cur.variable;
-        acc.net += cur.net;
-        return acc;
-      }, { income: 0, savings: 0, fixed: 0, variable: 0, net: 0 });
+      /* ==========================================================================
+         6. ENTRY FORM LOGIC
+         ========================================================================== */
+      function populateSubCategories(mainCat, selectedSub = null) {
+        const selectEl = document.getElementById("txSubCat");
+        const list = TAXONOMY[mainCat] || [];
+        selectEl.innerHTML = list
+          .map((sub) => `<option value="${escapeHtml(sub)}">${escapeHtml(sub)}</option>`)
+          .join("");
+        if (selectedSub && list.includes(selectedSub)) {
+          selectEl.value = selectedSub;
+        }
+      }
 
-      document.getElementById('dashKpiIncome').textContent = formatTHB(annual.income);
-      document.getElementById('dashKpiSavings').textContent = formatTHB(annual.savings);
-      document.getElementById('dashKpiFixed').textContent = formatTHB(annual.fixed);
-      document.getElementById('dashKpiVariable').textContent = formatTHB(annual.variable);
-
-      const annNetEl = document.getElementById('dashKpiNet');
-      annNetEl.textContent = formatTHB(annual.net);
-      annNetEl.style.color = annual.net >= 0 ? 'var(--accent-gold)' : 'var(--cat-variable)';
-
-      // 12-Month Bar Chart
-      const barsGrid = document.getElementById('dashBarsGrid');
-      barsGrid.innerHTML = '';
-      monthlyData.forEach(md => {
-        const isSelected = md.monthIndex === dashSelectedMonth;
-        const hIn = Math.round((md.income / maxBar) * 134);
-        const hSav = Math.round((md.savings / maxBar) * 134);
-        const hFix = Math.round((md.fixed / maxBar) * 134);
-        const hVar = Math.round((md.variable / maxBar) * 134);
-
-        const col = document.createElement('div');
-        col.className = 'annual-col' + (isSelected ? ' is-selected' : '');
-        col.innerHTML = `
-          <div class="annual-bar-group">
-            <div class="abar" style="height: ${Math.max(2, hIn)}px; background: var(--cat-income);"></div>
-            <div class="abar" style="height: ${Math.max(2, hSav)}px; background: var(--cat-savings);"></div>
-            <div class="abar" style="height: ${Math.max(2, hFix)}px; background: var(--cat-fixed);"></div>
-            <div class="abar" style="height: ${Math.max(2, hVar)}px; background: var(--cat-variable);"></div>
-          </div>
-          <div style="font-size: 12px; font-weight: 800; margin-top: 6px; color: ${isSelected ? 'var(--accent-gold)' : 'var(--text-muted)'};">
-            ${md.label}
-          </div>
-        `;
-        col.addEventListener('click', () => {
-          dashSelectedMonth = md.monthIndex;
-          renderDashboardTab();
+      function selectMainCategory(mainCat, selectedSub = null) {
+        document.getElementById("txMainCat").value = mainCat;
+        document.querySelectorAll("#mainCategoryGrid .cat-choice").forEach((btn) => {
+          btn.classList.toggle("selected", btn.dataset.cat === mainCat);
         });
-        barsGrid.appendChild(col);
-      });
+        populateSubCategories(mainCat, selectedSub);
+      }
 
-      // Interactive 12-Month Table
-      const tbody = document.getElementById('dashTableBody');
-      tbody.innerHTML = '';
-      monthlyData.forEach(md => {
-        const isCurrent = (dashYear === currentRealPeriod.year && md.monthIndex === currentRealPeriod.monthIndex);
-        const isSelected = (md.monthIndex === dashSelectedMonth);
+      function updateDatePreviewBadge() {
+        const val = document.getElementById("txDate").value;
+        document.getElementById("entryDatePreviewBadge").textContent = val ? formatDisplayDate(val) : "-";
+      }
 
-        const tr = document.createElement('tr');
-        tr.className = 'month-row' + (isCurrent ? ' is-current' : '') + (isSelected ? ' is-selected' : '');
-        const netColor = md.net >= 0 ? 'var(--accent-gold)' : 'var(--cat-variable)';
-        const currentBadge = isCurrent ? '<span class="badge-current">CURRENT</span>' : '';
+      function resetEntryForm() {
+        document.getElementById("txEditId").value = "";
+        document.getElementById("entryFormHeading").textContent = "➕ บันทึกรายการใหม่";
+        document.getElementById("btnSubmitTx").textContent = "💾 บันทึกรายการ";
+        document.getElementById("btnCancelEdit").classList.add("hidden");
+        document.getElementById("txAmount").value = "";
+        document.getElementById("txNote").value = "";
+        updateDatePreviewBadge();
+      }
 
-        tr.innerHTML = `
-          <td>${md.label} ${dashYear}${currentBadge}</td>
-          <td class="c-income">${formatTHB(md.income)}</td>
-          <td class="c-savings">${formatTHB(md.savings)}</td>
-          <td class="c-fixed">${formatTHB(md.fixed)}</td>
-          <td class="c-variable">${formatTHB(md.variable)}</td>
-          <td style="font-weight: 800; color: ${netColor};">${formatTHB(md.net)}</td>
-        `;
-        tr.addEventListener('click', () => {
-          dashSelectedMonth = md.monthIndex;
-          renderDashboardTab();
+      function startEditTransaction(id) {
+        const tx = transactions.find((item) => item.id === id);
+        if (!tx) return;
+        document.getElementById("txEditId").value = tx.id;
+        document.getElementById("txDate").value = tx.date;
+        updateDatePreviewBadge();
+        selectMainCategory(tx.main_category, tx.sub_category);
+        document.getElementById("txAmount").value = (tx.amount_satang / 100).toFixed(2);
+        document.getElementById("txNote").value = tx.note || "";
+        document.getElementById("entryFormHeading").textContent = "✏️ แก้ไขรายการ";
+        document.getElementById("btnSubmitTx").textContent = "💾 อัปเดตรายการ";
+        document.getElementById("btnCancelEdit").classList.remove("hidden");
+        switchTab("entry");
+      }
+
+      function showToast(msg) {
+        const toast = document.getElementById("entryToast");
+        toast.textContent = msg;
+        toast.classList.remove("hidden");
+        setTimeout(() => toast.classList.add("hidden"), 2400);
+      }
+
+      /* ==========================================================================
+         7. DAILY VIEW RENDERER
+         ========================================================================== */
+      function summarizeTransactions(txList) {
+        let income = 0;
+        let savings = 0;
+        let fixed = 0;
+        let variable = 0;
+
+        txList.forEach((tx) => {
+          if (tx.main_category === "Income") income += tx.amount_satang;
+          else if (tx.main_category === "Savings") savings += tx.amount_satang;
+          else if (tx.main_category === "Fixed_Expense") fixed += tx.amount_satang;
+          else if (tx.main_category === "Variable_Expense") variable += tx.amount_satang;
         });
-        tbody.appendChild(tr);
-      });
 
-      // Selected Month Sub-Category Drill-Down
-      renderMonthDrilldown(monthlyData[dashSelectedMonth]);
-    }
+        const net = income - (savings + fixed + variable);
+        return { income, savings, fixed, variable, net };
+      }
 
-    function renderMonthDrilldown(monthObj) {
-      const bounds = getPeriodBounds(dashYear, monthObj.monthIndex, settings.cycleMode);
-      document.getElementById('drilldownTitle').textContent = `🔍 เจาะลึกหมวดหมู่ย่อย: ${monthObj.label} ${dashYear}`;
-      document.getElementById('drilldownDateRange').textContent = bounds.rangeText;
+      function renderDailyView() {
+        document.getElementById("btnCycleCustom").classList.toggle("pixel-btn-primary", config.cycle_mode === "CUSTOM");
+        document.getElementById("btnCycleCalendar").classList.toggle("pixel-btn-primary", config.cycle_mode === "CALENDAR");
 
-      const grid = document.getElementById('drilldownGrid');
-      grid.innerHTML = '';
+        const { start, end } = getPeriodRange(viewPeriodYear, viewPeriodMonth, config.cycle_mode);
+        document.getElementById("periodLabel").textContent = `${SHORT_MONTHS[viewPeriodMonth]} ${viewPeriodYear}`;
+        document.getElementById("periodRangeText").textContent = `ช่วงวันที่: ${formatDisplayDate(toISODate(start))} – ${formatDisplayDate(toISODate(end))}`;
 
-      const catColors = {
-        Income: 'var(--cat-income)',
-        Savings: 'var(--cat-savings)',
-        Fixed_Expense: 'var(--cat-fixed)',
-        Variable_Expense: 'var(--cat-variable)'
-      };
+        const periodTxs = filterTransactionsByRange(start, end);
+        const sums = summarizeTransactions(periodTxs);
 
-      MAIN_CATEGORIES.forEach(mainCat => {
-        const subs = TAXONOMY[mainCat];
-        const catTxs = monthObj.txs.filter(t => t.main_category === mainCat);
-        const catSum = catTxs.reduce((s, t) => s + t.amount_satang, 0);
+        document.getElementById("dailyKpiIncome").textContent = formatTHB(sums.income);
+        document.getElementById("dailyKpiSavings").textContent = formatTHB(sums.savings);
+        document.getElementById("dailyKpiFixed").textContent = formatTHB(sums.fixed);
+        document.getElementById("dailyKpiVariable").textContent = formatTHB(sums.variable);
 
-        const card = document.createElement('div');
-        card.className = 'pixel-subbox';
-        card.style.padding = '12px';
+        const netEl = document.getElementById("dailyKpiNet");
+        netEl.textContent = formatTHB(sums.net);
+        applyNetBalanceStyle(netEl, sums.net);
 
-        let subRowsHtml = '';
-        subs.forEach(sub => {
-          const subSum = catTxs.filter(t => t.sub_category === sub).reduce((s, t) => s + t.amount_satang, 0);
-          const pct = catSum > 0 ? (subSum / catSum) * 100 : 0;
-          subRowsHtml += `
-            <div style="margin-bottom: 8px;">
-              <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 3px; gap: 6px;">
-                <span style="word-break: break-word;">${sub}</span>
-                <span class="tabular" style="flex-shrink: 0;">${formatTHB(subSum)} (${pct.toFixed(0)}%)</span>
-              </div>
-              <div class="sub-bar-track" style="height: 10px;">
-                <div class="sub-bar-fill" style="width: ${pct.toFixed(1)}%; background-color: ${catColors[mainCat]};"></div>
-              </div>
-            </div>
+        // Ratio Bar
+        const totalVolume = sums.income + sums.savings + sums.fixed + sums.variable;
+        const barEl = document.getElementById("dailyRatioBar");
+        if (totalVolume === 0) {
+          barEl.innerHTML = "";
+        } else {
+          const pInc = (sums.income / totalVolume) * 100;
+          const pSav = (sums.savings / totalVolume) * 100;
+          const pFix = (sums.fixed / totalVolume) * 100;
+          const pVar = (sums.variable / totalVolume) * 100;
+          barEl.innerHTML = `
+            <div style="width:${pInc}%; background:var(--cat-income);" title="Income"></div>
+            <div style="width:${pSav}%; background:var(--cat-savings);" title="Savings"></div>
+            <div style="width:${pFix}%; background:var(--cat-fixed);" title="Fixed_Expense"></div>
+            <div style="width:${pVar}%; background:var(--cat-variable);" title="Variable_Expense"></div>
           `;
+        }
+
+        // Filtered List
+        const filterVal = document.getElementById("dailyCatFilter").value;
+        const filtered = periodTxs
+          .filter((tx) => filterVal === "ALL" || tx.main_category === filterVal)
+          .sort((a, b) => (b.date !== a.date ? b.date.localeCompare(a.date) : b.id.localeCompare(a.id)));
+
+        document.getElementById("dailyTxCount").textContent = String(filtered.length);
+        const listEl = document.getElementById("dailyTxList");
+
+        if (filtered.length === 0) {
+          listEl.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-secondary);">ไม่มีรายการในรอบบัญชีนี้</div>`;
+          return;
+        }
+
+        listEl.innerHTML = filtered
+          .map((tx) => {
+            const colorVar =
+              tx.main_category === "Income"
+                ? "var(--cat-income)"
+                : tx.main_category === "Savings"
+                ? "var(--cat-savings)"
+                : tx.main_category === "Fixed_Expense"
+                ? "var(--cat-fixed)"
+                : "var(--cat-variable)";
+
+            return `
+              <div class="tx-item">
+                <div style="min-width:0; flex:1;">
+                  <div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:4px;">
+                    <span class="badge badge-${tx.main_category}">${escapeHtml(tx.sub_category)}</span>
+                    <span style="font-size:13px; color:var(--text-secondary); font-weight:700;">${formatDisplayDate(tx.date)}</span>
+                  </div>
+                  ${tx.note ? `<div style="font-size:14px; color:var(--text-primary); word-break:break-word;">${escapeHtml(tx.note)}</div>` : ""}
+                </div>
+                <div style="text-align:right; flex-shrink:0;">
+                  <div class="tabular" style="font-size:17px; font-weight:800; color:${colorVar}; margin-bottom:6px;">
+                    ${formatTHB(tx.amount_satang)}
+                  </div>
+                  <div style="display:flex; gap:6px; justify-content:flex-end;">
+                    <button type="button" class="pixel-btn pixel-btn-sm" data-edit="${tx.id}" aria-label="แก้ไข">✏️</button>
+                    <button type="button" class="pixel-btn pixel-btn-sm" data-del="${tx.id}" aria-label="ลบ">🗑️</button>
+                  </div>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      /* ==========================================================================
+         8. DASHBOARD VIEW RENDERER (ANNUAL + 12-MONTH + 2x2 DRILLDOWN)
+         ========================================================================== */
+      function populateDashboardYears() {
+        const yearSelect = document.getElementById("dashYearSelect");
+        const years = new Set([now.getFullYear(), dashSelectedYear]);
+        transactions.forEach((tx) => {
+          const y = parseInt(tx.date.slice(0, 4), 10);
+          if (!isNaN(y)) years.add(y);
         });
+        const sortedYears = Array.from(years).sort((a, b) => b - a);
+        yearSelect.innerHTML = sortedYears
+          .map((y) => `<option value="${y}" ${y === dashSelectedYear ? "selected" : ""}>Year ${y}</option>`)
+          .join("");
+      }
 
-        card.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid var(--border-outer);">
-            <span class="badge-cat badge-${mainCat}">${mainCat}</span>
-            <span class="tabular" style="font-size: 16px; font-weight: 800; color: ${catColors[mainCat]};">${formatTHB(catSum)}</span>
-          </div>
-          ${subRowsHtml}
-        `;
-        grid.appendChild(card);
-      });
-    }
+      function renderDashboardView() {
+        populateDashboardYears();
+        const cycleMode = document.getElementById("dashCycleSelect").value;
 
-    /* ==========================================================================
-       10. EXPORT CSV (UTF-8 BOM), COPY TSV, JSON BACKUP & STRICT SCHEMA VALIDATION
-       ========================================================================== */
-    function buildTableRows() {
-      const headers = ['ID', 'Date_Display', 'Date_ISO', 'Main_Category', 'Sub_Category', 'Amount_THB', 'Amount_Satang', 'Note'];
-      const sorted = [...transactions].sort((a, b) => b.date.localeCompare(a.date));
-      const rows = [headers];
-      sorted.forEach(tx => {
-        rows.push([
+        let yearInc = 0;
+        let yearSav = 0;
+        let yearFix = 0;
+        let yearVar = 0;
+        const monthlyStats = [];
+        let maxBarVal = 1;
+
+        for (let m = 0; m < 12; m++) {
+          const { start, end } = getPeriodRange(dashSelectedYear, m, cycleMode);
+          const txs = filterTransactionsByRange(start, end);
+          const sums = summarizeTransactions(txs);
+          yearInc += sums.income;
+          yearSav += sums.savings;
+          yearFix += sums.fixed;
+          yearVar += sums.variable;
+
+          maxBarVal = Math.max(maxBarVal, sums.income, sums.savings, sums.fixed, sums.variable);
+          monthlyStats.push({ monthIndex: m, txs, ...sums });
+        }
+
+        const yearNet = yearInc - (yearSav + yearFix + yearVar);
+
+        document.getElementById("dashYearIncome").textContent = formatTHB(yearInc, false);
+        document.getElementById("dashYearSavings").textContent = formatTHB(yearSav, false);
+        document.getElementById("dashYearFixed").textContent = formatTHB(yearFix, false);
+        document.getElementById("dashYearVariable").textContent = formatTHB(yearVar, false);
+
+        const dashYearNetEl = document.getElementById("dashYearNet");
+        dashYearNetEl.textContent = formatTHB(yearNet, false);
+        applyNetBalanceStyle(dashYearNetEl, yearNet);
+
+        // Render 12-Month Bar Chart
+        const chartEl = document.getElementById("dashBarChart");
+        chartEl.innerHTML = monthlyStats
+          .map((st) => {
+            const hInc = Math.round((st.income / maxBarVal) * 130);
+            const hSav = Math.round((st.savings / maxBarVal) * 130);
+            const hFix = Math.round((st.fixed / maxBarVal) * 130);
+            const hVar = Math.round((st.variable / maxBarVal) * 130);
+            const isSelected = st.monthIndex === dashSelectedMonth;
+
+            return `
+              <div class="chart-col ${isSelected ? "selected-col" : ""}" data-dash-month="${st.monthIndex}">
+                <div class="chart-bars">
+                  <div class="bar-seg" style="height:${Math.max(2, hInc)}px; background:var(--cat-income);"></div>
+                  <div class="bar-seg" style="height:${Math.max(2, hSav)}px; background:var(--cat-savings);"></div>
+                  <div class="bar-seg" style="height:${Math.max(2, hFix)}px; background:var(--cat-fixed);"></div>
+                  <div class="bar-seg" style="height:${Math.max(2, hVar)}px; background:var(--cat-variable);"></div>
+                </div>
+                <div style="font-size:12px; font-weight:800; margin-top:4px;">${SHORT_MONTHS[st.monthIndex]}</div>
+              </div>
+            `;
+          })
+          .join("");
+
+        // Render 12-Month Table with Current & Selected Month Highlight
+        const tbody = document.getElementById("dashMonthTableBody");
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+
+        tbody.innerHTML = monthlyStats
+          .map((st) => {
+            const isCurrent = dashSelectedYear === currentYear && st.monthIndex === currentMonth;
+            const isSelected = st.monthIndex === dashSelectedMonth;
+            const netColorCls = getNetBalanceColorClass(st.net);
+
+            return `
+              <tr class="${isCurrent || isSelected ? "row-highlight" : ""}" data-dash-month="${st.monthIndex}">
+                <td>
+                  ${SHORT_MONTHS[st.monthIndex]}
+                  ${isCurrent ? `<span class="badge" style="font-size:10px; margin-left:4px;">NOW</span>` : ""}
+                </td>
+                <td class="tabular" style="color:var(--cat-income);">${formatTHB(st.income, false)}</td>
+                <td class="tabular" style="color:var(--cat-savings);">${formatTHB(st.savings, false)}</td>
+                <td class="tabular" style="color:var(--cat-fixed);">${formatTHB(st.fixed, false)}</td>
+                <td class="tabular" style="color:var(--cat-variable);">${formatTHB(st.variable, false)}</td>
+                <td class="tabular ${netColorCls}" style="font-weight:800;">${formatTHB(st.net, false)}</td>
+              </tr>
+            `;
+          })
+          .join("");
+
+        // Render Symmetric 2x2 Sub-Category Drill-Down for Selected Month
+        const selectedStat = monthlyStats[dashSelectedMonth] || monthlyStats[0];
+        document.getElementById("drillMonthTitle").textContent = `${SHORT_MONTHS[dashSelectedMonth]} ${dashSelectedYear}`;
+
+        const drillGrid = document.getElementById("dashDrilldownGrid");
+        const mainCats = ["Income", "Savings", "Fixed_Expense", "Variable_Expense"];
+
+        drillGrid.innerHTML = mainCats
+          .map((mCat) => {
+            const subList = TAXONOMY[mCat];
+            const catTxs = selectedStat.txs.filter((t) => t.main_category === mCat);
+            const catTotal = catTxs.reduce((acc, t) => acc + t.amount_satang, 0);
+
+            const rowsHtml = subList
+              .map((sCat) => {
+                const subSum = catTxs
+                  .filter((t) => t.sub_category === sCat)
+                  .reduce((acc, t) => acc + t.amount_satang, 0);
+                if (subSum === 0) return "";
+                const pct = catTotal > 0 ? Math.round((subSum / catTotal) * 100) : 0;
+                return `
+                  <div style="display:flex; justify-content:space-between; gap:8px; font-size:13px; padding:4px 0; border-bottom:1px dashed var(--border-muted);">
+                    <span style="word-break:break-word;">${escapeHtml(sCat)} (${pct}%)</span>
+                    <span class="tabular" style="font-weight:700; flex-shrink:0;">${formatTHB(subSum, false)}</span>
+                  </div>
+                `;
+              })
+              .filter(Boolean)
+              .join("");
+
+            return `
+              <div class="pixel-subbox" style="display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:8px;">
+                    <span class="badge badge-${mCat}">${mCat}</span>
+                    <span class="tabular" style="font-weight:800;">${formatTHB(catTotal, false)}</span>
+                  </div>
+                  ${rowsHtml || `<div style="font-size:13px; color:var(--text-secondary);">ไม่มีรายการในหมวดนี้</div>`}
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      /* ==========================================================================
+         9. EXPORT / IMPORT / DEMO DATA & PIN LOCK HANDLERS
+         ========================================================================== */
+      function exportCSV() {
+        const headers = ["id", "date", "display_date", "main_category", "sub_category", "amount_thb", "amount_satang", "note"];
+        const rows = transactions.map((tx) => [
           tx.id,
-          formatShortDate(tx.date),
           tx.date,
+          formatDisplayDate(tx.date),
           tx.main_category,
           tx.sub_category,
           (tx.amount_satang / 100).toFixed(2),
-          String(tx.amount_satang),
-          tx.note || ''
+          tx.amount_satang,
+          `"${String(tx.note || "").replace(/"/g, '""')}"`
         ]);
-      });
-      return rows;
-    }
-
-    function exportCsv() {
-      const rows = buildTableRows();
-      const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\r\n');
-      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-      downloadBlob(blob, `ploys_ledger_${toISODate(new Date())}.csv`);
-      showToast('⬇️ ดาวน์โหลดไฟล์ CSV เรียบร้อย');
-    }
-
-    function copyTsvForSheets() {
-      const rows = buildTableRows();
-      const tsv = rows.map(r => r.map(c => String(c).replace(/\t|\r|\n/g, ' ')).join('\t')).join('\n');
-      const ta = document.createElement('textarea');
-      ta.value = tsv;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        document.execCommand('copy');
-        showToast('📋 คัดลอกตาราง TSV แล้ว! กดวางใน Google Sheets ได้ทันที');
-      } catch (e) {
-        showToast('⚠️ ไม่สามารถคัดลอกอัตโนมัติได้');
+        const csvContent = "\uFEFF" + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        triggerDownload(blob, `ploys_ledger_${toISODate(new Date())}.csv`);
+        setToolsFeedback("✅ ดาวน์โหลดไฟล์ .CSV เรียบร้อยแล้ว");
       }
-      document.body.removeChild(ta);
-    }
 
-    function exportJsonBackup() {
-      const payload = {
-        schema_version: '1.0.0',
-        settings: settings,
-        categories: TAXONOMY,
-        transactions: transactions
-      };
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8;' });
-      const dateTag = toISODate(new Date());
-      downloadBlob(blob, `ploys_ledger_backup_${dateTag}.json`);
-      showToast(`💾 บันทึกไฟล์ ploys_ledger_backup_${dateTag}.json สำเร็จ`);
-    }
-
-    function validateBackupSchema(obj) {
-      if (!obj || typeof obj !== 'object') return { ok: false, err: 'โครงสร้าง JSON ไม่ถูกต้อง' };
-      if (obj.schema_version !== '1.0.0') return { ok: false, err: 'schema_version ต้องเป็น 1.0.0' };
-      if (!obj.settings || typeof obj.settings !== 'object') return { ok: false, err: 'ไม่พบข้อมูล settings' };
-      if (!Array.isArray(obj.transactions)) return { ok: false, err: 'ไม่พบรายการ transactions' };
-
-      for (let i = 0; i < obj.transactions.length; i++) {
-        const tx = obj.transactions[i];
-        if (!tx.id || typeof tx.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(tx.date)) {
-          return { ok: false, err: `รายการที่ ${i + 1}: วันที่ไม่ถูกต้อง` };
-        }
-        if (!MAIN_CATEGORIES.includes(tx.main_category)) {
-          return { ok: false, err: `รายการที่ ${i + 1}: หมวดหมู่หลักไม่ถูกต้อง (${tx.main_category})` };
-        }
-        if (!TAXONOMY[tx.main_category].includes(tx.sub_category)) {
-          return { ok: false, err: `รายการที่ ${i + 1}: หมวดหมู่ย่อยไม่ตรงตามข้อกำหนด (${tx.sub_category})` };
-        }
-        if (!Number.isInteger(tx.amount_satang) || tx.amount_satang <= 0) {
-          return { ok: false, err: `รายการที่ ${i + 1}: amount_satang ต้องเป็นจำนวนเต็มบวก` };
-        }
+      function copyTSVForSheets() {
+        const headers = ["Date", "Main Category", "Sub-Category", "Amount (THB)", "Note"];
+        const rows = transactions.map((tx) => [
+          formatDisplayDate(tx.date),
+          tx.main_category,
+          tx.sub_category,
+          (tx.amount_satang / 100).toFixed(2),
+          String(tx.note || "").replace(/\t|\n/g, " ")
+        ]);
+        const tsv = [headers.join("\t"), ...rows.map((r) => r.join("\t"))].join("\n");
+        navigator.clipboard.writeText(tsv).then(() => {
+          setToolsFeedback("📋 คัดลอกตารางแล้ว! กด Ctrl+V / วางใน Google Sheets ได้เลย");
+        });
       }
-      return { ok: true };
-    }
 
-    function importJsonBackup(e) {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function (evt) {
-        try {
-          const parsed = JSON.parse(evt.target.result);
-          const check = validateBackupSchema(parsed);
-          if (!check.ok) {
-            showToast(`❌ ไม่ผ่าน Schema Validation: ${check.err}`);
-            e.target.value = '';
+      function exportJSON() {
+        const payload = {
+          schema_version: "1.0.4",
+          exported_at: new Date().toISOString(),
+          settings: config,
+          categories: TAXONOMY,
+          transactions
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        triggerDownload(blob, `ploys_ledger_backup_${toISODate(new Date())}.json`);
+        setToolsFeedback("💾 สำรองไฟล์ .JSON ทั้งระบบเรียบร้อยแล้ว");
+      }
+
+      function triggerDownload(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      function setToolsFeedback(msg) {
+        document.getElementById("toolsFeedback").textContent = msg;
+      }
+
+      function loadDemoData() {
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, "0");
+        const prevM = now.getMonth() === 0 ? "12" : String(now.getMonth()).padStart(2, "0");
+        const prevY = now.getMonth() === 0 ? y - 1 : y;
+
+        transactions = [
+          { id: "tx_demo_1", date: `${prevY}-${prevM}-26`, main_category: "Income", sub_category: "Salary", amount_satang: 5500000, note: "เงินเดือนประจำรอบ" },
+          { id: "tx_demo_2", date: `${prevY}-${prevM}-27`, main_category: "Savings", sub_category: "Retirement_PVD", amount_satang: 550000, note: "สมทบ PVD" },
+          { id: "tx_demo_3", date: `${prevY}-${prevM}-28`, main_category: "Savings", sub_category: "Emergency_AOTCOOP", amount_satang: 1000000, note: "ออมสหกรณ์" },
+          { id: "tx_demo_4", date: `${y}-${m}-01`, main_category: "Fixed_Expense", sub_category: "Condo Maintenance Fee", amount_satang: 350000, note: "ค่าส่วนกลางคอนโด" },
+          { id: "tx_demo_5", date: `${y}-${m}-05`, main_category: "Fixed_Expense", sub_category: "Personal Trainer", amount_satang: 800000, note: "คอร์สเทรนเนอร์" },
+          { id: "tx_demo_6", date: `${y}-${m}-10`, main_category: "Variable_Expense", sub_category: "Food & Beverage", amount_satang: 45000, note: "อาหารกลางวัน & กาแฟ" },
+          { id: "tx_demo_7", date: `${y}-${m}-14`, main_category: "Variable_Expense", sub_category: "Bread-Making", amount_satang: 125000, note: "แป้งขนมปังญี่ปุ่น & เนยแท้" },
+          { id: "tx_demo_8", date: `${y}-${m}-18`, main_category: "Variable_Expense", sub_category: "Gasoline", amount_satang: 110000, note: "เติมน้ำมันเต็มถัง" }
+        ];
+        saveState();
+        setToolsFeedback("✨ โหลดข้อมูลตัวอย่างเรียบร้อยแล้ว");
+        if (activeTab === "daily") renderDailyView();
+        if (activeTab === "dashboard") renderDashboardView();
+      }
+
+      /* ==========================================================================
+         10. EVENT BINDINGS & INITIALIZATION
+         ========================================================================== */
+      function openConfirm(title, message, onConfirm) {
+        document.getElementById("confirmTitle").textContent = title;
+        document.getElementById("confirmMessage").textContent = message;
+        pendingConfirmCallback = onConfirm;
+        document.getElementById("confirmModal").classList.remove("hidden");
+      }
+
+      function init() {
+        loadState();
+        applyTheme(config.theme);
+        detectInitialPeriod();
+
+        // Check PIN Lock on startup
+        if (config.pin_hash) {
+          document.getElementById("pinLockOverlay").classList.remove("hidden");
+        }
+
+        // Initialize Entry Form defaults
+        const txDateInput = document.getElementById("txDate");
+        txDateInput.value = toISODate(new Date());
+        updateDatePreviewBadge();
+        selectMainCategory("Variable_Expense");
+
+        // PIN Unlock Handler
+        document.getElementById("btnUnlockSubmit").addEventListener("click", async () => {
+          const pin = document.getElementById("unlockPinInput").value.trim();
+          const hashed = await sha256Hex(pin);
+          if (hashed === config.pin_hash) {
+            document.getElementById("pinLockOverlay").classList.add("hidden");
+            document.getElementById("unlockPinInput").value = "";
+            document.getElementById("unlockPinError").textContent = "";
+          } else {
+            document.getElementById("unlockPinError").textContent = "❌ รหัส PIN ไม่ถูกต้อง";
+          }
+        });
+
+        // Theme Toggle (2 Modes Only: Day / Night)
+        document.getElementById("btnThemeToggle").addEventListener("click", () => {
+          applyTheme(config.theme === "day" ? "night" : "day");
+        });
+
+        // Navigation Tabs (Desktop & Mobile)
+        document.querySelectorAll("[data-tab]").forEach((btn) => {
+          btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+        });
+
+        // Entry Form Events
+        txDateInput.addEventListener("change", updateDatePreviewBadge);
+        document.getElementById("btnSetToday").addEventListener("click", () => {
+          txDateInput.value = toISODate(new Date());
+          updateDatePreviewBadge();
+        });
+
+        document.querySelectorAll("#mainCategoryGrid .cat-choice").forEach((btn) => {
+          btn.addEventListener("click", () => selectMainCategory(btn.dataset.cat));
+        });
+
+        document.querySelectorAll("[data-add]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const addVal = parseFloat(btn.dataset.add) || 0;
+            const currentVal = parseFloat(document.getElementById("txAmount").value) || 0;
+            document.getElementById("txAmount").value = (currentVal + addVal).toFixed(2);
+          });
+        });
+
+        document.getElementById("btnClearAmount").addEventListener("click", () => {
+          document.getElementById("txAmount").value = "";
+        });
+
+        document.getElementById("btnCancelEdit").addEventListener("click", resetEntryForm);
+
+        document.getElementById("txForm").addEventListener("submit", (e) => {
+          e.preventDefault();
+          const editId = document.getElementById("txEditId").value;
+          const dateVal = document.getElementById("txDate").value;
+          const mainCat = document.getElementById("txMainCat").value;
+          const subCat = document.getElementById("txSubCat").value;
+          const amountSatang = toSatang(document.getElementById("txAmount").value);
+          const noteVal = document.getElementById("txNote").value.trim();
+
+          if (!dateVal || amountSatang <= 0) return;
+
+          if (editId) {
+            const idx = transactions.findIndex((t) => t.id === editId);
+            if (idx !== -1) {
+              transactions[idx] = {
+                id: editId,
+                date: dateVal,
+                main_category: mainCat,
+                sub_category: subCat,
+                amount_satang: amountSatang,
+                note: noteVal
+              };
+            }
+            showToast("✅ อัปเดตรายการเรียบร้อยแล้ว");
+          } else {
+            const newTx = {
+              id: `tx_${dateVal.replace(/-/g, "")}_${Date.now().toString().slice(-5)}`,
+              date: dateVal,
+              main_category: mainCat,
+              sub_category: subCat,
+              amount_satang: amountSatang,
+              note: noteVal
+            };
+            transactions.push(newTx);
+            showToast(`✅ บันทึก ${subCat} (${formatTHB(amountSatang)}) สำเร็จ!`);
+          }
+
+          saveState();
+          resetEntryForm();
+        });
+
+        // Daily View Events
+        document.getElementById("btnCycleCustom").addEventListener("click", () => {
+          config.cycle_mode = "CUSTOM";
+          saveState();
+          renderDailyView();
+        });
+
+        document.getElementById("btnCycleCalendar").addEventListener("click", () => {
+          config.cycle_mode = "CALENDAR";
+          saveState();
+          renderDailyView();
+        });
+
+        document.getElementById("btnPrevPeriod").addEventListener("click", () => {
+          if (viewPeriodMonth === 0) {
+            viewPeriodMonth = 11;
+            viewPeriodYear -= 1;
+          } else {
+            viewPeriodMonth -= 1;
+          }
+          renderDailyView();
+        });
+
+        document.getElementById("btnNextPeriod").addEventListener("click", () => {
+          if (viewPeriodMonth === 11) {
+            viewPeriodMonth = 0;
+            viewPeriodYear += 1;
+          } else {
+            viewPeriodMonth += 1;
+          }
+          renderDailyView();
+        });
+
+        document.getElementById("dailyCatFilter").addEventListener("change", renderDailyView);
+
+        document.getElementById("dailyTxList").addEventListener("click", (e) => {
+          const editBtn = e.target.closest("[data-edit]");
+          if (editBtn) {
+            startEditTransaction(editBtn.dataset.edit);
             return;
           }
-          const incomingTheme = parsed.settings.theme || parsed.settings.theme_mode;
-          const restoredTheme = (incomingTheme === 'DAY' || incomingTheme === 'NIGHT')
-            ? incomingTheme
-            : getInitialTimeBasedTheme();
-          const incomingCycle = parsed.settings.cycleMode || parsed.settings.cycle_mode;
-          const restoredCycle = (incomingCycle === 'CUSTOM' || incomingCycle === 'CALENDAR')
-            ? incomingCycle
-            : 'CUSTOM';
-          const restoredPin = parsed.settings.pinHash !== undefined
-            ? parsed.settings.pinHash
-            : (parsed.settings.pin_hash || null);
+          const delBtn = e.target.closest("[data-del]");
+          if (delBtn) {
+            const targetId = delBtn.dataset.del;
+            openConfirm("ยืนยันการลบรายการ", "ต้องการลบรายการนี้ใช่หรือไม่? (ไม่สามารถกู้คืนได้)", () => {
+              transactions = transactions.filter((t) => t.id !== targetId);
+              saveState();
+              renderDailyView();
+            });
+          }
+        });
 
-          settings = {
-            ...defaultSettings(),
-            ...parsed.settings,
-            theme: restoredTheme,
-            cycleMode: restoredCycle,
-            pinHash: restoredPin,
-            schema_version: '1.0.0'
+        // Dashboard View Events
+        document.getElementById("dashYearSelect").addEventListener("change", (e) => {
+          dashSelectedYear = parseInt(e.target.value, 10);
+          renderDashboardView();
+        });
+
+        document.getElementById("dashCycleSelect").addEventListener("change", renderDashboardView);
+
+        document.getElementById("viewDashboard").addEventListener("click", (e) => {
+          const monthTarget = e.target.closest("[data-dash-month]");
+          if (monthTarget) {
+            dashSelectedMonth = parseInt(monthTarget.dataset.dashMonth, 10);
+            renderDashboardView();
+          }
+        });
+
+        // Confirmation Dialog Events
+        document.getElementById("btnConfirmCancel").addEventListener("click", () => {
+          document.getElementById("confirmModal").classList.add("hidden");
+          pendingConfirmCallback = null;
+        });
+
+        document.getElementById("btnConfirmOk").addEventListener("click", () => {
+          document.getElementById("confirmModal").classList.add("hidden");
+          if (typeof pendingConfirmCallback === "function") {
+            pendingConfirmCallback();
+            pendingConfirmCallback = null;
+          }
+        });
+
+        // Tools Modal Events
+        document.getElementById("btnOpenTools").addEventListener("click", () => {
+          setToolsFeedback("");
+          document.getElementById("toolsModal").classList.remove("hidden");
+        });
+
+        document.getElementById("btnCloseTools").addEventListener("click", () => {
+          document.getElementById("toolsModal").classList.add("hidden");
+        });
+
+        document.getElementById("btnExportCsv").addEventListener("click", exportCSV);
+        document.getElementById("btnCopySheets").addEventListener("click", copyTSVForSheets);
+        document.getElementById("btnExportJson").addEventListener("click", exportJSON);
+        document.getElementById("btnLoadDemo").addEventListener("click", loadDemoData);
+
+        document.getElementById("btnClearAllData").addEventListener("click", () => {
+          openConfirm("ล้างข้อมูลทั้งหมด", "คุณต้องการลบประวัติรายการทั้งหมดออกจากเครื่องใช่หรือไม่?", () => {
+            transactions = [];
+            saveState();
+            setToolsFeedback("🗑️ ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว");
+            if (activeTab === "daily") renderDailyView();
+            if (activeTab === "dashboard") renderDashboardView();
+          });
+        });
+
+        document.getElementById("importJsonInput").addEventListener("change", (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            try {
+              const parsed = JSON.parse(evt.target.result);
+              if (!parsed || !Array.isArray(parsed.transactions)) {
+                setToolsFeedback("❌ ไฟล์ไม่ถูกต้อง: ไม่พบโครงสร้าง transactions");
+                return;
+              }
+              const validList = parsed.transactions.filter(isValidTransaction);
+              if (validList.length === 0 && parsed.transactions.length > 0) {
+                setToolsFeedback("❌ Schema Validation ไม่ผ่าน: หมวดหมู่หรือข้อมูลไม่ตรงสเปก");
+                return;
+              }
+              transactions = validList;
+              saveState();
+              setToolsFeedback(`✅ กู้คืนข้อมูลสำเร็จ (${validList.length} รายการ)`);
+              if (activeTab === "daily") renderDailyView();
+              if (activeTab === "dashboard") renderDashboardView();
+            } catch (err) {
+              setToolsFeedback("❌ อ่านไฟล์ JSON ไม่สำเร็จ");
+            }
           };
-          transactions = parsed.transactions;
-          saveSettings();
-          saveTransactions();
-          applyTheme();
-          refreshPinUI();
-          if (activeTab === 'daily') renderDailyTab();
-          if (activeTab === 'dashboard') renderDashboardTab();
-          showToast(`✅ กู้คืนข้อมูลสำเร็จ (${transactions.length} รายการ)`);
-        } catch (err) {
-          showToast('❌ อ่านไฟล์ JSON ไม่สำเร็จ');
-        }
-        e.target.value = '';
-      };
-      reader.readAsText(file);
-    }
-
-    function downloadBlob(blob, filename) {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
-
-    function loadDemoData() {
-      const now = new Date();
-      const y = now.getFullYear();
-      const m = now.getMonth();
-      const pad = n => String(n).padStart(2, '0');
-      const ymCur = `${y}-${pad(m + 1)}`;
-      const prevD = new Date(y, m - 1, 26);
-      const ymPrev = `${prevD.getFullYear()}-${pad(prevD.getMonth() + 1)}`;
-
-      const samples = [
-        { date: `${ymPrev}-26`, main_category: 'Income', sub_category: 'Salary', amount_satang: 5800000, note: 'เงินเดือนประจำรอบ' },
-        { date: `${ymPrev}-27`, main_category: 'Savings', sub_category: 'Retirement_PVD', amount_satang: 580000, note: 'PVD 10%' },
-        { date: `${ymPrev}-28`, main_category: 'Savings', sub_category: 'Emergency_Cash', amount_satang: 500000, note: 'สำรองฉุกเฉิน' },
-        { date: `${ymPrev}-28`, main_category: 'Savings', sub_category: 'Emergency_AOTCOOP', amount_satang: 400000, note: 'ออมสหกรณ์ AOTCOOP' },
-        { date: `${ymPrev}-29`, main_category: 'Savings', sub_category: 'Investment', amount_satang: 500000, note: 'ลงทุนกองทุนรวม' },
-        { date: `${ymCur}-01`, main_category: 'Fixed_Expense', sub_category: 'Condo Maintenance Fee', amount_satang: 320000, note: 'ค่าส่วนกลางคอนโด' },
-        { date: `${ymCur}-02`, main_category: 'Fixed_Expense', sub_category: 'Life/Health Insurance', amount_satang: 285000, note: 'เบี้ยประกันสุขภาพรายเดือน' },
-        { date: `${ymCur}-04`, main_category: 'Fixed_Expense', sub_category: 'Personal Trainer', amount_satang: 450000, note: 'คอร์ส PT ออกกำลังกาย' },
-        { date: `${ymCur}-05`, main_category: 'Variable_Expense', sub_category: 'Utilities', amount_satang: 175050, note: 'ค่าน้ำ-ค่าไฟ-เน็ต' },
-        { date: `${ymCur}-07`, main_category: 'Variable_Expense', sub_category: 'Food & Beverage', amount_satang: 64500, note: 'อาหารและเครื่องดื่ม' },
-        { date: `${ymCur}-09`, main_category: 'Variable_Expense', sub_category: 'Gasoline', amount_satang: 110000, note: 'เติมน้ำมันรถ' },
-        { date: `${ymCur}-11`, main_category: 'Variable_Expense', sub_category: 'Bread-Making', amount_satang: 89025, note: 'แป้งขนมปัง เนยสด ยีสต์' },
-        { date: `${ymCur}-13`, main_category: 'Variable_Expense', sub_category: 'Books & Education', amount_satang: 59000, note: 'หนังสือพัฒนาตัวเอง' }
-      ];
-
-      samples.forEach((s, idx) => {
-        transactions.push({
-          id: `tx_demo_${Date.now()}_${idx}`,
-          ...s
+          reader.readAsText(file);
+          e.target.value = "";
         });
-      });
 
-      dailyPeriod = resolvePeriodForDate(now, settings.cycleMode);
-      dashYear = dailyPeriod.year;
-      dashSelectedMonth = dailyPeriod.monthIndex;
-
-      saveTransactions();
-      document.getElementById('dataModal').classList.add('hidden');
-      switchTab('daily');
-      showToast('🧪 โหลดข้อมูลตัวอย่าง 13 รายการเรียบร้อย');
-    }
-
-    /* ==========================================================================
-       11. BOOTSTRAP & EVENT WIRING
-       ========================================================================== */
-    document.addEventListener('DOMContentLoaded', () => {
-      applyTheme();
-      initPinPad();
-      refreshPinUI();
-
-      // Default Entry Form State (Tab 1 - Date First)
-      document.getElementById('txDate').value = toISODate(new Date());
-      updateEntryDatePreview();
-      selectMainCategory('Variable_Expense');
-
-      // Header Controls
-      document.getElementById('btnThemeToggle').addEventListener('click', toggleTheme);
-      document.getElementById('btnOpenDataModal').addEventListener('click', () => {
-        document.getElementById('dataModal').classList.remove('hidden');
-      });
-      document.getElementById('btnCloseDataModal').addEventListener('click', () => {
-        document.getElementById('dataModal').classList.add('hidden');
-      });
-      document.getElementById('btnQuickLock').addEventListener('click', openPinOverlay);
-
-      // 3-Tab Navigation (Desktop & Mobile)
-      document.querySelectorAll('#desktopNav .pixel-btn').forEach(btn => {
-        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-      });
-      document.querySelectorAll('#mobileNav .dock-btn').forEach(btn => {
-        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-      });
-
-      // Tab 1: Entry Form Events
-      document.getElementById('txDate').addEventListener('change', updateEntryDatePreview);
-      document.getElementById('btnSetToday').addEventListener('click', () => {
-        document.getElementById('txDate').value = toISODate(new Date());
-        updateEntryDatePreview();
-      });
-      document.querySelectorAll('#mainCatCards .cat-card-btn').forEach(btn => {
-        btn.addEventListener('click', () => selectMainCategory(btn.dataset.cat));
-      });
-      document.querySelectorAll('.quick-add-grid [data-add]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const current = parseFloat(document.getElementById('txAmount').value) || 0;
-          const addVal = parseFloat(btn.dataset.add) || 0;
-          document.getElementById('txAmount').value = (current + addVal).toFixed(2);
+        document.getElementById("btnSavePin").addEventListener("click", async () => {
+          const pin = document.getElementById("setPinInput").value.trim();
+          if (!/^\d{4,6}$/.test(pin)) {
+            setToolsFeedback("❌ กรุณาตั้งรหัสตัวเลข 4 ถึง 6 หลัก");
+            return;
+          }
+          config.pin_hash = await sha256Hex(pin);
+          saveState();
+          document.getElementById("setPinInput").value = "";
+          setToolsFeedback("🔒 ตั้งค่ารหัส PIN เรียบร้อยแล้ว");
         });
-      });
-      document.getElementById('btnClearAmount').addEventListener('click', () => {
-        document.getElementById('txAmount').value = '';
-      });
-      document.getElementById('txForm').addEventListener('submit', handleEntrySubmit);
-      document.getElementById('btnCancelEdit').addEventListener('click', resetEntryForm);
 
-      // Tab 2: Daily Pay-Cycle & Filter Pills Events
-      document.getElementById('btnDailyModeCustom').addEventListener('click', () => {
-        settings.cycleMode = 'CUSTOM';
-        dailyPeriod = resolvePeriodForDate(new Date(), 'CUSTOM');
-        saveSettings();
-        renderDailyTab();
-      });
-      document.getElementById('btnDailyModeCalendar').addEventListener('click', () => {
-        settings.cycleMode = 'CALENDAR';
-        dailyPeriod = resolvePeriodForDate(new Date(), 'CALENDAR');
-        saveSettings();
-        renderDailyTab();
-      });
-      document.getElementById('btnPrevCycle').addEventListener('click', () => {
-        dailyPeriod.monthIndex -= 1;
-        if (dailyPeriod.monthIndex < 0) { dailyPeriod.monthIndex = 11; dailyPeriod.year -= 1; }
-        renderDailyTab();
-      });
-      document.getElementById('btnNextCycle').addEventListener('click', () => {
-        dailyPeriod.monthIndex += 1;
-        if (dailyPeriod.monthIndex > 11) { dailyPeriod.monthIndex = 0; dailyPeriod.year += 1; }
-        renderDailyTab();
-      });
-      document.getElementById('btnCurrentCycle').addEventListener('click', () => {
-        dailyPeriod = resolvePeriodForDate(new Date(), settings.cycleMode);
-        renderDailyTab();
-      });
-      document.querySelectorAll('#dailyFilterPills .filter-pill-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          dailyCategoryFilter = btn.dataset.filter;
-          renderDailyTab();
+        document.getElementById("btnRemovePin").addEventListener("click", () => {
+          config.pin_hash = null;
+          saveState();
+          setToolsFeedback("🔓 ปิดการใช้งานรหัส PIN แล้ว");
         });
-      });
+      }
 
-      // Delete Confirmation Modal
-      document.getElementById('btnConfirmCancel').addEventListener('click', () => {
-        pendingDeleteId = null;
-        document.getElementById('confirmModal').classList.add('hidden');
-      });
-      document.getElementById('btnConfirmOk').addEventListener('click', () => {
-        if (!pendingDeleteId) return;
-        transactions = transactions.filter(t => t.id !== pendingDeleteId);
-        if (document.getElementById('txId').value === pendingDeleteId) resetEntryForm();
-        pendingDeleteId = null;
-        document.getElementById('confirmModal').classList.add('hidden');
-        saveTransactions();
-        renderDailyTab();
-        showToast('🗑️ ลบรายการเรียบร้อยแล้ว');
-      });
-
-      // Tab 3: Dashboard Events
-      document.getElementById('btnDashModeCustom').addEventListener('click', () => {
-        settings.cycleMode = 'CUSTOM';
-        saveSettings();
-        renderDashboardTab();
-      });
-      document.getElementById('btnDashModeCalendar').addEventListener('click', () => {
-        settings.cycleMode = 'CALENDAR';
-        saveSettings();
-        renderDashboardTab();
-      });
-      document.getElementById('btnDashPrevYear').addEventListener('click', () => {
-        dashYear -= 1;
-        renderDashboardTab();
-      });
-      document.getElementById('btnDashNextYear').addEventListener('click', () => {
-        dashYear += 1;
-        renderDashboardTab();
-      });
-
-      // Data Modal & PIN Events
-      document.getElementById('btnExportCsv').addEventListener('click', exportCsv);
-      document.getElementById('btnCopyTsv').addEventListener('click', copyTsvForSheets);
-      document.getElementById('btnExportJson').addEventListener('click', exportJsonBackup);
-      document.getElementById('importJsonInput').addEventListener('change', importJsonBackup);
-      document.getElementById('btnLoadDemoData').addEventListener('click', loadDemoData);
-
-      document.getElementById('btnSetPin').addEventListener('click', async () => {
-        const raw = document.getElementById('setupPinInput').value.trim();
-        if (!/^\d{4,6}$/.test(raw)) {
-          showToast('⚠️ กรุณากรอกตัวเลข 4–6 หลัก');
-          return;
-        }
-        settings.pinHash = await sha256Pin(raw);
-        isUnlocked = true;
-        document.getElementById('setupPinInput').value = '';
-        saveSettings();
-        refreshPinUI();
-        showToast('🔐 ตั้งรหัส PIN (SHA-256) สำเร็จ');
-      });
-
-      document.getElementById('btnDisablePin').addEventListener('click', () => {
-        settings.pinHash = null;
-        isUnlocked = true;
-        saveSettings();
-        refreshPinUI();
-        showToast('🔓 ยกเลิกการใช้งาน PIN แล้ว');
-      });
-    });
+      document.addEventListener("DOMContentLoaded", init);
+    })();
   </script>
 </body>
 </html>
