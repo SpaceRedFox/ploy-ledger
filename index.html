@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PLOY'S LEDGER" />
-  <title>PLOY'S LEDGER // 16-Bit Retro Edition v1.0.2</title>
+  <title>PLOY'S LEDGER // 16-Bit Retro Edition v1.0.3</title>
 
   <!-- Typography: JetBrains Mono (16px Base for iOS Anti-Zoom & High Legibility) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -826,6 +826,19 @@
       vertical-align: middle;
     }
 
+    /* Symmetrical 2x2 Drill-Down Grid (1 col on narrow mobile < 520px, 2x2 on tablet/desktop) */
+    .drilldown-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 520px) {
+      .drilldown-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
     /* Modals & PIN Lock Overlay */
     .modal-overlay {
       position: fixed;
@@ -1013,7 +1026,7 @@
         </div>
         <div>
           <h1 class="brand-title">PLOY'S LEDGER</h1>
-          <div class="brand-sub">16-BIT RETRO • SRS v1.0.2</div>
+          <div class="brand-sub">16-BIT RETRO • SRS v1.0.3</div>
         </div>
       </div>
 
@@ -1294,7 +1307,7 @@
           </h3>
           <span id="drilldownDateRange" class="tabular" style="font-size: 13px; font-weight: 700; color: var(--text-muted);"></span>
         </div>
-        <div id="drilldownGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;"></div>
+        <div id="drilldownGrid" class="drilldown-grid"></div>
       </div>
     </section>
 
