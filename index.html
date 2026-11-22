@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PLOY'S LEDGER" />
-  <title>PLOY'S LEDGER // 16-Bit Retro Edition v1.0.1</title>
+  <title>PLOY'S LEDGER // 16-Bit Retro Edition v1.0.2</title>
 
   <!-- Typography: JetBrains Mono (16px Base for iOS Anti-Zoom & High Legibility) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,7 +16,7 @@
 
   <style>
     /* ============================================================================
-       MASTER SPECIFICATION LOCK (SRS v1.0.1 - IMMUTABLE CORE RULES)
+       MASTER SPECIFICATION LOCK (SRS v1.0.2 - IMMUTABLE CORE RULES)
        ============================================================================
        1. EXACT TAXONOMY LOCK (4 Main Categories, 25 Exact Sub-Categories):
           - Income (5): ["Salary", "Bonus", "Dividend", "Interest", "Others"]
@@ -28,9 +28,13 @@
           - Initial default on first visit (when no saved theme_mode exists): 06:00-17:59 = "DAY", 18:00-05:59 = "NIGHT".
           - Header button toggles directly between "☀️ Day" and "🌙 Night" in 1 tap.
        3. DATA SCHEMA & DUAL PAY-CYCLE ENGINE:
-          - Integer satang (`amount_satang = Math.round(thb * 100)`), ISO date `YYYY-MM-DD`, UI date `21 Nov 2026`.
+          - LocalStorage keys: `pixel_ledger_txs_v1` & `pixel_ledger_cfg_v1` (`schema_version: "1.0.0"`).
+          - Integer satang (`amount_satang = Math.round(thb * 100)`), ISO date `YYYY-MM-DD`, UI date `22 Nov 2026`.
           - 26TH PAY CYCLE (Sat/Sun adjusted backward to Friday, counts toward next month) & CALENDAR (1-31).
-          - 3 Tabs: "➕ บันทึกรายการ" (Default), "📅 Daily", "📊 Dashboard" (auto current month highlight + click drill-down).
+          - 3 Tabs:
+            * Tab 1: "➕ บันทึกรายการ" (Default) -> Step 1: Date (with Today shortcut), Step 2: Main Category, Step 3: Sub-Category, Step 4: Amount + Quick-Add, Step 5: Note.
+            * Tab 2: "📅 Daily" -> Pay-Cycle toggle, KPIs, 4-category stacked bar, filter pills & history.
+            * Tab 3: "📊 Dashboard" -> Annual KPIs, 12-month bar chart, 12-month table with auto CURRENT highlight & click drill-down.
        ============================================================================ */
 
     :root, [data-theme="light"] {
@@ -502,7 +506,20 @@
       color: var(--text-muted);
     }
 
-    /* KPI Summary Grid */
+    /* KPI Summary Grids (4 Cards for Daily, 5 Cards for Dashboard) */
+    .kpi-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    @media (min-width: 768px) {
+      .kpi-grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
     .kpi-grid-5 {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -565,7 +582,28 @@
     .badge-Fixed_Expense { background: var(--cat-fixed-bg); color: var(--cat-fixed); border-color: var(--cat-fixed); }
     .badge-Variable_Expense { background: var(--cat-variable-bg); color: var(--cat-variable); border-color: var(--cat-variable); }
 
-    /* Progress Bars */
+    /* Proportional Stacked Bar & Progress Bars */
+    .stacked-bar-track {
+      display: flex;
+      width: 100%;
+      height: 22px;
+      background: var(--bg-input);
+      border: 3px solid var(--border-outer);
+      overflow: hidden;
+    }
+
+    .stacked-seg {
+      height: 100%;
+      transition: width 0.2s steps(6);
+      background-image: repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 8px,
+        rgba(0, 0, 0, 0.22) 8px,
+        rgba(0, 0, 0, 0.22) 10px
+      );
+    }
+
     .sub-bar-track {
       width: 100%;
       height: 14px;
@@ -583,6 +621,32 @@
         rgba(0, 0, 0, 0.25) 8px,
         rgba(0, 0, 0, 0.25) 10px
       );
+    }
+
+    /* Filter Pills Row */
+    .filter-pills-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .filter-pill-btn {
+      min-height: 44px;
+      padding: 6px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 800;
+      background: var(--bg-panel-alt);
+      border: 2px solid var(--border-outer);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .filter-pill-btn.active {
+      background: var(--accent-gold);
+      color: var(--accent-gold-text);
+      box-shadow: 2px 2px 0px var(--shadow-hard);
     }
 
     /* Transaction History List */
@@ -841,7 +905,7 @@
   <div id="pinLockOverlay" class="modal-overlay hidden" style="z-index: 1500;">
     <div class="pixel-box pixel-rivets modal-card" style="text-align: center;">
       <div style="font-size: 32px; margin-bottom: 6px;">🔒</div>
-      <h2 style="margin: 0 0 4px; font-size: 18px; font-weight: 800; color: var(--accent-gold);">PIXEL LEDGER LOCKED</h2>
+      <h2 style="margin: 0 0 4px; font-size: 18px; font-weight: 800; color: var(--accent-gold);">PLOY'S LEDGER LOCKED</h2>
       <p style="margin: 0; font-size: 14px; color: var(--text-muted);">กรุณากรอกรหัส PIN 4–6 หลักเพื่อเข้าใช้งาน</p>
 
       <div class="pin-dots-row" id="unlockPinDots"></div>
@@ -929,33 +993,27 @@
         <div class="pixel-emblem" aria-hidden="true">
           <!-- Classic 16-Bit Pigtails Girl Emblem -->
           <svg width="32" height="32" viewBox="0 0 16 16" shape-rendering="crispEdges">
-            <!-- Pigtails -->
             <rect x="1" y="4" width="2" height="6" fill="#4A2E1B"/>
             <rect x="13" y="4" width="2" height="6" fill="#4A2E1B"/>
             <rect x="2" y="4" width="1" height="1" fill="#FB7185"/>
             <rect x="13" y="4" width="1" height="1" fill="#FB7185"/>
-            <!-- Hair Top & Bangs -->
             <rect x="4" y="1" width="8" height="2" fill="#4A2E1B"/>
             <rect x="3" y="3" width="10" height="2" fill="#4A2E1B"/>
             <rect x="5" y="4" width="2" height="1" fill="#4A2E1B"/>
             <rect x="9" y="4" width="2" height="1" fill="#4A2E1B"/>
-            <!-- Face -->
             <rect x="4" y="5" width="8" height="7" fill="#FDE68A"/>
-            <!-- Eyes & Blush -->
             <rect x="5" y="7" width="1" height="2" fill="#18202C"/>
             <rect x="10" y="7" width="1" height="2" fill="#18202C"/>
             <rect x="4" y="9" width="2" height="1" fill="#FDA4AF"/>
             <rect x="10" y="9" width="2" height="1" fill="#FDA4AF"/>
-            <!-- Big Smile -->
             <rect x="7" y="10" width="2" height="1" fill="#E11D48"/>
-            <!-- Collar / Shirt -->
             <rect x="4" y="12" width="8" height="3" fill="#38BDF8"/>
             <rect x="6" y="12" width="4" height="1" fill="#FFFFFF"/>
           </svg>
         </div>
         <div>
           <h1 class="brand-title">PLOY'S LEDGER</h1>
-          <div class="brand-sub">16-BIT RETRO • SRS v1.0.1</div>
+          <div class="brand-sub">16-BIT RETRO • SRS v1.0.2</div>
         </div>
       </div>
 
@@ -974,7 +1032,7 @@
     </nav>
 
     <!-- ======================================================================
-         TAB 1: ➕ บันทึกรายการ (DEFAULT ON LOAD)
+         TAB 1: ➕ บันทึกรายการ (DEFAULT ON LOAD - DATE FIRST)
          ====================================================================== -->
     <main id="tabEntry">
       <div class="pixel-box pixel-rivets" style="padding: 16px; max-width: 680px; margin: 0 auto;">
@@ -989,8 +1047,18 @@
           <input type="hidden" id="txId" value="" />
           <input type="hidden" id="txMainCat" value="Variable_Expense" />
 
-          <!-- Step 1: 4 Main Category Cards -->
-          <div class="pixel-label">1. เลือกหมวดหมู่หลัก (MAIN CATEGORY)</div>
+          <!-- STEP 1 (FIRST FIELD): Date Picker + Today Quick Reset + English Short Date Preview -->
+          <div style="margin-bottom: 16px;">
+            <label class="pixel-label" for="txDate">1. วันที่ทำรายการ (TRANSACTION DATE)</label>
+            <div style="display: flex; gap: 8px; align-items: stretch;">
+              <input type="date" id="txDate" class="pixel-input tabular" required style="flex: 1;" />
+              <button type="button" class="pixel-btn" id="btnSetToday" title="เลือกวันที่ปัจจุบัน">Today</button>
+            </div>
+            <div id="txDatePreview" style="font-size: 13px; font-weight: 700; color: var(--accent-gold); margin-top: 5px;"></div>
+          </div>
+
+          <!-- STEP 2: 4 Main Category Cards -->
+          <div class="pixel-label">2. เลือกหมวดหมู่หลัก (MAIN CATEGORY)</div>
           <div class="cat-cards-grid" id="mainCatCards">
             <button type="button" class="cat-card-btn" data-cat="Income">
               <span class="cat-en">Income</span>
@@ -1010,15 +1078,15 @@
             </button>
           </div>
 
-          <!-- Step 2: Dynamic Sub-Category Dropdown -->
+          <!-- STEP 3: Dynamic Sub-Category Dropdown -->
           <div style="margin-bottom: 14px;">
-            <label class="pixel-label" for="txSubCat">2. หมวดหมู่ย่อย (SUB-CATEGORY)</label>
+            <label class="pixel-label" for="txSubCat">3. หมวดหมู่ย่อย (SUB-CATEGORY)</label>
             <select id="txSubCat" class="pixel-select" required></select>
           </div>
 
-          <!-- Step 3: Hero Amount Input + Quick-Add Buttons -->
+          <!-- STEP 4: Hero Amount Input + Quick-Add Buttons -->
           <div style="margin-bottom: 14px;">
-            <label class="pixel-label" for="txAmount">3. จำนวนเงิน (THB)</label>
+            <label class="pixel-label" for="txAmount">4. จำนวนเงิน (THB)</label>
             <input
               type="number"
               id="txAmount"
@@ -1039,14 +1107,7 @@
             </div>
           </div>
 
-          <!-- Step 4: Date Picker & English Short Date Preview -->
-          <div style="margin-bottom: 14px;">
-            <label class="pixel-label" for="txDate">4. วันที่ทำรายการ (DATE)</label>
-            <input type="date" id="txDate" class="pixel-input tabular" required />
-            <div id="txDatePreview" style="font-size: 13px; font-weight: 700; color: var(--accent-gold); margin-top: 5px;"></div>
-          </div>
-
-          <!-- Step 5: Optional Note -->
+          <!-- STEP 5: Optional Note -->
           <div style="margin-bottom: 18px;">
             <label class="pixel-label" for="txNote">5. บันทึกช่วยจำ (NOTE - ไม่บังคับ)</label>
             <input type="text" id="txNote" class="pixel-input" maxlength="140" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)..." />
@@ -1066,7 +1127,7 @@
     </main>
 
     <!-- ======================================================================
-         TAB 2: 📅 Daily (PAY-CYCLE KPIs, BREAKDOWN, FILTER & HISTORY)
+         TAB 2: 📅 Daily (PAY-CYCLE KPIs, STACKED BAR, FILTER PILLS & HISTORY)
          ====================================================================== -->
     <section id="tabDaily" class="hidden">
       <!-- Dual Pay-Cycle Controller -->
@@ -1090,8 +1151,8 @@
         </div>
       </div>
 
-      <!-- 4 Main Category KPIs + Net Cash Flow -->
-      <div class="kpi-grid-5">
+      <!-- 4 KPI Cards (Income, Savings, Expenses [Fixed + Variable], Net Cashflow) -->
+      <div class="kpi-grid-4">
         <div class="pixel-box kpi-card">
           <div class="kpi-label">INCOME</div>
           <div class="kpi-value tabular c-income" id="dailyKpiIncome">฿0.00</div>
@@ -1101,41 +1162,40 @@
           <div class="kpi-value tabular c-savings" id="dailyKpiSavings">฿0.00</div>
         </div>
         <div class="pixel-box kpi-card">
-          <div class="kpi-label">FIXED EXP.</div>
-          <div class="kpi-value tabular c-fixed" id="dailyKpiFixed">฿0.00</div>
+          <div class="kpi-label">EXPENSES (FIXED + VAR)</div>
+          <div class="kpi-value tabular c-variable" id="dailyKpiExpenses">฿0.00</div>
         </div>
         <div class="pixel-box kpi-card">
-          <div class="kpi-label">VARIABLE EXP.</div>
-          <div class="kpi-value tabular c-variable" id="dailyKpiVariable">฿0.00</div>
-        </div>
-        <div class="pixel-box kpi-card kpi-card-wide">
-          <div class="kpi-label">NET CASH FLOW</div>
+          <div class="kpi-label">NET CASHFLOW</div>
           <div class="kpi-value tabular" id="dailyKpiNet" style="color: var(--accent-gold);">฿0.00</div>
         </div>
       </div>
 
-      <!-- 4-Category Progress Breakdown -->
+      <!-- 4-Category Proportional Stacked Bar & Legend -->
       <div class="pixel-box" style="padding: 14px; margin-bottom: 12px;">
-        <div style="font-size: 14px; font-weight: 800; color: var(--accent-gold); margin-bottom: 10px;">
-          📊 สัดส่วน 4 หมวดหมู่หลักในรอบนี้
+        <div style="font-size: 14px; font-weight: 800; color: var(--accent-gold); margin-bottom: 8px;">
+          📊 สัดส่วนกระแสเงินสด 4 หมวดหมู่หลักในรอบนี้
         </div>
-        <div id="dailyProgressContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;"></div>
+        <div class="stacked-bar-track" id="dailyStackedBar"></div>
+        <div id="dailyStackedLegend" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin-top: 10px;"></div>
       </div>
 
-      <!-- Chronological Transaction History -->
+      <!-- Chronological Transaction History with Filter Pills -->
       <div class="pixel-box" style="padding: 14px;">
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
           <h2 style="margin: 0; font-size: 16px; font-weight: 800;">
             📜 รายการในรอบนี้ (<span id="dailyTxCount" class="tabular">0</span>)
           </h2>
-          <select id="dailyFilterCat" class="pixel-select" style="width: auto; font-size: 14px;">
-            <option value="ALL">ทุกหมวดหมู่หลัก</option>
-            <option value="Income">Income (รายรับ)</option>
-            <option value="Savings">Savings (ออม/ลงทุน)</option>
-            <option value="Fixed_Expense">Fixed_Expense (คงที่)</option>
-            <option value="Variable_Expense">Variable_Expense (ผันแปร)</option>
-          </select>
         </div>
+
+        <div class="filter-pills-row" id="dailyFilterPills">
+          <button type="button" class="filter-pill-btn active" data-filter="ALL">ALL</button>
+          <button type="button" class="filter-pill-btn" data-filter="Income">Income</button>
+          <button type="button" class="filter-pill-btn" data-filter="Savings">Savings</button>
+          <button type="button" class="filter-pill-btn" data-filter="Fixed_Expense">Fixed_Expense</button>
+          <button type="button" class="filter-pill-btn" data-filter="Variable_Expense">Variable_Expense</button>
+        </div>
+
         <div id="dailyTxList" class="pixel-subbox" style="max-height: 540px; overflow-y: auto;"></div>
       </div>
     </section>
@@ -1167,28 +1227,28 @@
       <!-- Annual KPI Summary (5 Cards) -->
       <div class="kpi-grid-5">
         <div class="pixel-box kpi-card">
-          <div class="kpi-label">ANNUAL INCOME</div>
+          <div class="kpi-label">TOTAL INCOME</div>
           <div class="kpi-value tabular c-income" id="dashKpiIncome">฿0.00</div>
         </div>
         <div class="pixel-box kpi-card">
-          <div class="kpi-label">ANNUAL SAVINGS</div>
+          <div class="kpi-label">TOTAL SAVINGS</div>
           <div class="kpi-value tabular c-savings" id="dashKpiSavings">฿0.00</div>
         </div>
         <div class="pixel-box kpi-card">
-          <div class="kpi-label">ANNUAL FIXED</div>
+          <div class="kpi-label">FIXED EXPENSE</div>
           <div class="kpi-value tabular c-fixed" id="dashKpiFixed">฿0.00</div>
         </div>
         <div class="pixel-box kpi-card">
-          <div class="kpi-label">ANNUAL VARIABLE</div>
+          <div class="kpi-label">VARIABLE EXPENSE</div>
           <div class="kpi-value tabular c-variable" id="dashKpiVariable">฿0.00</div>
         </div>
         <div class="pixel-box kpi-card kpi-card-wide">
-          <div class="kpi-label">ANNUAL NET FLOW</div>
+          <div class="kpi-label">NET BALANCE</div>
           <div class="kpi-value tabular" id="dashKpiNet" style="color: var(--accent-gold);">฿0.00</div>
         </div>
       </div>
 
-      <!-- 12-Month Cash Flow Bar Chart -->
+      <!-- 12-Month Bar Chart -->
       <div class="pixel-box" style="padding: 14px; margin-bottom: 12px;">
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 8px;">
           <span style="font-size: 15px; font-weight: 800; color: var(--accent-gold);">📈 กราฟเปรียบเทียบ 12 เดือน (คลิกแท่งเดือนเพื่อดูรายละเอียด)</span>
@@ -1218,7 +1278,7 @@
                 <th>SAVINGS</th>
                 <th>FIXED_EXP</th>
                 <th>VARIABLE_EXP</th>
-                <th>NET FLOW</th>
+                <th>NET BALANCE</th>
               </tr>
             </thead>
             <tbody id="dashTableBody" class="tabular"></tbody>
@@ -1260,7 +1320,7 @@
 
   <script>
     /* ==========================================================================
-       1. LOCKED SCHEMA & TAXONOMY CONSTANTS (SRS v1.0.1 - 4 MAIN, 25 EXACT SUB)
+       1. LOCKED SCHEMA & TAXONOMY CONSTANTS (SRS v1.0.2 - 4 MAIN, 25 EXACT SUB)
        ========================================================================== */
     const TX_STORAGE_KEY = 'pixel_ledger_txs_v1';
     const CFG_STORAGE_KEY = 'pixel_ledger_cfg_v1';
@@ -1316,11 +1376,11 @@
       return {
         schema_version: '1.0.0',
         currency: 'THB',
-        cycle_mode: 'CUSTOM', // 'CUSTOM' (26th Pay Cycle) | 'CALENDAR' (1-31)
+        cycleMode: 'CUSTOM', // 'CUSTOM' (26th Pay Cycle) | 'CALENDAR' (1-31)
         pay_cycle_day: 26,
         adjust_weekend: true,
-        theme_mode: getInitialTimeBasedTheme(), // Strictly 'DAY' or 'NIGHT'
-        pin_hash: null
+        theme: getInitialTimeBasedTheme(), // Strictly 'DAY' or 'NIGHT'
+        pinHash: null
       };
     }
 
@@ -1329,12 +1389,28 @@
         const raw = localStorage.getItem(CFG_STORAGE_KEY);
         if (!raw) return defaultSettings();
         const parsed = JSON.parse(raw);
-        const merged = { ...defaultSettings(), ...parsed, schema_version: '1.0.0' };
-        // Normalize legacy theme values to strict 'DAY' or 'NIGHT'
-        if (merged.theme_mode !== 'DAY' && merged.theme_mode !== 'NIGHT') {
-          merged.theme_mode = getInitialTimeBasedTheme();
-        }
-        return merged;
+
+        // Migrate any legacy property names smoothly
+        const legacyTheme = parsed.theme || parsed.theme_mode;
+        const normalizedTheme = (legacyTheme === 'DAY' || legacyTheme === 'NIGHT')
+          ? legacyTheme
+          : getInitialTimeBasedTheme();
+
+        const legacyCycle = parsed.cycleMode || parsed.cycle_mode;
+        const normalizedCycle = (legacyCycle === 'CUSTOM' || legacyCycle === 'CALENDAR')
+          ? legacyCycle
+          : 'CUSTOM';
+
+        const legacyPin = parsed.pinHash !== undefined ? parsed.pinHash : (parsed.pin_hash || null);
+
+        return {
+          ...defaultSettings(),
+          ...parsed,
+          schema_version: '1.0.0',
+          theme: normalizedTheme,
+          cycleMode: normalizedCycle,
+          pinHash: legacyPin
+        };
       } catch (e) {
         return defaultSettings();
       }
@@ -1511,19 +1587,19 @@
         else if (tx.main_category === 'Fixed_Expense') fixed += tx.amount_satang;
         else if (tx.main_category === 'Variable_Expense') variable += tx.amount_satang;
       });
-      const net = income - savings - fixed - variable;
-      return { income, savings, fixed, variable, net };
+      const expenses = fixed + variable;
+      const net = income - savings - expenses;
+      return { income, savings, fixed, variable, expenses, net };
     }
 
     /* ==========================================================================
        5. STRICT 2-MODE THEME ENGINE (DAY / NIGHT) & SECURITY PIN (SHA-256)
        ========================================================================== */
     function applyTheme() {
-      const isDay = settings.theme_mode === 'DAY';
+      const isDay = settings.theme === 'DAY';
       const effectiveAttr = isDay ? 'light' : 'dark';
       const btn = document.getElementById('btnThemeToggle');
 
-      // Show current active theme mode clearly on the toggle button
       btn.textContent = isDay ? '☀️ Day' : '🌙 Night';
 
       document.documentElement.setAttribute('data-theme', effectiveAttr);
@@ -1531,7 +1607,7 @@
     }
 
     function toggleTheme() {
-      settings.theme_mode = (settings.theme_mode === 'DAY') ? 'NIGHT' : 'DAY';
+      settings.theme = (settings.theme === 'DAY') ? 'NIGHT' : 'DAY';
       saveSettings();
       applyTheme();
     }
@@ -1546,7 +1622,7 @@
     let pinBuffer = '';
 
     function refreshPinUI() {
-      const hasPin = Boolean(settings.pin_hash);
+      const hasPin = Boolean(settings.pinHash);
       document.getElementById('btnQuickLock').classList.toggle('hidden', !hasPin);
       document.getElementById('btnDisablePin').classList.toggle('hidden', !hasPin);
       const statusEl = document.getElementById('pinStatusText');
@@ -1619,7 +1695,7 @@
         return;
       }
       const hashed = await sha256Pin(pinBuffer);
-      if (hashed === settings.pin_hash) {
+      if (hashed === settings.pinHash) {
         isUnlocked = true;
         document.getElementById('pinLockOverlay').classList.add('hidden');
         showToast('🔓 ปลดล็อกเรียบร้อย');
@@ -1634,7 +1710,8 @@
        6. NAVIGATION & VIEW CONTROLLERS (3 TABS)
        ========================================================================== */
     let activeTab = 'entry';
-    let dailyPeriod = resolvePeriodForDate(new Date(), settings.cycle_mode);
+    let dailyPeriod = resolvePeriodForDate(new Date(), settings.cycleMode);
+    let dailyCategoryFilter = 'ALL';
     let dashYear = dailyPeriod.year;
     let dashSelectedMonth = dailyPeriod.monthIndex;
 
@@ -1672,7 +1749,7 @@
     }
 
     /* ==========================================================================
-       7. TAB 1: ENTRY FORM LOGIC
+       7. TAB 1: ENTRY FORM LOGIC (STEP 1: DATE FIRST)
        ========================================================================== */
     function selectMainCategory(cat, selectedSub = null) {
       document.getElementById('txMainCat').value = cat;
@@ -1704,9 +1781,9 @@
 
     function resetEntryForm() {
       document.getElementById('txId').value = '';
-      document.getElementById('txAmount').value = '';
       document.getElementById('txDate').value = toISODate(new Date());
       updateEntryDatePreview();
+      document.getElementById('txAmount').value = '';
       document.getElementById('txNote').value = '';
       document.getElementById('entryFormTitle').textContent = '➕ บันทึกรายการใหม่';
       document.getElementById('entryEditBadge').classList.add('hidden');
@@ -1717,22 +1794,22 @@
     function handleEntrySubmit(e) {
       e.preventDefault();
       const editId = document.getElementById('txId').value.trim();
+      const dateVal = document.getElementById('txDate').value;
       const mainCat = document.getElementById('txMainCat').value;
       const subCat = document.getElementById('txSubCat').value;
       const satang = toSatang(document.getElementById('txAmount').value);
-      const dateVal = document.getElementById('txDate').value;
       const noteVal = document.getElementById('txNote').value.trim();
 
+      if (!dateVal || !/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+        showToast('⚠️ กรุณาระบุวันที่ให้ถูกต้อง');
+        return;
+      }
       if (!MAIN_CATEGORIES.includes(mainCat) || !TAXONOMY[mainCat].includes(subCat)) {
         showToast('⚠️ หมวดหมู่ไม่ถูกต้อง');
         return;
       }
       if (satang <= 0) {
         showToast('⚠️ กรุณากรอกจำนวนเงินมากกว่า 0.00 บาท');
-        return;
-      }
-      if (!dateVal || !/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
-        showToast('⚠️ กรุณาระบุวันที่ให้ถูกต้อง');
         return;
       }
 
@@ -1763,7 +1840,7 @@
         showToast(`✅ บันทึก ${subCat} (${formatTHB(satang)}) แล้ว`);
       }
 
-      dailyPeriod = resolvePeriodForDate(parseLocalDate(dateVal), settings.cycle_mode);
+      dailyPeriod = resolvePeriodForDate(parseLocalDate(dateVal), settings.cycleMode);
       dashYear = dailyPeriod.year;
       dashSelectedMonth = dailyPeriod.monthIndex;
 
@@ -1777,10 +1854,10 @@
       if (!tx) return;
 
       document.getElementById('txId').value = tx.id;
-      selectMainCategory(tx.main_category, tx.sub_category);
-      document.getElementById('txAmount').value = (tx.amount_satang / 100).toFixed(2);
       document.getElementById('txDate').value = tx.date;
       updateEntryDatePreview();
+      selectMainCategory(tx.main_category, tx.sub_category);
+      document.getElementById('txAmount').value = (tx.amount_satang / 100).toFixed(2);
       document.getElementById('txNote').value = tx.note || '';
 
       document.getElementById('entryFormTitle').textContent = '✏️ แก้ไขรายการ';
@@ -1798,7 +1875,7 @@
     let pendingDeleteId = null;
 
     function renderDailyTab() {
-      const mode = settings.cycle_mode;
+      const mode = settings.cycleMode;
       document.getElementById('btnDailyModeCustom').classList.toggle('pixel-btn-gold', mode === 'CUSTOM');
       document.getElementById('btnDailyModeCalendar').classList.toggle('pixel-btn-gold', mode === 'CALENDAR');
 
@@ -1811,44 +1888,58 @@
 
       document.getElementById('dailyKpiIncome').textContent = formatTHB(totals.income);
       document.getElementById('dailyKpiSavings').textContent = formatTHB(totals.savings);
-      document.getElementById('dailyKpiFixed').textContent = formatTHB(totals.fixed);
-      document.getElementById('dailyKpiVariable').textContent = formatTHB(totals.variable);
+      document.getElementById('dailyKpiExpenses').textContent = formatTHB(totals.expenses);
 
       const netEl = document.getElementById('dailyKpiNet');
       netEl.textContent = formatTHB(totals.net);
       netEl.style.color = totals.net >= 0 ? 'var(--accent-gold)' : 'var(--cat-variable)';
 
-      // 4-Category Progress Breakdown
-      const denom = Math.max(totals.income, totals.savings + totals.fixed + totals.variable, 1);
-      const progItems = [
+      // Proportional Stacked Bar for 4 Categories
+      const totalVolume = totals.income + totals.savings + totals.fixed + totals.variable;
+      const segments = [
         { label: 'Income', val: totals.income, color: 'var(--cat-income)' },
         { label: 'Savings', val: totals.savings, color: 'var(--cat-savings)' },
         { label: 'Fixed_Expense', val: totals.fixed, color: 'var(--cat-fixed)' },
         { label: 'Variable_Expense', val: totals.variable, color: 'var(--cat-variable)' }
       ];
 
-      const progWrap = document.getElementById('dailyProgressContainer');
-      progWrap.innerHTML = '';
-      progItems.forEach(item => {
-        const pct = Math.min(100, (item.val / denom) * 100);
-        const box = document.createElement('div');
-        box.className = 'pixel-subbox';
-        box.style.padding = '10px';
-        box.innerHTML = `
-          <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; margin-bottom: 5px;">
-            <span style="color: ${item.color};">${item.label}</span>
-            <span class="tabular">${formatTHB(item.val)} (${pct.toFixed(0)}%)</span>
-          </div>
-          <div class="sub-bar-track">
-            <div class="sub-bar-fill" style="width: ${pct.toFixed(1)}%; background-color: ${item.color};"></div>
-          </div>
+      const stackedBar = document.getElementById('dailyStackedBar');
+      const stackedLegend = document.getElementById('dailyStackedLegend');
+      stackedBar.innerHTML = '';
+      stackedLegend.innerHTML = '';
+
+      segments.forEach(seg => {
+        const pct = totalVolume > 0 ? (seg.val / totalVolume) * 100 : 0;
+        if (pct > 0) {
+          const div = document.createElement('div');
+          div.className = 'stacked-seg';
+          div.style.width = `${pct}%`;
+          div.style.backgroundColor = seg.color;
+          div.title = `${seg.label}: ${formatTHB(seg.val)} (${pct.toFixed(1)}%)`;
+          stackedBar.appendChild(div);
+        }
+
+        const item = document.createElement('div');
+        item.className = 'pixel-subbox';
+        item.style.padding = '8px 10px';
+        item.style.display = 'flex';
+        item.style.justifyContent = 'space-between';
+        item.style.alignItems = 'center';
+        item.style.gap = '6px';
+        item.innerHTML = `
+          <span style="font-size: 13px; font-weight: 800; color: ${seg.color};">■ ${seg.label}</span>
+          <span class="tabular" style="font-size: 13px; font-weight: 700;">${formatTHB(seg.val)} (${pct.toFixed(0)}%)</span>
         `;
-        progWrap.appendChild(box);
+        stackedLegend.appendChild(item);
+      });
+
+      // Update Filter Pills Active State
+      document.querySelectorAll('#dailyFilterPills .filter-pill-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === dailyCategoryFilter);
       });
 
       // Filtered Transaction List
-      const filterVal = document.getElementById('dailyFilterCat').value;
-      const filtered = filterVal === 'ALL' ? txs : txs.filter(t => t.main_category === filterVal);
+      const filtered = dailyCategoryFilter === 'ALL' ? txs : txs.filter(t => t.main_category === dailyCategoryFilter);
       document.getElementById('dailyTxCount').textContent = filtered.length;
 
       const listEl = document.getElementById('dailyTxList');
@@ -1917,7 +2008,7 @@
        9. TAB 3: DASHBOARD (ANNUAL & MONTHLY TRENDS + AUTO CURRENT & CLICK DRILL-DOWN)
        ========================================================================== */
     function renderDashboardTab() {
-      const mode = settings.cycle_mode;
+      const mode = settings.cycleMode;
       document.getElementById('btnDashModeCustom').classList.toggle('pixel-btn-gold', mode === 'CUSTOM');
       document.getElementById('btnDashModeCalendar').classList.toggle('pixel-btn-gold', mode === 'CALENDAR');
 
@@ -2022,7 +2113,7 @@
     }
 
     function renderMonthDrilldown(monthObj) {
-      const bounds = getPeriodBounds(dashYear, monthObj.monthIndex, settings.cycle_mode);
+      const bounds = getPeriodBounds(dashYear, monthObj.monthIndex, settings.cycleMode);
       document.getElementById('drilldownTitle').textContent = `🔍 เจาะลึกหมวดหมู่ย่อย: ${monthObj.label} ${dashYear}`;
       document.getElementById('drilldownDateRange').textContent = bounds.rangeText;
 
@@ -2099,7 +2190,7 @@
       const rows = buildTableRows();
       const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\r\n');
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-      downloadBlob(blob, `pixel_ledger_${toISODate(new Date())}.csv`);
+      downloadBlob(blob, `ploys_ledger_${toISODate(new Date())}.csv`);
       showToast('⬇️ ดาวน์โหลดไฟล์ CSV เรียบร้อย');
     }
 
@@ -2130,8 +2221,8 @@
       };
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8;' });
       const dateTag = toISODate(new Date());
-      downloadBlob(blob, `ledger_backup_${dateTag}.json`);
-      showToast(`💾 บันทึกไฟล์ ledger_backup_${dateTag}.json สำเร็จ`);
+      downloadBlob(blob, `ploys_ledger_backup_${dateTag}.json`);
+      showToast(`💾 บันทึกไฟล์ ploys_ledger_backup_${dateTag}.json สำเร็จ`);
     }
 
     function validateBackupSchema(obj) {
@@ -2171,10 +2262,26 @@
             e.target.value = '';
             return;
           }
-          const restoredTheme = (parsed.settings.theme_mode === 'DAY' || parsed.settings.theme_mode === 'NIGHT')
-            ? parsed.settings.theme_mode
+          const incomingTheme = parsed.settings.theme || parsed.settings.theme_mode;
+          const restoredTheme = (incomingTheme === 'DAY' || incomingTheme === 'NIGHT')
+            ? incomingTheme
             : getInitialTimeBasedTheme();
-          settings = { ...defaultSettings(), ...parsed.settings, theme_mode: restoredTheme, schema_version: '1.0.0' };
+          const incomingCycle = parsed.settings.cycleMode || parsed.settings.cycle_mode;
+          const restoredCycle = (incomingCycle === 'CUSTOM' || incomingCycle === 'CALENDAR')
+            ? incomingCycle
+            : 'CUSTOM';
+          const restoredPin = parsed.settings.pinHash !== undefined
+            ? parsed.settings.pinHash
+            : (parsed.settings.pin_hash || null);
+
+          settings = {
+            ...defaultSettings(),
+            ...parsed.settings,
+            theme: restoredTheme,
+            cycleMode: restoredCycle,
+            pinHash: restoredPin,
+            schema_version: '1.0.0'
+          };
           transactions = parsed.transactions;
           saveSettings();
           saveTransactions();
@@ -2234,7 +2341,7 @@
         });
       });
 
-      dailyPeriod = resolvePeriodForDate(now, settings.cycle_mode);
+      dailyPeriod = resolvePeriodForDate(now, settings.cycleMode);
       dashYear = dailyPeriod.year;
       dashSelectedMonth = dailyPeriod.monthIndex;
 
@@ -2252,10 +2359,10 @@
       initPinPad();
       refreshPinUI();
 
-      // Default Entry Form State (Tab 1)
-      selectMainCategory('Variable_Expense');
+      // Default Entry Form State (Tab 1 - Date First)
       document.getElementById('txDate').value = toISODate(new Date());
       updateEntryDatePreview();
+      selectMainCategory('Variable_Expense');
 
       // Header Controls
       document.getElementById('btnThemeToggle').addEventListener('click', toggleTheme);
@@ -2276,6 +2383,11 @@
       });
 
       // Tab 1: Entry Form Events
+      document.getElementById('txDate').addEventListener('change', updateEntryDatePreview);
+      document.getElementById('btnSetToday').addEventListener('click', () => {
+        document.getElementById('txDate').value = toISODate(new Date());
+        updateEntryDatePreview();
+      });
       document.querySelectorAll('#mainCatCards .cat-card-btn').forEach(btn => {
         btn.addEventListener('click', () => selectMainCategory(btn.dataset.cat));
       });
@@ -2289,19 +2401,18 @@
       document.getElementById('btnClearAmount').addEventListener('click', () => {
         document.getElementById('txAmount').value = '';
       });
-      document.getElementById('txDate').addEventListener('change', updateEntryDatePreview);
       document.getElementById('txForm').addEventListener('submit', handleEntrySubmit);
       document.getElementById('btnCancelEdit').addEventListener('click', resetEntryForm);
 
-      // Tab 2: Daily Pay-Cycle & Filter Events
+      // Tab 2: Daily Pay-Cycle & Filter Pills Events
       document.getElementById('btnDailyModeCustom').addEventListener('click', () => {
-        settings.cycle_mode = 'CUSTOM';
+        settings.cycleMode = 'CUSTOM';
         dailyPeriod = resolvePeriodForDate(new Date(), 'CUSTOM');
         saveSettings();
         renderDailyTab();
       });
       document.getElementById('btnDailyModeCalendar').addEventListener('click', () => {
-        settings.cycle_mode = 'CALENDAR';
+        settings.cycleMode = 'CALENDAR';
         dailyPeriod = resolvePeriodForDate(new Date(), 'CALENDAR');
         saveSettings();
         renderDailyTab();
@@ -2317,10 +2428,15 @@
         renderDailyTab();
       });
       document.getElementById('btnCurrentCycle').addEventListener('click', () => {
-        dailyPeriod = resolvePeriodForDate(new Date(), settings.cycle_mode);
+        dailyPeriod = resolvePeriodForDate(new Date(), settings.cycleMode);
         renderDailyTab();
       });
-      document.getElementById('dailyFilterCat').addEventListener('change', renderDailyTab);
+      document.querySelectorAll('#dailyFilterPills .filter-pill-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          dailyCategoryFilter = btn.dataset.filter;
+          renderDailyTab();
+        });
+      });
 
       // Delete Confirmation Modal
       document.getElementById('btnConfirmCancel').addEventListener('click', () => {
@@ -2340,12 +2456,12 @@
 
       // Tab 3: Dashboard Events
       document.getElementById('btnDashModeCustom').addEventListener('click', () => {
-        settings.cycle_mode = 'CUSTOM';
+        settings.cycleMode = 'CUSTOM';
         saveSettings();
         renderDashboardTab();
       });
       document.getElementById('btnDashModeCalendar').addEventListener('click', () => {
-        settings.cycle_mode = 'CALENDAR';
+        settings.cycleMode = 'CALENDAR';
         saveSettings();
         renderDashboardTab();
       });
@@ -2371,7 +2487,7 @@
           showToast('⚠️ กรุณากรอกตัวเลข 4–6 หลัก');
           return;
         }
-        settings.pin_hash = await sha256Pin(raw);
+        settings.pinHash = await sha256Pin(raw);
         isUnlocked = true;
         document.getElementById('setupPinInput').value = '';
         saveSettings();
@@ -2380,7 +2496,7 @@
       });
 
       document.getElementById('btnDisablePin').addEventListener('click', () => {
-        settings.pin_hash = null;
+        settings.pinHash = null;
         isUnlocked = true;
         saveSettings();
         refreshPinUI();
