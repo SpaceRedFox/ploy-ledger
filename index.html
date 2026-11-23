@@ -1804,19 +1804,21 @@
     }
 
     function getPeriodBounds(year, monthIndex, mode) {
+      const y = Number(year);
+      const m = Number(monthIndex);
       if (mode === 'CALENDAR') {
-        const start = new Date(year, monthIndex, 1, 12, 0, 0);
-        const end = new Date(year, monthIndex + 1, 0, 12, 0, 0);
+        const start = new Date(y, m, 1, 12, 0, 0);
+        const end = new Date(y, m + 1, 0, 12, 0, 0);
         return {
           startISO: toISODate(start),
           endISO: toISODate(end),
-          label: `${SHORT_MONTHS[monthIndex]} ${year} (Calendar)`,
+          label: `${SHORT_MONTHS[m]} ${y} (Calendar)`,
           rangeText: `${formatShortDate(start)} - ${formatShortDate(end)}`
         };
       } else {
-        const start = getCustomCycleStart(year, monthIndex);
-        let nextY = year;
-        let nextM = monthIndex + 1;
+        const start = getCustomCycleStart(y, m);
+        let nextY = y;
+        let nextM = m + 1;
         if (nextM > 11) {
           nextM = 0;
           nextY += 1;
@@ -1826,7 +1828,7 @@
         return {
           startISO: toISODate(start),
           endISO: toISODate(end),
-          label: `${SHORT_MONTHS[monthIndex]} ${year} Cycle`,
+          label: `${SHORT_MONTHS[m]} ${y} Cycle`,
           rangeText: `${formatShortDate(start)} - ${formatShortDate(end)}`
         };
       }
@@ -1857,9 +1859,12 @@
     }
 
     function getTransactionsInPeriod(year, monthIndex, mode) {
-      const bounds = getPeriodBounds(year, monthIndex, mode);
+      const bounds = getPeriodBounds(Number(year), Number(monthIndex), mode);
       return transactions
-        .filter(tx => tx.date >= bounds.startISO && tx.date <= bounds.endISO)
+        .filter(tx => {
+          const txDateOnly = String(tx.date || '').slice(0, 10);
+          return txDateOnly >= bounds.startISO && txDateOnly <= bounds.endISO;
+        })
         .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
     }
 
