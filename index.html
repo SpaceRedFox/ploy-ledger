@@ -7,21 +7,42 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PLOY'S LEDGER" />
-  <title>PLOY'S LEDGER // 16-Bit Retro Cloud v2.0</title>
+  <title>PLOY'S LEDGER // 16-Bit Retro Edition v1.0.4</title>
 
   <!-- Typography: JetBrains Mono (16px Base for iOS Anti-Zoom & High Legibility) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Supabase JS SDK v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
     /* ============================================================================
-       MASTER SPECIFICATION LOCK (SRS v1.0.4 + SUPABASE CLOUD SYNC v2.0)
+       MASTER SPECIFICATION LOCK (SRS v1.0.4 - IMMUTABLE CORE RULES)
+       ============================================================================
+       1. EXACT TAXONOMY LOCK (4 Main Categories, 25 Exact Sub-Categories):
+          - Income (5): ["Salary", "Bonus", "Dividend", "Interest", "Others"]
+          - Savings (5): ["Retirement_PVD", "Emergency_Cash", "Emergency_AOTCOOP", "Travel", "Investment"]
+          - Fixed_Expense (6): ["WHT", "Life/Health Insurance", "Car Insurance", "Condo Maintenance Fee", "Personal Trainer", "Debt Repayment"]
+          - Variable_Expense (9): ["Food & Beverage", "Non Food", "Utilities", "Gasoline", "Subscription", "Credit Card Installment", "Books & Education", "Bread-Making", "Others"]
+       2. STRICT 2-MODE THEME SYSTEM:
+          - Only 2 explicit modes: "DAY" (16-Bit Pastel) and "NIGHT" (16-Bit Modern Black, zero purple).
+          - Initial default on first visit (when no saved theme_mode exists): 06:00-17:59 = "DAY", 18:00-05:59 = "NIGHT".
+          - Header button toggles directly between "☀️ Day" and "🌙 Night" in 1 tap.
+       3. DATA SCHEMA & DUAL PAY-CYCLE ENGINE:
+          - LocalStorage keys: `pixel_ledger_txs_v1` & `pixel_ledger_cfg_v1` (`schema_version: "1.0.0"`).
+          - Integer satang (`amount_satang = Math.round(thb * 100)`), ISO date `YYYY-MM-DD`, UI date `22 Nov 2026`.
+          - 26TH PAY CYCLE (Sat/Sun adjusted backward to Friday, counts toward next month) & CALENDAR (1-31).
+          - 3 Tabs:
+            * Tab 1: "➕ บันทึกรายการ" (Default) -> Step 1: Date (with Today shortcut), Step 2: Main Category, Step 3: Sub-Category, Step 4: Amount + Quick-Add, Step 5: Note.
+            * Tab 2: "📅 Daily" -> Pay-Cycle toggle, KPIs, 4-category stacked bar, filter pills & history.
+            * Tab 3: "📊 Dashboard" -> Annual KPIs, 12-month bar chart, 12-month table with auto CURRENT highlight & click drill-down.
+       4. NET BALANCE CONDITIONAL TEXT COLOR RULES:
+          - Net Balance > 5,000.00 THB (> 500000 satang)        -> Black text (Day) / Grey text (Night)
+          - Net Balance < 0.00 THB (< 0 satang)                -> Red text
+          - Net Balance >= 0.00 THB and <= 5,000.00 THB        -> Orange text
        ============================================================================ */
+
     :root, [data-theme="light"] {
+      /* Day Mode: Warm Cream & Crisp Pastel 16-Bit Retro */
       --bg-base: #F7F4EB;
       --bg-grid: rgba(30, 41, 59, 0.06);
       --bg-panel: #FFFDF8;
@@ -36,6 +57,7 @@
       --text-muted: #475569;
       --text-dim: #64748B;
 
+      /* Category Palette (Day) */
       --cat-income: #0D9488;
       --cat-income-bg: #CCFBF1;
       --cat-savings: #0284C7;
@@ -50,6 +72,7 @@
       --accent-sky: #0284C7;
       --accent-sky-text: #FFFFFF;
 
+      /* Net Balance Conditional Text Colors */
       --net-black: #000000;
       --net-red: #DC2626;
       --net-orange: #EA580C;
@@ -59,6 +82,7 @@
     }
 
     [data-theme="dark"] {
+      /* Night Mode: Modern Obsidian & Slate 16-Bit Retro (Zero Purple) */
       --bg-base: #0D1117;
       --bg-grid: rgba(148, 163, 184, 0.05);
       --bg-panel: #161B22;
@@ -73,6 +97,7 @@
       --text-muted: #9BA6B4;
       --text-dim: #6E7681;
 
+      /* Category Palette (Night - High-contrast Pastel-Neon on Obsidian) */
       --cat-income: #34D399;
       --cat-income-bg: rgba(52, 211, 153, 0.15);
       --cat-savings: #38BDF8;
@@ -87,6 +112,7 @@
       --accent-sky: #38BDF8;
       --accent-sky-text: #090D13;
 
+      /* Net Balance Conditional Text Colors (Adjusted to Grey for Night Mode) */
       --net-black: #9BA6B4;
       --net-red: #FB7185;
       --net-orange: #FB923C;
@@ -95,6 +121,7 @@
       --row-selected-bg: rgba(251, 191, 36, 0.20);
     }
 
+    /* Strict 0px Pixelate Geometry */
     * {
       box-sizing: border-box;
       border-radius: 0px !important;
@@ -117,9 +144,15 @@
       overflow-x: hidden;
     }
 
-    .tabular { font-variant-numeric: tabular-nums; }
-    .hidden { display: none !important; }
+    .tabular {
+      font-variant-numeric: tabular-nums;
+    }
 
+    .hidden {
+      display: none !important;
+    }
+
+    /* 16-Bit RPG Window Container */
     .pixel-box {
       background: var(--bg-panel);
       border: 3px solid var(--border-outer);
@@ -136,6 +169,7 @@
       box-shadow: inset 2px 2px 0px var(--highlight);
     }
 
+    /* Corner Rivets */
     .pixel-rivets::before,
     .pixel-rivets::after {
       content: "";
@@ -149,6 +183,7 @@
     .pixel-rivets::before { left: 6px; }
     .pixel-rivets::after { right: 6px; }
 
+    /* Tactile 16-Bit Buttons (Minimum 44x44px Touch Target) */
     .pixel-btn {
       display: inline-flex;
       align-items: center;
@@ -180,11 +215,6 @@
         2px 2px 0px var(--shadow-hard);
     }
 
-    .pixel-btn:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-    }
-
     .pixel-btn-gold {
       background: var(--accent-gold);
       color: var(--accent-gold-text);
@@ -204,6 +234,7 @@
       color: #FFFFFF;
     }
 
+    /* Form Controls (16px font to prevent iOS Safari Auto-Zoom, >= 48px height) */
     .pixel-label {
       display: block;
       font-size: 13px;
@@ -233,6 +264,7 @@
       box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.22), 0 0 0 2px var(--accent-gold);
     }
 
+    /* App Container */
     .app-shell {
       max-width: 1040px;
       margin: 0 auto;
@@ -240,9 +272,12 @@
     }
 
     @media (min-width: 768px) {
-      .app-shell { padding: 18px 18px 36px; }
+      .app-shell {
+        padding: 18px 18px 36px;
+      }
     }
 
+    /* Top Header HUD */
     .top-header {
       padding: 12px 14px;
       margin-bottom: 12px;
@@ -290,9 +325,9 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      flex-wrap: wrap;
     }
 
+    /* Desktop Top Navigation (3 Tabs) */
     .desktop-tabs {
       display: none;
       grid-template-columns: repeat(3, 1fr);
@@ -301,7 +336,9 @@
     }
 
     @media (min-width: 768px) {
-      .desktop-tabs { display: grid; }
+      .desktop-tabs {
+        display: grid;
+      }
     }
 
     .desktop-tabs .pixel-btn.active {
@@ -309,6 +346,7 @@
       color: var(--accent-gold-text);
     }
 
+    /* Mobile Thumb-Zone Bottom Dock (3 Tabs) */
     .mobile-dock {
       position: fixed;
       bottom: 0;
@@ -325,7 +363,9 @@
     }
 
     @media (min-width: 768px) {
-      .mobile-dock { display: none; }
+      .mobile-dock {
+        display: none;
+      }
     }
 
     .dock-btn {
@@ -351,6 +391,7 @@
       box-shadow: inset 2px 2px 0px rgba(255, 255, 255, 0.45);
     }
 
+    /* 4 Main Category Selector Cards (Tab 1 Entry) */
     .cat-cards-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -359,7 +400,9 @@
     }
 
     @media (min-width: 640px) {
-      .cat-cards-grid { grid-template-columns: repeat(4, 1fr); }
+      .cat-cards-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
 
     .cat-card-btn {
@@ -379,8 +422,16 @@
       text-align: center;
     }
 
-    .cat-card-btn .cat-en { font-size: 13px; font-weight: 800; }
-    .cat-card-btn .cat-th { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .cat-card-btn .cat-en {
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .cat-card-btn .cat-th {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
 
     .cat-card-btn.selected[data-cat="Income"] {
       background: var(--cat-income-bg);
@@ -402,8 +453,11 @@
       border-color: var(--cat-variable);
       color: var(--cat-variable);
     }
-    .cat-card-btn.selected .cat-th { color: inherit; }
+    .cat-card-btn.selected .cat-th {
+      color: inherit;
+    }
 
+    /* Quick-Add Amount Pills */
     .quick-add-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -417,6 +471,7 @@
       min-height: 44px;
     }
 
+    /* Dual Pay-Cycle Control Bar */
     .cycle-bar {
       padding: 12px;
       margin-bottom: 12px;
@@ -453,9 +508,19 @@
       min-width: 185px;
     }
 
-    .cycle-title { font-size: 15px; font-weight: 800; color: var(--accent-gold); }
-    .cycle-dates { font-size: 12px; font-weight: 700; color: var(--text-muted); }
+    .cycle-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--accent-gold);
+    }
 
+    .cycle-dates {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* KPI Summary Grids (4 Cards for Daily, 5 Cards for Dashboard) */
     .kpi-grid-4 {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -464,7 +529,9 @@
     }
 
     @media (min-width: 768px) {
-      .kpi-grid-4 { grid-template-columns: repeat(4, 1fr); }
+      .kpi-grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
 
     .kpi-grid-5 {
@@ -475,7 +542,9 @@
     }
 
     @media (min-width: 768px) {
-      .kpi-grid-5 { grid-template-columns: repeat(5, 1fr); }
+      .kpi-grid-5 {
+        grid-template-columns: repeat(5, 1fr);
+      }
     }
 
     .kpi-card {
@@ -485,18 +554,38 @@
       gap: 4px;
     }
 
-    .kpi-card-wide { grid-column: span 2; }
-    @media (min-width: 768px) { .kpi-card-wide { grid-column: span 1; } }
+    .kpi-card-wide {
+      grid-column: span 2;
+    }
 
-    .kpi-label { font-size: 12px; font-weight: 800; color: var(--text-muted); }
-    .kpi-value { font-size: 18px; font-weight: 800; word-break: break-word; }
+    @media (min-width: 768px) {
+      .kpi-card-wide {
+        grid-column: span 1;
+      }
+    }
 
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .kpi-value {
+      font-size: 18px;
+      font-weight: 800;
+      word-break: break-word;
+    }
+
+    /* Category Text & Badges */
     .c-income { color: var(--cat-income); }
     .c-savings { color: var(--cat-savings); }
     .c-fixed { color: var(--cat-fixed); }
     .c-variable { color: var(--cat-variable); }
 
-    .net-bal-black { color: var(--net-black) !important; }
+    /* Net Balance Conditional Text Color Only (No Card Box Changes) */
+    .net-bal-black {
+      color: var(--net-black) !important;
+    }
     .net-bal-red { color: var(--net-red) !important; }
     .net-bal-orange { color: var(--net-orange) !important; }
 
@@ -514,6 +603,7 @@
     .badge-Fixed_Expense { background: var(--cat-fixed-bg); color: var(--cat-fixed); border-color: var(--cat-fixed); }
     .badge-Variable_Expense { background: var(--cat-variable-bg); color: var(--cat-variable); border-color: var(--cat-variable); }
 
+    /* Proportional Stacked Bar & Progress Bars */
     .stacked-bar-track {
       display: flex;
       width: 100%;
@@ -554,6 +644,7 @@
       );
     }
 
+    /* Filter Pills Row */
     .filter-pills-row {
       display: flex;
       flex-wrap: wrap;
@@ -579,6 +670,7 @@
       box-shadow: 2px 2px 0px var(--shadow-hard);
     }
 
+    /* Transaction History List */
     .tx-item {
       padding: 12px;
       border-bottom: 2px dashed var(--border-inner);
@@ -587,12 +679,42 @@
       justify-content: space-between;
       gap: 10px;
     }
-    .tx-item:last-child { border-bottom: none; }
-    .tx-meta { min-width: 0; flex: 1; }
-    .tx-subcat { font-size: 16px; font-weight: 800; color: var(--text-main); word-break: break-word; }
-    .tx-note { font-size: 13px; color: var(--text-muted); margin-top: 3px; word-break: break-word; }
-    .tx-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
-    .tx-actions { display: flex; gap: 6px; }
+
+    .tx-item:last-child {
+      border-bottom: none;
+    }
+
+    .tx-meta {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .tx-subcat {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-main);
+      word-break: break-word;
+    }
+
+    .tx-note {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      word-break: break-word;
+    }
+
+    .tx-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .tx-actions {
+      display: flex;
+      gap: 6px;
+    }
 
     .icon-action-btn {
       min-width: 44px;
@@ -614,7 +736,11 @@
       box-shadow: 1px 1px 0px var(--shadow-hard);
     }
 
-    .annual-chart-scroll { overflow-x: auto; padding-bottom: 6px; }
+    /* Dashboard 12-Month Chart & Interactive Table */
+    .annual-chart-scroll {
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
 
     .annual-bars-grid {
       display: grid;
@@ -650,18 +776,39 @@
       height: 142px;
     }
 
-    .abar { width: 10px; min-height: 2px; border: 1px solid var(--border-outer); }
-    .table-scroll { overflow-x: auto; border: 2px solid var(--border-outer); }
+    .abar {
+      width: 10px;
+      min-height: 2px;
+      border: 1px solid var(--border-outer);
+    }
 
-    table.pixel-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    table.pixel-table th, table.pixel-table td {
+    .table-scroll {
+      overflow-x: auto;
+      border: 2px solid var(--border-outer);
+    }
+
+    table.pixel-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    table.pixel-table th,
+    table.pixel-table td {
       padding: 10px 10px;
       border: 1px solid var(--border-inner);
       text-align: right;
       white-space: nowrap;
     }
-    table.pixel-table th { background: var(--bg-panel-alt); font-weight: 800; color: var(--accent-gold); }
-    table.pixel-table th:first-child, table.pixel-table td:first-child {
+
+    table.pixel-table th {
+      background: var(--bg-panel-alt);
+      font-weight: 800;
+      color: var(--accent-gold);
+    }
+
+    table.pixel-table th:first-child,
+    table.pixel-table td:first-child {
       text-align: left;
       position: sticky;
       left: 0;
@@ -670,9 +817,18 @@
       z-index: 2;
     }
 
-    table.pixel-table tbody tr.month-row { cursor: pointer; }
-    table.pixel-table tbody tr.month-row:hover td { background: var(--bg-panel-alt); }
-    table.pixel-table tbody tr.is-current td { background: var(--row-current-bg) !important; }
+    table.pixel-table tbody tr.month-row {
+      cursor: pointer;
+    }
+
+    table.pixel-table tbody tr.month-row:hover td {
+      background: var(--bg-panel-alt);
+    }
+
+    table.pixel-table tbody tr.is-current td {
+      background: var(--row-current-bg) !important;
+    }
+
     table.pixel-table tbody tr.is-selected td {
       background: var(--row-selected-bg) !important;
       border-top: 2px solid var(--accent-gold);
@@ -691,20 +847,25 @@
       vertical-align: middle;
     }
 
+    /* Symmetrical 2x2 Drill-Down Grid (1 col on narrow mobile < 520px, 2x2 on tablet/desktop) */
     .drilldown-grid {
       display: grid;
       grid-template-columns: 1fr;
       gap: 12px;
     }
+
     @media (min-width: 520px) {
-      .drilldown-grid { grid-template-columns: repeat(2, 1fr); }
+      .drilldown-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
+    /* Modals & PIN Lock Overlay */
     .modal-overlay {
       position: fixed;
       inset: 0;
       z-index: 900;
-      background: rgba(0, 0, 0, 0.86);
+      background: rgba(0, 0, 0, 0.84);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -746,14 +907,19 @@
       margin: 0 auto;
     }
 
-    .pin-key { min-height: 50px; font-size: 18px; font-weight: 800; }
+    .pin-key {
+      min-height: 50px;
+      font-size: 18px;
+      font-weight: 800;
+    }
 
+    /* Toast Banner */
     .pixel-toast {
       position: fixed;
       top: 14px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 2000;
+      z-index: 1200;
       padding: 12px 16px;
       background: var(--bg-panel);
       border: 3px solid var(--accent-gold);
@@ -763,72 +929,9 @@
       max-width: 92vw;
       text-align: center;
     }
-
-    .cloud-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 2px 7px;
-      font-size: 11px;
-      font-weight: 800;
-      border: 2px solid var(--border-outer);
-      background: var(--cat-income-bg);
-      color: var(--cat-income);
-    }
-    .cloud-badge.offline {
-      background: var(--cat-fixed-bg);
-      color: var(--cat-fixed);
-    }
   </style>
 </head>
 <body>
-
-  <!-- ========================================================================
-       SUPABASE CLOUD AUTHENTICATION MODAL (LOGIN / SIGN UP / DEMO MODE)
-       ======================================================================== -->
-  <div id="authOverlay" class="modal-overlay" style="z-index: 1600;">
-    <div class="pixel-box pixel-rivets modal-card">
-      <div style="text-align: center; margin-bottom: 14px;">
-        <div style="font-size: 32px; margin-bottom: 4px;">👾</div>
-        <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: var(--accent-gold);">PLOY'S LEDGER</h2>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); margin-top: 2px;">
-          16-BIT RETRO • SUPABASE CLOUD SYNC v2.0
-        </div>
-      </div>
-
-      <!-- Mode Switcher: Login vs Sign Up -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;">
-        <button type="button" class="pixel-btn pixel-btn-gold" id="btnAuthTabLogin">เข้าสู่ระบบ (LOGIN)</button>
-        <button type="button" class="pixel-btn" id="btnAuthTabSignup">สมัครใหม่ (SIGN UP)</button>
-      </div>
-
-      <form id="authForm" novalidate>
-        <div style="margin-bottom: 12px;">
-          <label class="pixel-label" for="authEmail">อีเมล (EMAIL)</label>
-          <input type="email" id="authEmail" class="pixel-input" placeholder="you@example.com" required autocomplete="email" />
-        </div>
-        <div style="margin-bottom: 14px;">
-          <label class="pixel-label" for="authPassword">รหัสผ่าน (PASSWORD - อย่างน้อย 6 ตัวอักษร)</label>
-          <input type="password" id="authPassword" class="pixel-input" placeholder="••••••" minlength="6" required autocomplete="current-password" />
-        </div>
-
-        <div id="authErrorMsg" style="min-height: 20px; font-size: 13px; font-weight: 700; color: var(--cat-variable); margin-bottom: 10px;"></div>
-
-        <button type="submit" class="pixel-btn pixel-btn-gold" id="btnAuthSubmit" style="width: 100%; min-height: 52px; font-size: 16px;">
-          🔑 เข้าสู่ระบบ Cloud
-        </button>
-      </form>
-
-      <div style="margin-top: 14px; padding-top: 12px; border-top: 2px dashed var(--border-inner); text-align: center;">
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
-          สำหรับผู้เยี่ยมชม Portfolio หรือใช้งานแบบออฟไลน์ในเครื่อง:
-        </div>
-        <button type="button" class="pixel-btn" id="btnDemoOfflineMode" style="width: 100%;">
-          🎮 ทดลองเล่น (Demo / Local Mode)
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- ========================================================================
        PIN LOCK SCREEN OVERLAY (SHA-256)
@@ -860,50 +963,31 @@
   </div>
 
   <!-- ========================================================================
-       CLOUD ACCOUNT, DATA PORTABILITY & PIN MODAL
+       SECURITY & DATA PORTABILITY MODAL
        ======================================================================== -->
   <div id="dataModal" class="modal-overlay hidden">
     <div class="pixel-box pixel-rivets modal-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--accent-gold);">💾 บัญชี Cloud &amp; สำรองข้อมูล</h3>
+        <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--accent-gold);">💾 สำรองข้อมูล &amp; PIN</h3>
         <button type="button" class="pixel-btn" id="btnCloseDataModal" style="min-width: 44px; padding: 6px 10px;">✕</button>
-      </div>
-
-      <!-- Cloud Account & Migration -->
-      <div class="pixel-subbox" style="padding: 12px; margin-bottom: 12px;">
-        <div class="pixel-label" style="color: var(--accent-sky);">☁️ บัญชี SUPABASE CLOUD</div>
-        <div id="cloudAccountInfo" style="font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--text-main);">
-          สถานะ: โหมดออฟไลน์ในเครื่อง
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <button type="button" class="pixel-btn pixel-btn-gold" id="btnSyncLocalToCloud">
-            ☁️ อัปโหลดข้อมูลในเครื่องขึ้น Cloud
-          </button>
-          <button type="button" class="pixel-btn" id="btnRefreshCloud">
-            🔄 ดึงข้อมูลล่าสุดจาก Cloud
-          </button>
-          <button type="button" class="pixel-btn pixel-btn-danger" id="btnLogoutCloud">
-            🚪 ออกจากระบบ / สลับบัญชี
-          </button>
-        </div>
       </div>
 
       <!-- Export & Google Sheets -->
       <div class="pixel-subbox" style="padding: 12px; margin-bottom: 12px;">
         <div class="pixel-label" style="color: var(--cat-income);">📊 ส่งออกข้อมูล (CSV / GOOGLE SHEETS)</div>
         <div style="display: flex; flex-direction: column; gap: 8px;">
-          <button type="button" class="pixel-btn" id="btnExportCsv">⬇️ ดาวน์โหลดไฟล์ .CSV (UTF-8 BOM)</button>
+          <button type="button" class="pixel-btn pixel-btn-gold" id="btnExportCsv">⬇️ ดาวน์โหลดไฟล์ .CSV (UTF-8 BOM)</button>
           <button type="button" class="pixel-btn" id="btnCopyTsv">📋 คัดลอก TSV วางใน Google Sheets</button>
         </div>
       </div>
 
       <!-- JSON Backup & Restore -->
       <div class="pixel-subbox" style="padding: 12px; margin-bottom: 12px;">
-        <div class="pixel-label" style="color: var(--cat-savings);">💾 นำเข้า / สำรองไฟล์ JSON (SCHEMA v1.0.0)</div>
+        <div class="pixel-label" style="color: var(--cat-savings);">💾 สำรอง &amp; กู้คืนไฟล์ JSON (SCHEMA v1.0.0)</div>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <button type="button" class="pixel-btn pixel-btn-sky" id="btnExportJson">💾 Export JSON Backup</button>
           <label class="pixel-btn" style="cursor: pointer;">
-            📂 Import JSON Backup (รองรับโอนข้อมูลเก่าขึ้น Cloud)
+            📂 Import JSON Backup
             <input type="file" id="importJsonInput" accept=".json,application/json" class="hidden" />
           </label>
           <button type="button" class="pixel-btn" id="btnLoadDemoData">🧪 โหลดข้อมูลตัวอย่าง (Demo Data)</button>
@@ -941,6 +1025,7 @@
     <header class="pixel-box pixel-rivets top-header">
       <div class="brand-group">
         <div class="pixel-emblem" aria-hidden="true">
+          <!-- Classic 16-Bit Pigtails Girl Emblem -->
           <svg width="32" height="32" viewBox="0 0 16 16" shape-rendering="crispEdges">
             <rect x="1" y="4" width="2" height="6" fill="#4A2E1B"/>
             <rect x="13" y="4" width="2" height="6" fill="#4A2E1B"/>
@@ -961,17 +1046,14 @@
           </svg>
         </div>
         <div>
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <h1 class="brand-title">PLOY'S LEDGER</h1>
-            <span id="headerCloudBadge" class="cloud-badge offline">OFFLINE</span>
-          </div>
-          <div class="brand-sub" id="headerUserLabel">16-BIT RETRO • v2.0 CLOUD</div>
+          <h1 class="brand-title">PLOY'S LEDGER</h1>
+          <div class="brand-sub">16-BIT RETRO • SRS v1.0.4</div>
         </div>
       </div>
 
       <div class="header-actions">
         <button type="button" class="pixel-btn" id="btnThemeToggle" title="สลับธีม Day / Night">🌙 Night</button>
-        <button type="button" class="pixel-btn" id="btnOpenDataModal" title="บัญชี Cloud & สำรองข้อมูล">💾</button>
+        <button type="button" class="pixel-btn" id="btnOpenDataModal" title="สำรองข้อมูล & ตั้งรหัส PIN">💾</button>
         <button type="button" class="pixel-btn hidden" id="btnQuickLock" title="ล็อกหน้าจอทันที">🔒</button>
       </div>
     </header>
@@ -984,7 +1066,7 @@
     </nav>
 
     <!-- ======================================================================
-         TAB 1: ➕ บันทึกรายการ
+         TAB 1: ➕ บันทึกรายการ (DEFAULT ON LOAD - FULL WIDTH MATCHING TOP CARD)
          ====================================================================== -->
     <main id="tabEntry">
       <div class="pixel-box pixel-rivets" style="padding: 16px; width: 100%;">
@@ -999,7 +1081,7 @@
           <input type="hidden" id="txId" value="" />
           <input type="hidden" id="txMainCat" value="Variable_Expense" />
 
-          <!-- STEP 1: Date Picker + Today Shortcut -->
+          <!-- STEP 1 (FIRST FIELD): Date Picker + Today Quick Reset + English Short Date Preview -->
           <div style="margin-bottom: 16px;">
             <label class="pixel-label" for="txDate">1. วันที่ทำรายการ (TRANSACTION DATE)</label>
             <div style="display: flex; gap: 8px; align-items: stretch;">
@@ -1065,6 +1147,7 @@
             <input type="text" id="txNote" class="pixel-input" maxlength="140" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)..." />
           </div>
 
+          <!-- Submit / Cancel Edit -->
           <div style="display: flex; gap: 10px;">
             <button type="submit" class="pixel-btn pixel-btn-gold" id="btnSubmitTx" style="flex: 1; min-height: 54px; font-size: 16px;">
               💾 บันทึกรายการ
@@ -1078,9 +1161,10 @@
     </main>
 
     <!-- ======================================================================
-         TAB 2: 📅 Daily
+         TAB 2: 📅 Daily (PAY-CYCLE KPIs, STACKED BAR, FILTER PILLS & HISTORY)
          ====================================================================== -->
     <section id="tabDaily" class="hidden">
+      <!-- Dual Pay-Cycle Controller -->
       <div class="pixel-box cycle-bar">
         <div>
           <div class="pixel-label" style="margin-bottom: 5px;">โหมดรอบบัญชี (PAY-CYCLE)</div>
@@ -1101,6 +1185,7 @@
         </div>
       </div>
 
+      <!-- 4 KPI Cards (Income, Savings, Expenses [Fixed + Variable], Net Cashflow) -->
       <div class="kpi-grid-4">
         <div class="pixel-box kpi-card">
           <div class="kpi-label">INCOME</div>
@@ -1120,6 +1205,7 @@
         </div>
       </div>
 
+      <!-- 4-Category Proportional Stacked Bar & Legend -->
       <div class="pixel-box" style="padding: 14px; margin-bottom: 12px;">
         <div style="font-size: 14px; font-weight: 800; color: var(--accent-gold); margin-bottom: 8px;">
           📊 สัดส่วนกระแสเงินสด 4 หมวดหมู่หลักในรอบนี้
@@ -1128,6 +1214,7 @@
         <div id="dailyStackedLegend" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin-top: 10px;"></div>
       </div>
 
+      <!-- Chronological Transaction History with Filter Pills -->
       <div class="pixel-box" style="padding: 14px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
           <h2 style="margin: 0; font-size: 16px; font-weight: 800;">
@@ -1148,9 +1235,10 @@
     </section>
 
     <!-- ======================================================================
-         TAB 3: 📊 Dashboard
+         TAB 3: 📊 Dashboard (ANNUAL & MONTHLY TRENDS + INTERACTIVE DRILL-DOWN)
          ====================================================================== -->
     <section id="tabDashboard" class="hidden">
+      <!-- Top Controls: Year Selector & Pay-Cycle vs Calendar Toggle -->
       <div class="pixel-box cycle-bar">
         <div>
           <div class="pixel-label" style="margin-bottom: 5px;">เกณฑ์สรุปข้อมูลรายเดือน</div>
@@ -1170,6 +1258,7 @@
         </div>
       </div>
 
+      <!-- Annual KPI Summary (5 Cards) -->
       <div class="kpi-grid-5">
         <div class="pixel-box kpi-card">
           <div class="kpi-label">TOTAL INCOME</div>
@@ -1193,6 +1282,7 @@
         </div>
       </div>
 
+      <!-- 12-Month Bar Chart -->
       <div class="pixel-box" style="padding: 14px; margin-bottom: 12px;">
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 8px;">
           <span style="font-size: 15px; font-weight: 800; color: var(--accent-gold);">📈 กราฟเปรียบเทียบ 12 เดือน (คลิกแท่งเดือนเพื่อดูรายละเอียด)</span>
@@ -1208,6 +1298,7 @@
         </div>
       </div>
 
+      <!-- Interactive 12-Month Breakdown Table -->
       <div class="pixel-box" style="padding: 14px; margin-bottom: 12px;">
         <div style="font-size: 15px; font-weight: 800; margin-bottom: 8px;">
           📋 ตารางสรุปรายเดือน (คลิกแถวเดือนที่ต้องการเจาะลึก)
@@ -1229,6 +1320,7 @@
         </div>
       </div>
 
+      <!-- Selected Month Sub-Category Drill-Down Panel -->
       <div class="pixel-box pixel-rivets" style="padding: 14px;">
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px;">
           <h3 id="drilldownTitle" style="margin: 0; font-size: 16px; font-weight: 800; color: var(--accent-gold);">
@@ -1243,7 +1335,7 @@
   </div>
 
   <!-- ========================================================================
-       MOBILE BOTTOM DOCK (3 TABS)
+       MOBILE BOTTOM DOCK (3 TABS - THUMB ZONE)
        ======================================================================== -->
   <nav class="mobile-dock" id="mobileNav">
     <button type="button" class="dock-btn active" data-tab="entry">
@@ -1262,32 +1354,52 @@
 
   <script>
     /* ==========================================================================
-       1. SUPABASE CLOUD CONFIGURATION (YOUR PROJECT CREDENTIALS)
-       ========================================================================== */
-    const SUPABASE_URL = 'https://wgacpehnwxbqootfapvt.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_AiB8ASPxsgAnO-m-nYQFYA_sRjiRAzu';
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let currentUser = null; // null = Offline/Demo mode, Object = Authenticated Supabase User
-
-    /* ==========================================================================
-       2. LOCKED SCHEMA & TAXONOMY CONSTANTS (SRS v1.0.4)
+       1. LOCKED SCHEMA & TAXONOMY CONSTANTS (SRS v1.0.4 - 4 MAIN, 25 EXACT SUB)
        ========================================================================== */
     const TX_STORAGE_KEY = 'pixel_ledger_txs_v1';
     const CFG_STORAGE_KEY = 'pixel_ledger_cfg_v1';
 
     const TAXONOMY = Object.freeze({
-      Income: Object.freeze(['Salary', 'Bonus', 'Dividend', 'Interest', 'Others']),
-      Savings: Object.freeze(['Retirement_PVD', 'Emergency_Cash', 'Emergency_AOTCOOP', 'Travel', 'Investment']),
-      Fixed_Expense: Object.freeze(['WHT', 'Life/Health Insurance', 'Car Insurance', 'Condo Maintenance Fee', 'Personal Trainer', 'Debt Repayment']),
-      Variable_Expense: Object.freeze(['Food & Beverage', 'Non Food', 'Utilities', 'Gasoline', 'Subscription', 'Credit Card Installment', 'Books & Education', 'Bread-Making', 'Others'])
+      Income: Object.freeze([
+        'Salary',
+        'Bonus',
+        'Dividend',
+        'Interest',
+        'Others'
+      ]),
+      Savings: Object.freeze([
+        'Retirement_PVD',
+        'Emergency_Cash',
+        'Emergency_AOTCOOP',
+        'Travel',
+        'Investment'
+      ]),
+      Fixed_Expense: Object.freeze([
+        'WHT',
+        'Life/Health Insurance',
+        'Car Insurance',
+        'Condo Maintenance Fee',
+        'Personal Trainer',
+        'Debt Repayment'
+      ]),
+      Variable_Expense: Object.freeze([
+        'Food & Beverage',
+        'Non Food',
+        'Utilities',
+        'Gasoline',
+        'Subscription',
+        'Credit Card Installment',
+        'Books & Education',
+        'Bread-Making',
+        'Others'
+      ])
     });
 
     const MAIN_CATEGORIES = Object.keys(TAXONOMY);
     const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     /* ==========================================================================
-       3. STATE INITIALIZATION & HYBRID STORAGE (CLOUD + LOCAL CACHE)
+       2. STATE INITIALIZATION & STORAGE PERSISTENCE
        ========================================================================== */
     function getInitialTimeBasedTheme() {
       const h = new Date().getHours();
@@ -1298,10 +1410,10 @@
       return {
         schema_version: '1.0.0',
         currency: 'THB',
-        cycleMode: 'CUSTOM',
+        cycleMode: 'CUSTOM', // 'CUSTOM' (26th Pay Cycle) | 'CALENDAR' (1-31)
         pay_cycle_day: 26,
         adjust_weekend: true,
-        theme: getInitialTimeBasedTheme(),
+        theme: getInitialTimeBasedTheme(), // Strictly 'DAY' or 'NIGHT'
         pinHash: null
       };
     }
@@ -1311,11 +1423,20 @@
         const raw = localStorage.getItem(CFG_STORAGE_KEY);
         if (!raw) return defaultSettings();
         const parsed = JSON.parse(raw);
+
+        // Migrate any legacy property names smoothly
         const legacyTheme = parsed.theme || parsed.theme_mode;
-        const normalizedTheme = (legacyTheme === 'DAY' || legacyTheme === 'NIGHT') ? legacyTheme : getInitialTimeBasedTheme();
+        const normalizedTheme = (legacyTheme === 'DAY' || legacyTheme === 'NIGHT')
+          ? legacyTheme
+          : getInitialTimeBasedTheme();
+
         const legacyCycle = parsed.cycleMode || parsed.cycle_mode;
-        const normalizedCycle = (legacyCycle === 'CUSTOM' || legacyCycle === 'CALENDAR') ? legacyCycle : 'CUSTOM';
+        const normalizedCycle = (legacyCycle === 'CUSTOM' || legacyCycle === 'CALENDAR')
+          ? legacyCycle
+          : 'CUSTOM';
+
         const legacyPin = parsed.pinHash !== undefined ? parsed.pinHash : (parsed.pin_hash || null);
+
         return {
           ...defaultSettings(),
           ...parsed,
@@ -1329,7 +1450,7 @@
       }
     }
 
-    function loadLocalTransactions() {
+    function loadTransactions() {
       try {
         const raw = localStorage.getItem(TX_STORAGE_KEY);
         if (!raw) return [];
@@ -1351,147 +1472,26 @@
     }
 
     let settings = loadSettings();
-    let transactions = loadLocalTransactions();
+    let transactions = loadTransactions();
 
     function saveSettings() {
       try {
         localStorage.setItem(CFG_STORAGE_KEY, JSON.stringify(settings));
-      } catch (e) {}
-    }
-
-    function saveLocalTransactions() {
-      if (!currentUser) {
-        try {
-          localStorage.setItem(TX_STORAGE_KEY, JSON.stringify(transactions));
-        } catch (e) {}
+      } catch (e) {
+        showToast('⚠️ ไม่สามารถบันทึกการตั้งค่าได้');
       }
     }
 
-    /* ==========================================================================
-       4. SUPABASE CLOUD AUTH & DATABASE OPERATIONS
-       ========================================================================== */
-    function updateCloudStatusUI() {
-      const badge = document.getElementById('headerCloudBadge');
-      const userLabel = document.getElementById('headerUserLabel');
-      const accountInfo = document.getElementById('cloudAccountInfo');
-      const btnSync = document.getElementById('btnSyncLocalToCloud');
-      const btnRefresh = document.getElementById('btnRefreshCloud');
-
-      if (currentUser) {
-        badge.textContent = '☁️ CLOUD';
-        badge.classList.remove('offline');
-        userLabel.textContent = currentUser.email;
-        accountInfo.innerHTML = `สถานะ: <span class="c-income">เชื่อมต่อ Cloud แล้ว</span><br>บัญชี: ${escapeHtml(currentUser.email)}`;
-        btnSync.classList.remove('hidden');
-        btnRefresh.classList.remove('hidden');
-      } else {
-        badge.textContent = 'LOCAL';
-        badge.classList.add('offline');
-        userLabel.textContent = 'DEMO / OFFLINE MODE';
-        accountInfo.innerHTML = 'สถานะ: <span class="c-fixed">โหมดออฟไลน์ในเครื่อง</span> (ไม่ได้ Login)';
-        btnSync.classList.add('hidden');
-        btnRefresh.classList.add('hidden');
+    function saveTransactions() {
+      try {
+        localStorage.setItem(TX_STORAGE_KEY, JSON.stringify(transactions));
+      } catch (e) {
+        showToast('⚠️ ไม่สามารถบันทึกรายการได้');
       }
-    }
-
-    async function fetchCloudTransactions(silent = false) {
-      if (!currentUser) return;
-      if (!silent) showToast('🔄 กำลังดึงข้อมูลจาก Cloud...');
-
-      const { data, error } = await supabaseClient
-        .from('transactions')
-        .select('id, date, main_category, sub_category, amount_satang, note')
-        .order('date', { ascending: false });
-
-      if (error) {
-        showToast('❌ ดึงข้อมูล Cloud ไม่สำเร็จ: ' + error.message);
-        return;
-      }
-
-      transactions = (data || []).map(row => ({
-        id: row.id,
-        date: row.date,
-        main_category: row.main_category,
-        sub_category: row.sub_category,
-        amount_satang: Number(row.amount_satang),
-        note: row.note || ''
-      }));
-
-      if (activeTab === 'daily') renderDailyTab();
-      if (activeTab === 'dashboard') renderDashboardTab();
-      if (!silent) showToast(`☁️ โหลดข้อมูลสำเร็จ (${transactions.length} รายการ)`);
-    }
-
-    async function upsertCloudTransaction(txObj) {
-      if (!currentUser) return true;
-      const payload = {
-        id: txObj.id,
-        user_id: currentUser.id,
-        date: txObj.date,
-        main_category: txObj.main_category,
-        sub_category: txObj.sub_category,
-        amount_satang: txObj.amount_satang,
-        note: txObj.note || ''
-      };
-      const { error } = await supabaseClient.from('transactions').upsert(payload);
-      if (error) {
-        showToast('❌ บันทึกขึ้น Cloud ไม่สำเร็จ: ' + error.message);
-        return false;
-      }
-      return true;
-    }
-
-    async function deleteCloudTransaction(txId) {
-      if (!currentUser) return true;
-      const { error } = await supabaseClient
-        .from('transactions')
-        .delete()
-        .eq('id', txId);
-      if (error) {
-        showToast('❌ ลบข้อมูลบน Cloud ไม่สำเร็จ: ' + error.message);
-        return false;
-      }
-      return true;
-    }
-
-    async function bulkUploadToCloud(txArray) {
-      if (!currentUser) {
-        showToast('⚠️ กรุณาเข้าสู่ระบบ Cloud ก่อนอัปโหลด');
-        return;
-      }
-      if (!txArray || txArray.length === 0) {
-        showToast('ℹ️ ไม่มีรายการสำหรับอัปโหลด');
-        return;
-      }
-
-      showToast(`☁️ กำลังอัปโหลด ${txArray.length} รายการขึ้น Cloud...`);
-      const rows = txArray.map(tx => ({
-        id: tx.id,
-        user_id: currentUser.id,
-        date: tx.date,
-        main_category: tx.main_category,
-        sub_category: tx.sub_category,
-        amount_satang: tx.amount_satang,
-        note: tx.note || ''
-      }));
-
-      // อัปโหลดทีละชุดละ 500 รายการเพื่อความเสถียร
-      const CHUNK_SIZE = 500;
-      for (let i = 0; i < rows.length; i += CHUNK_SIZE) {
-        const chunk = rows.slice(i, i + CHUNK_SIZE);
-        const { error } = await supabaseClient.from('transactions').upsert(chunk);
-        if (error) {
-          showToast('❌ อัปโหลดผิดพลาด: ' + error.message);
-          return;
-        }
-      }
-
-      await fetchCloudTransactions(true);
-      showToast(`✅ อัปโหลดขึ้น Cloud สำเร็จครบ ${txArray.length} รายการ!`);
     }
 
     /* ==========================================================================
-       5. PRECISION SATANG, SHORT ENGLISH DATE & NET BALANCE COLOR HELPERS
+       3. PRECISION SATANG, SHORT ENGLISH DATE & NET BALANCE COLOR HELPERS
        ========================================================================== */
     function toSatang(val) {
       const num = parseFloat(val);
@@ -1507,6 +1507,12 @@
       return `${isNeg ? '-' : ''}฿${baht.toLocaleString('en-US')}.${st}`;
     }
 
+    /**
+     * NET BALANCE CONDITIONAL TEXT COLOR RULES:
+     * 1. > 5,000.00 THB (> 500000 satang)        -> Black (Day) / Grey (Night) (.net-bal-black)
+     * 2. < 0.00 THB (< 0 satang)                -> Red (.net-bal-red)
+     * 3. >= 0.00 THB and <= 5,000.00 THB        -> Orange (.net-bal-orange)
+     */
     function getNetBalanceColorClass(netSatang) {
       if (netSatang > 500000) return 'net-bal-black';
       if (netSatang < 0) return 'net-bal-red';
@@ -1524,9 +1530,13 @@
       let y, m, d;
       if (typeof dateInput === 'string') {
         const parts = dateInput.split('-').map(Number);
-        y = parts[0]; m = parts[1] - 1; d = parts[2];
+        y = parts[0];
+        m = parts[1] - 1;
+        d = parts[2];
       } else {
-        y = dateInput.getFullYear(); m = dateInput.getMonth(); d = dateInput.getDate();
+        y = dateInput.getFullYear();
+        m = dateInput.getMonth();
+        d = dateInput.getDate();
       }
       return `${d} ${SHORT_MONTHS[m]} ${y}`;
     }
@@ -1544,17 +1554,20 @@
     }
 
     /* ==========================================================================
-       6. DUAL PAY-CYCLE ENGINE (26TH PAY CYCLE + WEEKEND ADJUSTMENT & CALENDAR)
+       4. DUAL PAY-CYCLE ENGINE (26TH PAY CYCLE + WEEKEND ADJUSTMENT & CALENDAR)
        ========================================================================== */
     function getCustomCycleStart(targetYear, targetMonthIndex) {
       let startYear = targetYear;
       let startMonth = targetMonthIndex - 1;
-      if (startMonth < 0) { startMonth = 11; startYear -= 1; }
+      if (startMonth < 0) {
+        startMonth = 11;
+        startYear -= 1;
+      }
       const payday = new Date(startYear, startMonth, settings.pay_cycle_day || 26, 12, 0, 0);
       if (settings.adjust_weekend) {
-        const dow = payday.getDay();
-        if (dow === 6) payday.setDate(payday.getDate() - 1);
-        else if (dow === 0) payday.setDate(payday.getDate() - 2);
+        const dow = payday.getDay(); // 0 = Sun, 6 = Sat
+        if (dow === 6) payday.setDate(payday.getDate() - 1); // Saturday -> Friday
+        else if (dow === 0) payday.setDate(payday.getDate() - 2); // Sunday -> Friday
       }
       return payday;
     }
@@ -1571,8 +1584,12 @@
         };
       } else {
         const start = getCustomCycleStart(year, monthIndex);
-        let nextY = year, nextM = monthIndex + 1;
-        if (nextM > 11) { nextM = 0; nextY += 1; }
+        let nextY = year;
+        let nextM = monthIndex + 1;
+        if (nextM > 11) {
+          nextM = 0;
+          nextY += 1;
+        }
         const nextStart = getCustomCycleStart(nextY, nextM);
         const end = new Date(nextStart.getFullYear(), nextStart.getMonth(), nextStart.getDate() - 1, 12, 0, 0);
         return {
@@ -1585,15 +1602,26 @@
     }
 
     function resolvePeriodForDate(dateObj, mode) {
-      const y = dateObj.getFullYear(), m = dateObj.getMonth();
-      if (mode === 'CALENDAR') return { year: y, monthIndex: m };
+      const y = dateObj.getFullYear();
+      const m = dateObj.getMonth();
+      if (mode === 'CALENDAR') {
+        return { year: y, monthIndex: m };
+      }
       const iso = toISODate(dateObj);
       const curBounds = getPeriodBounds(y, m, 'CUSTOM');
-      if (iso >= curBounds.startISO && iso <= curBounds.endISO) return { year: y, monthIndex: m };
-      let nextY = y, nextM = m + 1;
-      if (nextM > 11) { nextM = 0; nextY += 1; }
+      if (iso >= curBounds.startISO && iso <= curBounds.endISO) {
+        return { year: y, monthIndex: m };
+      }
+      let nextY = y;
+      let nextM = m + 1;
+      if (nextM > 11) {
+        nextM = 0;
+        nextY += 1;
+      }
       const nextBounds = getPeriodBounds(nextY, nextM, 'CUSTOM');
-      if (iso >= nextBounds.startISO && iso <= nextBounds.endISO) return { year: nextY, monthIndex: nextM };
+      if (iso >= nextBounds.startISO && iso <= nextBounds.endISO) {
+        return { year: nextY, monthIndex: nextM };
+      }
       return { year: y, monthIndex: m };
     }
 
@@ -1618,12 +1646,16 @@
     }
 
     /* ==========================================================================
-       7. THEME ENGINE & SECURITY PIN (SHA-256)
+       5. STRICT 2-MODE THEME ENGINE (DAY / NIGHT) & SECURITY PIN (SHA-256)
        ========================================================================== */
     function applyTheme() {
       const isDay = settings.theme === 'DAY';
-      document.getElementById('btnThemeToggle').textContent = isDay ? '☀️ Day' : '🌙 Night';
-      document.documentElement.setAttribute('data-theme', isDay ? 'light' : 'dark');
+      const effectiveAttr = isDay ? 'light' : 'dark';
+      const btn = document.getElementById('btnThemeToggle');
+
+      btn.textContent = isDay ? '☀️ Day' : '🌙 Night';
+
+      document.documentElement.setAttribute('data-theme', effectiveAttr);
       document.getElementById('metaThemeColor').setAttribute('content', isDay ? '#F7F4EB' : '#0D1117');
     }
 
@@ -1650,7 +1682,9 @@
       if (hasPin) {
         statusEl.textContent = 'สถานะ: เปิดใช้งาน PIN Lock แล้ว (SHA-256)';
         statusEl.style.color = 'var(--cat-income)';
-        if (!isUnlocked) openPinOverlay();
+        if (!isUnlocked) {
+          openPinOverlay();
+        }
       } else {
         statusEl.textContent = 'สถานะ: ยังไม่ได้เปิดใช้งาน PIN';
         statusEl.style.color = 'var(--text-muted)';
@@ -1687,12 +1721,21 @@
         btn.textContent = k;
         btn.addEventListener('click', async () => {
           document.getElementById('unlockPinError').textContent = '';
-          if (k === 'DEL') { pinBuffer = pinBuffer.slice(0, -1); renderPinDots(); return; }
-          if (k === 'OK') { await checkPinMatch(true); return; }
+          if (k === 'DEL') {
+            pinBuffer = pinBuffer.slice(0, -1);
+            renderPinDots();
+            return;
+          }
+          if (k === 'OK') {
+            await checkPinMatch(true);
+            return;
+          }
           if (pinBuffer.length < 6) {
             pinBuffer += k;
             renderPinDots();
-            if (pinBuffer.length >= 4) await checkPinMatch(false);
+            if (pinBuffer.length >= 4) {
+              await checkPinMatch(false);
+            }
           }
         });
         pad.appendChild(btn);
@@ -1717,7 +1760,7 @@
     }
 
     /* ==========================================================================
-       8. NAVIGATION & VIEW CONTROLLERS (3 TABS)
+       6. NAVIGATION & VIEW CONTROLLERS (3 TABS)
        ========================================================================== */
     let activeTab = 'entry';
     let dailyPeriod = resolvePeriodForDate(new Date(), settings.cycleMode);
@@ -1747,7 +1790,7 @@
       el.textContent = msg;
       el.classList.remove('hidden');
       clearTimeout(el._timer);
-      el._timer = setTimeout(() => el.classList.add('hidden'), 3000);
+      el._timer = setTimeout(() => el.classList.add('hidden'), 2800);
     }
 
     function escapeHtml(str) {
@@ -1759,7 +1802,7 @@
     }
 
     /* ==========================================================================
-       9. TAB 1: ENTRY FORM LOGIC
+       7. TAB 1: ENTRY FORM LOGIC (STEP 1: DATE FIRST)
        ========================================================================== */
     function selectMainCategory(cat, selectedSub = null) {
       document.getElementById('txMainCat').value = cat;
@@ -1782,9 +1825,11 @@
     function updateEntryDatePreview() {
       const val = document.getElementById('txDate').value;
       const el = document.getElementById('txDatePreview');
-      el.textContent = (val && /^\d{4}-\d{2}-\d{2}$/.test(val))
-        ? `วันที่แสดงผล: ${formatShortDate(val)}`
-        : '';
+      if (val && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
+        el.textContent = `วันที่แสดงผล: ${formatShortDate(val)}`;
+      } else {
+        el.textContent = '';
+      }
     }
 
     function resetEntryForm() {
@@ -1799,7 +1844,7 @@
       document.getElementById('btnCancelEdit').classList.add('hidden');
     }
 
-    async function handleEntrySubmit(e) {
+    function handleEntrySubmit(e) {
       e.preventDefault();
       const editId = document.getElementById('txId').value.trim();
       const dateVal = document.getElementById('txDate').value;
@@ -1809,53 +1854,50 @@
       const noteVal = document.getElementById('txNote').value.trim();
 
       if (!dateVal || !/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
-        showToast('⚠️ กรุณาระบุวันที่ให้ถูกต้อง'); return;
+        showToast('⚠️ กรุณาระบุวันที่ให้ถูกต้อง');
+        return;
       }
       if (!MAIN_CATEGORIES.includes(mainCat) || !TAXONOMY[mainCat].includes(subCat)) {
-        showToast('⚠️ หมวดหมู่ไม่ถูกต้อง'); return;
+        showToast('⚠️ หมวดหมู่ไม่ถูกต้อง');
+        return;
       }
       if (satang <= 0) {
-        showToast('⚠️ กรุณากรอกจำนวนเงินมากกว่า 0.00 บาท'); return;
-      }
-
-      const submitBtn = document.getElementById('btnSubmitTx');
-      submitBtn.disabled = true;
-      submitBtn.textContent = '⏳ กำลังบันทึก...';
-
-      const compactDate = dateVal.replace(/-/g, '');
-      const txObj = {
-        id: editId || `tx_${compactDate}_${Date.now()}`,
-        date: dateVal,
-        main_category: mainCat,
-        sub_category: subCat,
-        amount_satang: satang,
-        note: noteVal
-      };
-
-      const cloudOk = await upsertCloudTransaction(txObj);
-      submitBtn.disabled = false;
-
-      if (!cloudOk) {
-        submitBtn.textContent = editId ? '💾 บันทึกการแก้ไข' : '💾 บันทึกรายการ';
+        showToast('⚠️ กรุณากรอกจำนวนเงินมากกว่า 0.00 บาท');
         return;
       }
 
       if (editId) {
         const idx = transactions.findIndex(t => t.id === editId);
-        if (idx !== -1) transactions[idx] = txObj;
-        showToast(currentUser ? '☁️ อัปเดตขึ้น Cloud เรียบร้อย' : '✅ อัปเดตรายการเรียบร้อย');
+        if (idx !== -1) {
+          transactions[idx] = {
+            id: editId,
+            date: dateVal,
+            main_category: mainCat,
+            sub_category: subCat,
+            amount_satang: satang,
+            note: noteVal
+          };
+          showToast('✅ อัปเดตรายการเรียบร้อย');
+        }
       } else {
-        transactions.push(txObj);
-        showToast(currentUser
-          ? `☁️ บันทึก ${subCat} (${formatTHB(satang)}) ขึ้น Cloud แล้ว`
-          : `✅ บันทึก ${subCat} (${formatTHB(satang)}) แล้ว`);
+        const compactDate = dateVal.replace(/-/g, '');
+        const newTx = {
+          id: `tx_${compactDate}_${Date.now()}`,
+          date: dateVal,
+          main_category: mainCat,
+          sub_category: subCat,
+          amount_satang: satang,
+          note: noteVal
+        };
+        transactions.push(newTx);
+        showToast(`✅ บันทึก ${subCat} (${formatTHB(satang)}) แล้ว`);
       }
 
       dailyPeriod = resolvePeriodForDate(parseLocalDate(dateVal), settings.cycleMode);
       dashYear = dailyPeriod.year;
       dashSelectedMonth = dailyPeriod.monthIndex;
 
-      saveLocalTransactions();
+      saveTransactions();
       resetEntryForm();
       switchTab('daily');
     }
@@ -1863,6 +1905,7 @@
     function startEditTx(txId) {
       const tx = transactions.find(t => t.id === txId);
       if (!tx) return;
+
       document.getElementById('txId').value = tx.id;
       document.getElementById('txDate').value = tx.date;
       updateEntryDatePreview();
@@ -1880,7 +1923,7 @@
     }
 
     /* ==========================================================================
-       10. TAB 2 & TAB 3 RENDERERS
+       8. TAB 2: DAILY SUMMARY & HISTORY RENDERER
        ========================================================================== */
     let pendingDeleteId = null;
 
@@ -1904,6 +1947,7 @@
       netEl.textContent = formatTHB(totals.net);
       applyNetBalanceTextColor(netEl, totals.net);
 
+      // Proportional Stacked Bar for 4 Categories
       const totalVolume = totals.income + totals.savings + totals.fixed + totals.variable;
       const segments = [
         { label: 'Income', val: totals.income, color: 'var(--cat-income)' },
@@ -1924,6 +1968,7 @@
           div.className = 'stacked-seg';
           div.style.width = `${pct}%`;
           div.style.backgroundColor = seg.color;
+          div.title = `${seg.label}: ${formatTHB(seg.val)} (${pct.toFixed(1)}%)`;
           stackedBar.appendChild(div);
         }
 
@@ -1941,10 +1986,12 @@
         stackedLegend.appendChild(item);
       });
 
+      // Update Filter Pills Active State
       document.querySelectorAll('#dailyFilterPills .filter-pill-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.filter === dailyCategoryFilter);
       });
 
+      // Filtered Transaction List
       const filtered = dailyCategoryFilter === 'ALL' ? txs : txs.filter(t => t.main_category === dailyCategoryFilter);
       document.getElementById('dailyTxCount').textContent = filtered.length;
 
@@ -1965,7 +2012,8 @@
         const row = document.createElement('div');
         row.className = 'tx-item';
 
-        let amtColor = 'c-variable', sign = '-';
+        let amtColor = 'c-variable';
+        let sign = '-';
         if (tx.main_category === 'Income') { amtColor = 'c-income'; sign = '+'; }
         else if (tx.main_category === 'Savings') { amtColor = 'c-savings'; sign = '★ '; }
         else if (tx.main_category === 'Fixed_Expense') { amtColor = 'c-fixed'; sign = '-'; }
@@ -2009,6 +2057,9 @@
       });
     }
 
+    /* ==========================================================================
+       9. TAB 3: DASHBOARD (ANNUAL & MONTHLY TRENDS + AUTO CURRENT & CLICK DRILL-DOWN)
+       ========================================================================== */
     function renderDashboardTab() {
       const mode = settings.cycleMode;
       document.getElementById('btnDashModeCustom').classList.toggle('pixel-btn-gold', mode === 'CUSTOM');
@@ -2026,13 +2077,21 @@
       for (let m = 0; m < 12; m++) {
         const mTxs = getTransactionsInPeriod(dashYear, m, mode);
         const sum = summarizeTransactions(mTxs);
-        monthlyData.push({ monthIndex: m, label: SHORT_MONTHS[m], txs: mTxs, ...sum });
+        monthlyData.push({
+          monthIndex: m,
+          label: SHORT_MONTHS[m],
+          txs: mTxs,
+          ...sum
+        });
         maxBar = Math.max(maxBar, sum.income, sum.savings, sum.fixed, sum.variable);
       }
 
       const annual = monthlyData.reduce((acc, cur) => {
-        acc.income += cur.income; acc.savings += cur.savings;
-        acc.fixed += cur.fixed; acc.variable += cur.variable; acc.net += cur.net;
+        acc.income += cur.income;
+        acc.savings += cur.savings;
+        acc.fixed += cur.fixed;
+        acc.variable += cur.variable;
+        acc.net += cur.net;
         return acc;
       }, { income: 0, savings: 0, fixed: 0, variable: 0, net: 0 });
 
@@ -2045,6 +2104,7 @@
       annNetEl.textContent = formatTHB(annual.net);
       applyNetBalanceTextColor(annNetEl, annual.net);
 
+      // 12-Month Bar Chart
       const barsGrid = document.getElementById('dashBarsGrid');
       barsGrid.innerHTML = '';
       monthlyData.forEach(md => {
@@ -2067,10 +2127,14 @@
             ${md.label}
           </div>
         `;
-        col.addEventListener('click', () => { dashSelectedMonth = md.monthIndex; renderDashboardTab(); });
+        col.addEventListener('click', () => {
+          dashSelectedMonth = md.monthIndex;
+          renderDashboardTab();
+        });
         barsGrid.appendChild(col);
       });
 
+      // Interactive 12-Month Table
       const tbody = document.getElementById('dashTableBody');
       tbody.innerHTML = '';
       monthlyData.forEach(md => {
@@ -2090,10 +2154,14 @@
           <td class="c-variable">${formatTHB(md.variable)}</td>
           <td class="${netColorClass}" style="font-weight: 800;">${formatTHB(md.net)}</td>
         `;
-        tr.addEventListener('click', () => { dashSelectedMonth = md.monthIndex; renderDashboardTab(); });
+        tr.addEventListener('click', () => {
+          dashSelectedMonth = md.monthIndex;
+          renderDashboardTab();
+        });
         tbody.appendChild(tr);
       });
 
+      // Selected Month Sub-Category Drill-Down
       renderMonthDrilldown(monthlyData[dashSelectedMonth]);
     }
 
@@ -2150,7 +2218,7 @@
     }
 
     /* ==========================================================================
-       11. EXPORT CSV, COPY TSV, JSON BACKUP & CLOUD MIGRATION
+       10. EXPORT CSV (UTF-8 BOM), COPY TSV, JSON BACKUP & STRICT SCHEMA VALIDATION
        ========================================================================== */
     function buildTableRows() {
       const headers = ['ID', 'Date_Display', 'Date_ISO', 'Main_Category', 'Sub_Category', 'Amount_THB', 'Amount_Satang', 'Note'];
@@ -2158,8 +2226,14 @@
       const rows = [headers];
       sorted.forEach(tx => {
         rows.push([
-          tx.id, formatShortDate(tx.date), tx.date, tx.main_category, tx.sub_category,
-          (tx.amount_satang / 100).toFixed(2), String(tx.amount_satang), tx.note || ''
+          tx.id,
+          formatShortDate(tx.date),
+          tx.date,
+          tx.main_category,
+          tx.sub_category,
+          (tx.amount_satang / 100).toFixed(2),
+          String(tx.amount_satang),
+          tx.note || ''
         ]);
       });
       return rows;
@@ -2177,10 +2251,17 @@
       const rows = buildTableRows();
       const tsv = rows.map(r => r.map(c => String(c).replace(/\t|\r|\n/g, ' ')).join('\t')).join('\n');
       const ta = document.createElement('textarea');
-      ta.value = tsv; ta.style.position = 'fixed'; ta.style.opacity = '0';
-      document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); showToast('📋 คัดลอกตาราง TSV แล้ว! กดวางใน Google Sheets ได้ทันที'); }
-      catch (e) { showToast('⚠️ ไม่สามารถคัดลอกอัตโนมัติได้'); }
+      ta.value = tsv;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('📋 คัดลอกตาราง TSV แล้ว! กดวางใน Google Sheets ได้ทันที');
+      } catch (e) {
+        showToast('⚠️ ไม่สามารถคัดลอกอัตโนมัติได้');
+      }
       document.body.removeChild(ta);
     }
 
@@ -2200,6 +2281,7 @@
     function validateBackupSchema(obj) {
       if (!obj || typeof obj !== 'object') return { ok: false, err: 'โครงสร้าง JSON ไม่ถูกต้อง' };
       if (obj.schema_version !== '1.0.0') return { ok: false, err: 'schema_version ต้องเป็น 1.0.0' };
+      if (!obj.settings || typeof obj.settings !== 'object') return { ok: false, err: 'ไม่พบข้อมูล settings' };
       if (!Array.isArray(obj.transactions)) return { ok: false, err: 'ไม่พบรายการ transactions' };
 
       for (let i = 0; i < obj.transactions.length; i++) {
@@ -2224,7 +2306,7 @@
       const file = e.target.files && e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = async function (evt) {
+      reader.onload = function (evt) {
         try {
           const parsed = JSON.parse(evt.target.result);
           const check = validateBackupSchema(parsed);
@@ -2233,16 +2315,34 @@
             e.target.value = '';
             return;
           }
+          const incomingTheme = parsed.settings.theme || parsed.settings.theme_mode;
+          const restoredTheme = (incomingTheme === 'DAY' || incomingTheme === 'NIGHT')
+            ? incomingTheme
+            : getInitialTimeBasedTheme();
+          const incomingCycle = parsed.settings.cycleMode || parsed.settings.cycle_mode;
+          const restoredCycle = (incomingCycle === 'CUSTOM' || incomingCycle === 'CALENDAR')
+            ? incomingCycle
+            : 'CUSTOM';
+          const restoredPin = parsed.settings.pinHash !== undefined
+            ? parsed.settings.pinHash
+            : (parsed.settings.pin_hash || null);
 
-          if (currentUser) {
-            await bulkUploadToCloud(parsed.transactions);
-          } else {
-            transactions = parsed.transactions;
-            saveLocalTransactions();
-            if (activeTab === 'daily') renderDailyTab();
-            if (activeTab === 'dashboard') renderDashboardTab();
-            showToast(`✅ นำเข้าในเครื่องสำเร็จ (${transactions.length} รายการ)`);
-          }
+          settings = {
+            ...defaultSettings(),
+            ...parsed.settings,
+            theme: restoredTheme,
+            cycleMode: restoredCycle,
+            pinHash: restoredPin,
+            schema_version: '1.0.0'
+          };
+          transactions = parsed.transactions;
+          saveSettings();
+          saveTransactions();
+          applyTheme();
+          refreshPinUI();
+          if (activeTab === 'daily') renderDailyTab();
+          if (activeTab === 'dashboard') renderDashboardTab();
+          showToast(`✅ กู้คืนข้อมูลสำเร็จ (${transactions.length} รายการ)`);
         } catch (err) {
           showToast('❌ อ่านไฟล์ JSON ไม่สำเร็จ');
         }
@@ -2254,14 +2354,18 @@
     function downloadBlob(blob, filename) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = filename;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    async function loadDemoData() {
+    function loadDemoData() {
       const now = new Date();
-      const y = now.getFullYear(), m = now.getMonth();
+      const y = now.getFullYear();
+      const m = now.getMonth();
       const pad = n => String(n).padStart(2, '0');
       const ymCur = `${y}-${pad(m + 1)}`;
       const prevD = new Date(y, m - 1, 26);
@@ -2281,137 +2385,37 @@
         { date: `${ymCur}-09`, main_category: 'Variable_Expense', sub_category: 'Gasoline', amount_satang: 110000, note: 'เติมน้ำมันรถ' },
         { date: `${ymCur}-11`, main_category: 'Variable_Expense', sub_category: 'Bread-Making', amount_satang: 89025, note: 'แป้งขนมปัง เนยสด ยีสต์' },
         { date: `${ymCur}-13`, main_category: 'Variable_Expense', sub_category: 'Books & Education', amount_satang: 59000, note: 'หนังสือพัฒนาตัวเอง' }
-      ].map((s, idx) => ({ id: `tx_demo_${Date.now()}_${idx}`, ...s }));
+      ];
 
-      if (currentUser) {
-        await bulkUploadToCloud(samples);
-      } else {
-        transactions.push(...samples);
-        saveLocalTransactions();
-        showToast('🧪 โหลดข้อมูลตัวอย่าง 13 รายการเรียบร้อย');
-      }
+      samples.forEach((s, idx) => {
+        transactions.push({
+          id: `tx_demo_${Date.now()}_${idx}`,
+          ...s
+        });
+      });
 
       dailyPeriod = resolvePeriodForDate(now, settings.cycleMode);
       dashYear = dailyPeriod.year;
       dashSelectedMonth = dailyPeriod.monthIndex;
+
+      saveTransactions();
       document.getElementById('dataModal').classList.add('hidden');
       switchTab('daily');
+      showToast('🧪 โหลดข้อมูลตัวอย่าง 13 รายการเรียบร้อย');
     }
 
     /* ==========================================================================
-       12. AUTH MODAL UI & BOOTSTRAP
+       11. BOOTSTRAP & EVENT WIRING
        ========================================================================== */
-    let authMode = 'LOGIN'; // 'LOGIN' | 'SIGNUP'
-
-    function setAuthMode(mode) {
-      authMode = mode;
-      document.getElementById('authErrorMsg').textContent = '';
-      document.getElementById('btnAuthTabLogin').classList.toggle('pixel-btn-gold', mode === 'LOGIN');
-      document.getElementById('btnAuthTabSignup').classList.toggle('pixel-btn-gold', mode === 'SIGNUP');
-      document.getElementById('btnAuthSubmit').textContent = mode === 'LOGIN'
-        ? '🔑 เข้าสู่ระบบ Cloud'
-        : '✨ สมัครสมาชิกใหม่';
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', () => {
       applyTheme();
       initPinPad();
       refreshPinUI();
 
+      // Default Entry Form State (Tab 1 - Date First)
       document.getElementById('txDate').value = toISODate(new Date());
       updateEntryDatePreview();
       selectMainCategory('Variable_Expense');
-
-      // Check existing Supabase Session on load
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (session && session.user) {
-        currentUser = session.user;
-        document.getElementById('authOverlay').classList.add('hidden');
-        updateCloudStatusUI();
-        await fetchCloudTransactions(true);
-      } else {
-        updateCloudStatusUI();
-      }
-
-      // Auth Tab Switches
-      document.getElementById('btnAuthTabLogin').addEventListener('click', () => setAuthMode('LOGIN'));
-      document.getElementById('btnAuthTabSignup').addEventListener('click', () => setAuthMode('SIGNUP'));
-
-      // Auth Form Submit (Login / Sign Up)
-      document.getElementById('authForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('authEmail').value.trim();
-        const password = document.getElementById('authPassword').value;
-        const errEl = document.getElementById('authErrorMsg');
-        const btn = document.getElementById('btnAuthSubmit');
-
-        errEl.textContent = '';
-        if (!email || password.length < 6) {
-          errEl.textContent = 'กรุณากรอกอีเมล และรหัสผ่านอย่างน้อย 6 ตัวอักษร';
-          return;
-        }
-
-        btn.disabled = true;
-        btn.textContent = '⏳ กำลังเชื่อมต่อ...';
-
-        let result;
-        if (authMode === 'SIGNUP') {
-          result = await supabaseClient.auth.signUp({ email, password });
-        } else {
-          result = await supabaseClient.auth.signInWithPassword({ email, password });
-        }
-
-        btn.disabled = false;
-        setAuthMode(authMode);
-
-        if (result.error) {
-          errEl.textContent = result.error.message;
-          return;
-        }
-
-        if (result.data && result.data.user) {
-          currentUser = result.data.user;
-          document.getElementById('authOverlay').classList.add('hidden');
-          updateCloudStatusUI();
-          await fetchCloudTransactions(true);
-          showToast(authMode === 'SIGNUP' ? '🎉 สมัครสมาชิกและเชื่อมต่อ Cloud สำเร็จ!' : '☁️ เข้าสู่ระบบ Cloud สำเร็จ!');
-        } else {
-          errEl.textContent = 'กรุณาตรวจสอบอีเมลเพื่อยืนยันบัญชี (หรือปิด Confirm Email ใน Supabase)';
-        }
-      });
-
-      // Demo / Offline Mode Button
-      document.getElementById('btnDemoOfflineMode').addEventListener('click', () => {
-        currentUser = null;
-        transactions = loadLocalTransactions();
-        document.getElementById('authOverlay').classList.add('hidden');
-        updateCloudStatusUI();
-        showToast('🎮 เข้าใช้งานโหมดทดลองเล่นในเครื่อง');
-      });
-
-      // Cloud Sync / Refresh / Logout inside Data Modal
-      document.getElementById('btnSyncLocalToCloud').addEventListener('click', async () => {
-        const localData = loadLocalTransactions();
-        if (localData.length === 0) {
-          showToast('ℹ️ ไม่พบข้อมูลค้างอยู่ใน LocalStorage ของเครื่องนี้');
-          return;
-        }
-        await bulkUploadToCloud(localData);
-      });
-
-      document.getElementById('btnRefreshCloud').addEventListener('click', () => fetchCloudTransactions(false));
-
-      document.getElementById('btnLogoutCloud').addEventListener('click', async () => {
-        if (currentUser) {
-          await supabaseClient.auth.signOut();
-          currentUser = null;
-        }
-        transactions = loadLocalTransactions();
-        document.getElementById('dataModal').classList.add('hidden');
-        document.getElementById('authOverlay').classList.remove('hidden');
-        updateCloudStatusUI();
-        showToast('🚪 ออกจากระบบแล้ว');
-      });
 
       // Header Controls
       document.getElementById('btnThemeToggle').addEventListener('click', toggleTheme);
@@ -2423,7 +2427,7 @@
       });
       document.getElementById('btnQuickLock').addEventListener('click', openPinOverlay);
 
-      // 3-Tab Navigation
+      // 3-Tab Navigation (Desktop & Mobile)
       document.querySelectorAll('#desktopNav .pixel-btn').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
       });
@@ -2431,7 +2435,7 @@
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
       });
 
-      // Entry Form Events
+      // Tab 1: Entry Form Events
       document.getElementById('txDate').addEventListener('change', updateEntryDatePreview);
       document.getElementById('btnSetToday').addEventListener('click', () => {
         document.getElementById('txDate').value = toISODate(new Date());
@@ -2453,14 +2457,18 @@
       document.getElementById('txForm').addEventListener('submit', handleEntrySubmit);
       document.getElementById('btnCancelEdit').addEventListener('click', resetEntryForm);
 
-      // Daily Pay-Cycle & Filter Pills Events
+      // Tab 2: Daily Pay-Cycle & Filter Pills Events
       document.getElementById('btnDailyModeCustom').addEventListener('click', () => {
-        settings.cycleMode = 'CUSTOM'; dailyPeriod = resolvePeriodForDate(new Date(), 'CUSTOM');
-        saveSettings(); renderDailyTab();
+        settings.cycleMode = 'CUSTOM';
+        dailyPeriod = resolvePeriodForDate(new Date(), 'CUSTOM');
+        saveSettings();
+        renderDailyTab();
       });
       document.getElementById('btnDailyModeCalendar').addEventListener('click', () => {
-        settings.cycleMode = 'CALENDAR'; dailyPeriod = resolvePeriodForDate(new Date(), 'CALENDAR');
-        saveSettings(); renderDailyTab();
+        settings.cycleMode = 'CALENDAR';
+        dailyPeriod = resolvePeriodForDate(new Date(), 'CALENDAR');
+        saveSettings();
+        renderDailyTab();
       });
       document.getElementById('btnPrevCycle').addEventListener('click', () => {
         dailyPeriod.monthIndex -= 1;
@@ -2477,7 +2485,10 @@
         renderDailyTab();
       });
       document.querySelectorAll('#dailyFilterPills .filter-pill-btn').forEach(btn => {
-        btn.addEventListener('click', () => { dailyCategoryFilter = btn.dataset.filter; renderDailyTab(); });
+        btn.addEventListener('click', () => {
+          dailyCategoryFilter = btn.dataset.filter;
+          renderDailyTab();
+        });
       });
 
       // Delete Confirmation Modal
@@ -2485,31 +2496,38 @@
         pendingDeleteId = null;
         document.getElementById('confirmModal').classList.add('hidden');
       });
-      document.getElementById('btnConfirmOk').addEventListener('click', async () => {
+      document.getElementById('btnConfirmOk').addEventListener('click', () => {
         if (!pendingDeleteId) return;
-        const ok = await deleteCloudTransaction(pendingDeleteId);
-        if (!ok) return;
-
         transactions = transactions.filter(t => t.id !== pendingDeleteId);
         if (document.getElementById('txId').value === pendingDeleteId) resetEntryForm();
         pendingDeleteId = null;
         document.getElementById('confirmModal').classList.add('hidden');
-        saveLocalTransactions();
+        saveTransactions();
         renderDailyTab();
         showToast('🗑️ ลบรายการเรียบร้อยแล้ว');
       });
 
-      // Dashboard Events
+      // Tab 3: Dashboard Events
       document.getElementById('btnDashModeCustom').addEventListener('click', () => {
-        settings.cycleMode = 'CUSTOM'; saveSettings(); renderDashboardTab();
+        settings.cycleMode = 'CUSTOM';
+        saveSettings();
+        renderDashboardTab();
       });
       document.getElementById('btnDashModeCalendar').addEventListener('click', () => {
-        settings.cycleMode = 'CALENDAR'; saveSettings(); renderDashboardTab();
+        settings.cycleMode = 'CALENDAR';
+        saveSettings();
+        renderDashboardTab();
       });
-      document.getElementById('btnDashPrevYear').addEventListener('click', () => { dashYear -= 1; renderDashboardTab(); });
-      document.getElementById('btnDashNextYear').addEventListener('click', () => { dashYear += 1; renderDashboardTab(); });
+      document.getElementById('btnDashPrevYear').addEventListener('click', () => {
+        dashYear -= 1;
+        renderDashboardTab();
+      });
+      document.getElementById('btnDashNextYear').addEventListener('click', () => {
+        dashYear += 1;
+        renderDashboardTab();
+      });
 
-      // Data & PIN Events
+      // Data Modal & PIN Events
       document.getElementById('btnExportCsv').addEventListener('click', exportCsv);
       document.getElementById('btnCopyTsv').addEventListener('click', copyTsvForSheets);
       document.getElementById('btnExportJson').addEventListener('click', exportJsonBackup);
@@ -2518,17 +2536,23 @@
 
       document.getElementById('btnSetPin').addEventListener('click', async () => {
         const raw = document.getElementById('setupPinInput').value.trim();
-        if (!/^\d{4,6}$/.test(raw)) { showToast('⚠️ กรุณากรอกตัวเลข 4–6 หลัก'); return; }
+        if (!/^\d{4,6}$/.test(raw)) {
+          showToast('⚠️ กรุณากรอกตัวเลข 4–6 หลัก');
+          return;
+        }
         settings.pinHash = await sha256Pin(raw);
         isUnlocked = true;
         document.getElementById('setupPinInput').value = '';
-        saveSettings(); refreshPinUI();
+        saveSettings();
+        refreshPinUI();
         showToast('🔐 ตั้งรหัส PIN (SHA-256) สำเร็จ');
       });
 
       document.getElementById('btnDisablePin').addEventListener('click', () => {
-        settings.pinHash = null; isUnlocked = true;
-        saveSettings(); refreshPinUI();
+        settings.pinHash = null;
+        isUnlocked = true;
+        saveSettings();
+        refreshPinUI();
         showToast('🔓 ยกเลิกการใช้งาน PIN แล้ว');
       });
     });
