@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PLOY'S LEDGER" />
-  <title>PLOY'S LEDGER // 16-Bit Retro Edition v1.0.8</title>
+  <title>PLOY'S LEDGER // 16-Bit Retro Edition v1.0.9</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -835,11 +835,11 @@
         <button type="button" class="pixel-btn" id="btnCloseDataModal" style="min-width: 44px; padding: 6px 10px;">✕</button>
       </div>
 
-      <!-- Google Sheets Cloud Sync (POST Body + Encrypted Key) -->
+      <!-- Google Sheets Cloud Sync (FULL SYNC MODE) -->
       <div class="pixel-subbox" style="padding: 12px; margin-bottom: 12px; border-color: var(--accent-sky);">
-        <div class="pixel-label" style="color: var(--accent-sky);">🛡️ ซิงก์ GOOGLE SHEETS (SECURE POST MODE)</div>
+        <div class="pixel-label" style="color: var(--accent-sky);">🛡️ ซิงก์ GOOGLE SHEETS (FULL SYNC 100%)</div>
         <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
-          ส่ง Secret Key ผ่าน POST Body (ไม่แสดงใน URL) และเข้ารหัส Key บนเครื่องอัตโนมัติเมื่อเปิดใช้ PIN
+          รวมข้อมูลทั้งหมดระหว่างมือถือและ Google Sheets อัตโนมัติ ป้องกันรายการตกหล่น
         </div>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <div>
@@ -863,10 +863,10 @@
             />
           </div>
           <button type="button" class="pixel-btn pixel-btn-sky" id="btnSaveAndTestGsSync">
-            💾 บันทึกการตั้งค่า &amp; ทดสอบซิงก์
+            💾 บันทึกการตั้งค่า &amp; ซิงก์ทั้งหมดทันที
           </button>
           <button type="button" class="pixel-btn pixel-btn-gold" id="btnManualGsSync">
-            🔄 ซิงก์ข้อมูลเดี๋ยวนี้
+            🔄 ซิงก์ข้อมูลเดี๋ยวนี้ (<span id="syncLocalCountBadge" class="tabular">0</span> รายการ)
           </button>
           <div id="gsSyncStatusText" style="font-size: 12px; font-weight: 700; color: var(--text-muted); word-break: break-word;">
             สถานะ: ยังไม่ได้ตั้งค่าการซิงก์ Google Sheets
@@ -944,13 +944,13 @@
         </div>
         <div>
           <h1 class="brand-title">PLOY'S LEDGER</h1>
-          <div class="brand-sub">16-BIT RETRO • SRS v1.0.8</div>
+          <div class="brand-sub">16-BIT RETRO • SRS v1.0.9</div>
         </div>
       </div>
 
       <div class="header-actions">
         <button type="button" class="pixel-btn" id="btnThemeToggle" title="สลับธีม Day / Night">🌙 Night</button>
-        <button type="button" class="pixel-btn hidden" id="btnHeaderCloudSync" title="ซิงก์ข้อมูลกับ Google Sheets ทันที">☁️</button>
+        <button type="button" class="pixel-btn hidden" id="btnHeaderCloudSync" title="ซิงก์ข้อมูลทั้งหมดกับ Google Sheets ทันที">☁️</button>
         <button type="button" class="pixel-btn" id="btnOpenDataModal" title="Cloud Sync, สำรองข้อมูล & ตั้งรหัส PIN">💾</button>
         <button type="button" class="pixel-btn hidden" id="btnQuickLock" title="ล็อกหน้าจอทันที">🔒</button>
       </div>
@@ -1232,45 +1232,15 @@
     const CFG_STORAGE_KEY = 'pixel_ledger_cfg_v1';
 
     const TAXONOMY = Object.freeze({
-      Income: Object.freeze([
-        'Salary',
-        'Bonus',
-        'Dividend',
-        'Interest',
-        'Others'
-      ]),
-      Savings: Object.freeze([
-        'Retirement_PVD',
-        'Emergency_Cash',
-        'Emergency_AOTCOOP',
-        'Travel',
-        'Investment'
-      ]),
-      Fixed_Expense: Object.freeze([
-        'WHT',
-        'Life/Health Insurance',
-        'Car Insurance',
-        'Condo Maintenance Fee',
-        'Personal Trainer',
-        'Debt Repayment'
-      ]),
-      Variable_Expense: Object.freeze([
-        'Food & Beverage',
-        'Non Food',
-        'Utilities',
-        'Gasoline',
-        'Subscription',
-        'Credit Card Installment',
-        'Books & Education',
-        'Bread-Making',
-        'Others'
-      ])
+      Income: Object.freeze(['Salary', 'Bonus', 'Dividend', 'Interest', 'Others']),
+      Savings: Object.freeze(['Retirement_PVD', 'Emergency_Cash', 'Emergency_AOTCOOP', 'Travel', 'Investment']),
+      Fixed_Expense: Object.freeze(['WHT', 'Life/Health Insurance', 'Car Insurance', 'Condo Maintenance Fee', 'Personal Trainer', 'Debt Repayment']),
+      Variable_Expense: Object.freeze(['Food & Beverage', 'Non Food', 'Utilities', 'Gasoline', 'Subscription', 'Credit Card Installment', 'Books & Education', 'Bread-Making', 'Others'])
     });
 
     const MAIN_CATEGORIES = Object.keys(TAXONOMY);
     const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-    /* In-Memory Secret Key (Never persisted as plaintext if PIN is set) */
     let activeSecretKey = '';
 
     function getInitialTimeBasedTheme() {
@@ -1301,15 +1271,9 @@
         const parsed = JSON.parse(raw);
 
         const legacyTheme = parsed.theme || parsed.theme_mode;
-        const normalizedTheme = (legacyTheme === 'DAY' || legacyTheme === 'NIGHT')
-          ? legacyTheme
-          : getInitialTimeBasedTheme();
-
+        const normalizedTheme = (legacyTheme === 'DAY' || legacyTheme === 'NIGHT') ? legacyTheme : getInitialTimeBasedTheme();
         const legacyCycle = parsed.cycleMode || parsed.cycle_mode;
-        const normalizedCycle = (legacyCycle === 'CUSTOM' || legacyCycle === 'CALENDAR')
-          ? legacyCycle
-          : 'CUSTOM';
-
+        const normalizedCycle = (legacyCycle === 'CUSTOM' || legacyCycle === 'CALENDAR') ? legacyCycle : 'CUSTOM';
         const legacyPin = parsed.pinHash !== undefined ? parsed.pinHash : (parsed.pin_hash || null);
 
         const loaded = {
@@ -1383,9 +1347,6 @@
       }
     }
 
-    /* ==========================================================================
-       WEB CRYPTO API (SHA-256 PIN + AES-GCM ENCRYPTION FOR SECRET KEY)
-       ========================================================================== */
     function bufToB64(buf) {
       const bytes = new Uint8Array(buf);
       let bin = '';
@@ -1427,11 +1388,7 @@
         aesKey,
         new TextEncoder().encode(plainSecret)
       );
-      return {
-        salt: bufToB64(salt),
-        iv: bufToB64(iv),
-        ct: bufToB64(cipher)
-      };
+      return { salt: bufToB64(salt), iv: bufToB64(iv), ct: bufToB64(cipher) };
     }
 
     async function decryptSecretWithPin(encObj, pin) {
@@ -1444,10 +1401,8 @@
       return new TextDecoder().decode(plainBuf);
     }
 
-    /* ==========================================================================
-       SECURE GOOGLE SHEETS SYNC (POST BODY - NO SECRET IN URL)
-       ========================================================================== */
     let isGsSyncing = false;
+    let queuedFullSync = false;
 
     function isGsConfigured() {
       return Boolean(
@@ -1460,9 +1415,10 @@
     function refreshGsSyncUI() {
       const configured = isGsConfigured();
       const headerBtn = document.getElementById('btnHeaderCloudSync');
-      if (headerBtn) {
-        headerBtn.classList.toggle('hidden', !configured);
-      }
+      if (headerBtn) headerBtn.classList.toggle('hidden', !configured);
+
+      const countBadge = document.getElementById('syncLocalCountBadge');
+      if (countBadge) countBadge.textContent = transactions.length;
 
       const urlInput = document.getElementById('gsWebAppUrlInput');
       const keyInput = document.getElementById('gsSecretKeyInput');
@@ -1493,69 +1449,16 @@
       else statusEl.style.color = 'var(--text-muted)';
     }
 
-    /* ส่ง POST ด้วย text/plain เพื่อหลีกเลี่ยง Preflight CORS และไม่ให้ Secret Key อยู่ใน URL */
-    async function gsPostSecure(payloadObj) {
-      if (!settings.gsWebAppUrl || !activeSecretKey) {
-        return { status: 'skipped' };
-      }
-      const res = await fetch(settings.gsWebAppUrl.trim(), {
-        method: 'POST',
-        redirect: 'follow',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8'
-        },
-        body: JSON.stringify({
-          secret: activeSecretKey.trim(),
-          ...payloadObj
-        })
-      });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-      const data = await res.json();
-      if (data.status === 'error') {
-        throw new Error(data.message || 'Apps Script Error');
-      }
-      return data;
-    }
-
-    function bgSyncUpsert(tx) {
-      if (!activeSecretKey || !settings.gsWebAppUrl) return;
-      gsPostSecure({ action: 'upsert', tx })
-        .then(() => {
-          const nowStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-          setGsSyncStatus(`ซิงก์รายการล่าสุดสำเร็จ (${nowStr})`, 'ok');
-        })
-        .catch(err => {
-          setGsSyncStatus(`ออฟไลน์/รอซิงก์เมื่อออนไลน์ (${err.message})`, 'err');
-        });
-    }
-
-    function bgSyncDelete(txId) {
-      if (!settings.gsWebAppUrl) return;
-      if (!settings.pendingDeletedIds.includes(txId)) {
-        settings.pendingDeletedIds.push(txId);
-        saveSettings();
-      }
-      if (!activeSecretKey) return;
-      gsPostSecure({ action: 'delete', id: txId })
-        .then(() => {
-          settings.pendingDeletedIds = settings.pendingDeletedIds.filter(id => id !== txId);
-          saveSettings();
-          const nowStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-          setGsSyncStatus(`ลบรายการบน Google Sheets สำเร็จ (${nowStr})`, 'ok');
-        })
-        .catch(err => {
-          setGsSyncStatus(`คิวรอซิงก์การลบเมื่อออนไลน์ (${err.message})`, 'err');
-        });
-    }
-
     async function syncWithGoogleSheets(silent = false) {
       if (!settings.gsWebAppUrl || !activeSecretKey) {
         if (!silent) showToast('⚠️ กรุณากรอก Web App URL และ Secret Key ก่อน');
         return false;
       }
-      if (isGsSyncing) return false;
+
+      if (isGsSyncing) {
+        queuedFullSync = true;
+        return false;
+      }
 
       isGsSyncing = true;
       const headerBtn = document.getElementById('btnHeaderCloudSync');
@@ -1565,72 +1468,46 @@
       if (manualBtn) manualBtn.disabled = true;
       if (testBtn) testBtn.disabled = true;
 
-      setGsSyncStatus('กำลังซิงก์ข้อมูลแบบเข้ารหัสกับ Google Sheets...', 'busy');
-      if (!silent) showToast('🔄 กำลังซิงก์ข้อมูลกับ Google Sheets...');
+      setGsSyncStatus(`กำลังซิงก์ข้อมูลทั้งหมด (${transactions.length} รายการ)...`, 'busy');
+      if (!silent) showToast('🔄 กำลังซิงก์ข้อมูลทั้งหมดกับ Google Sheets...');
 
       try {
-        if (settings.pendingDeletedIds.length > 0) {
-          const toDelete = [...settings.pendingDeletedIds];
-          for (let i = 0; i < toDelete.length; i++) {
-            await gsPostSecure({ action: 'delete', id: toDelete[i] });
-            settings.pendingDeletedIds = settings.pendingDeletedIds.filter(id => id !== toDelete[i]);
-            saveSettings();
-          }
-        }
+        const res = await fetch(settings.gsWebAppUrl.trim(), {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            secret: activeSecretKey.trim(),
+            action: 'sync_all',
+            transactions: transactions,
+            deletedIds: settings.pendingDeletedIds
+          })
+        });
 
-        const data = await gsPostSecure({ action: 'list' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.status === 'error') throw new Error(data.message || 'Apps Script Error');
         if (data.status !== 'ok' || !Array.isArray(data.transactions)) {
-          throw new Error('รูปแบบข้อมูลจาก Google Sheets ไม่ถูกต้อง');
+          throw new Error('รูปแบบข้อมูลตอบกลับไม่ถูกต้อง (กรุณาอัปเดต Code.gs เป็น v1.0.9)');
         }
 
-        const remoteTxs = data.transactions.map(sanitizeTransaction).filter(Boolean);
-        const remoteMap = new Map(remoteTxs.map(t => [t.id, t]));
-        const localMap = new Map(transactions.map(t => [t.id, t]));
-        const mergedMap = new Map();
-        const pushToCloudList = [];
-
-        remoteMap.forEach((rTx, id) => {
-          const lTx = localMap.get(id);
-          if (!lTx) {
-            mergedMap.set(id, rTx);
-          } else {
-            const lTime = Number(lTx.updated_at) || 0;
-            const rTime = Number(rTx.updated_at) || 0;
-            if (lTime > rTime) {
-              mergedMap.set(id, lTx);
-              pushToCloudList.push(lTx);
-            } else {
-              mergedMap.set(id, rTx);
-            }
-          }
-        });
-
-        localMap.forEach((lTx, id) => {
-          if (!remoteMap.has(id)) {
-            mergedMap.set(id, lTx);
-            pushToCloudList.push(lTx);
-          }
-        });
-
-        transactions = Array.from(mergedMap.values());
+        transactions = data.transactions.map(sanitizeTransaction).filter(Boolean);
+        settings.pendingDeletedIds = [];
         saveTransactions();
-
-        for (let i = 0; i < pushToCloudList.length; i++) {
-          await gsPostSecure({ action: 'upsert', tx: pushToCloudList[i] });
-        }
+        saveSettings();
+        refreshGsSyncUI();
 
         if (activeTab === 'daily') renderDailyTab();
         if (activeTab === 'dashboard') renderDashboardTab();
 
         const nowStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const pushNote = pushToCloudList.length > 0 ? ` (ส่งขึ้น Cloud ${pushToCloudList.length} รายการ)` : '';
-        setGsSyncStatus(`ซิงก์สำเร็จ เวลา ${nowStr} • รวม ${transactions.length} รายการ${pushNote}`, 'ok');
+        setGsSyncStatus(`ซิงก์ครบ 100% เวลา ${nowStr} • รวมทั้งหมด ${transactions.length} รายการ`, 'ok');
         if (!silent) {
-          showToast(`☁️ ซิงก์ Google Sheets สำเร็จ (${transactions.length} รายการ)`);
+          showToast(`☁️ ซิงก์ครบทั้งหมด ${transactions.length} รายการเรียบร้อย`);
         }
         return true;
       } catch (err) {
-        setGsSyncStatus(err.message, 'err');
+        setGsSyncStatus(`รอเชื่อมต่อ/ซิงก์ไม่สำเร็จ: ${err.message}`, 'err');
         if (!silent) {
           showToast(`❌ ซิงก์ไม่สำเร็จ: ${err.message}`);
         }
@@ -1640,6 +1517,11 @@
         if (headerBtn) headerBtn.disabled = false;
         if (manualBtn) manualBtn.disabled = false;
         if (testBtn) testBtn.disabled = false;
+
+        if (queuedFullSync) {
+          queuedFullSync = false;
+          setTimeout(() => syncWithGoogleSheets(true), 400);
+        }
       }
     }
 
@@ -1674,13 +1556,9 @@
       let y, m, d;
       if (typeof dateInput === 'string') {
         const parts = dateInput.split('-').map(Number);
-        y = parts[0];
-        m = parts[1] - 1;
-        d = parts[2];
+        y = parts[0]; m = parts[1] - 1; d = parts[2];
       } else {
-        y = dateInput.getFullYear();
-        m = dateInput.getMonth();
-        d = dateInput.getDate();
+        y = dateInput.getFullYear(); m = dateInput.getMonth(); d = dateInput.getDate();
       }
       return `${d} ${SHORT_MONTHS[m]} ${y}`;
     }
@@ -1700,10 +1578,7 @@
     function getCustomCycleStart(targetYear, targetMonthIndex) {
       let startYear = targetYear;
       let startMonth = targetMonthIndex - 1;
-      if (startMonth < 0) {
-        startMonth = 11;
-        startYear -= 1;
-      }
+      if (startMonth < 0) { startMonth = 11; startYear -= 1; }
       const payday = new Date(startYear, startMonth, settings.pay_cycle_day || 26, 12, 0, 0);
       if (settings.adjust_weekend) {
         const dow = payday.getDay();
@@ -1727,12 +1602,8 @@
         };
       } else {
         const start = getCustomCycleStart(y, m);
-        let nextY = y;
-        let nextM = m + 1;
-        if (nextM > 11) {
-          nextM = 0;
-          nextY += 1;
-        }
+        let nextY = y, nextM = m + 1;
+        if (nextM > 11) { nextM = 0; nextY += 1; }
         const nextStart = getCustomCycleStart(nextY, nextM);
         const end = new Date(nextStart.getFullYear(), nextStart.getMonth(), nextStart.getDate() - 1, 12, 0, 0);
         return {
@@ -1747,24 +1618,14 @@
     function resolvePeriodForDate(dateObj, mode) {
       const y = dateObj.getFullYear();
       const m = dateObj.getMonth();
-      if (mode === 'CALENDAR') {
-        return { year: y, monthIndex: m };
-      }
+      if (mode === 'CALENDAR') return { year: y, monthIndex: m };
       const iso = toISODate(dateObj);
       const curBounds = getPeriodBounds(y, m, 'CUSTOM');
-      if (iso >= curBounds.startISO && iso <= curBounds.endISO) {
-        return { year: y, monthIndex: m };
-      }
-      let nextY = y;
-      let nextM = m + 1;
-      if (nextM > 11) {
-        nextM = 0;
-        nextY += 1;
-      }
+      if (iso >= curBounds.startISO && iso <= curBounds.endISO) return { year: y, monthIndex: m };
+      let nextY = y, nextM = m + 1;
+      if (nextM > 11) { nextM = 0; nextY += 1; }
       const nextBounds = getPeriodBounds(nextY, nextM, 'CUSTOM');
-      if (iso >= nextBounds.startISO && iso <= nextBounds.endISO) {
-        return { year: nextY, monthIndex: nextM };
-      }
+      if (iso >= nextBounds.startISO && iso <= nextBounds.endISO) return { year: nextY, monthIndex: nextM };
       return { year: y, monthIndex: m };
     }
 
@@ -1795,9 +1656,7 @@
       const isDay = settings.theme === 'DAY';
       const effectiveAttr = isDay ? 'light' : 'dark';
       const btn = document.getElementById('btnThemeToggle');
-
       btn.textContent = isDay ? '☀️ Day' : '🌙 Night';
-
       document.documentElement.setAttribute('data-theme', effectiveAttr);
       document.getElementById('metaThemeColor').setAttribute('content', isDay ? '#F7F4EB' : '#0D1117');
     }
@@ -1826,9 +1685,7 @@
       if (hasPin) {
         statusEl.textContent = 'สถานะ: เปิดใช้งาน PIN + เข้ารหัส Secret Key (AES-GCM)';
         statusEl.style.color = 'var(--cat-income)';
-        if (!isUnlocked) {
-          openPinOverlay();
-        }
+        if (!isUnlocked) openPinOverlay();
       } else {
         isUnlocked = true;
         statusEl.textContent = 'สถานะ: ยังไม่ได้เปิดใช้งาน PIN (แนะนำให้ตั้ง PIN เพื่อเข้ารหัส Key)';
@@ -1840,9 +1697,7 @@
     function openPinOverlay() {
       isUnlocked = false;
       pinBuffer = '';
-      if (settings.gsSecretEnc) {
-        activeSecretKey = '';
-      }
+      if (settings.gsSecretEnc) activeSecretKey = '';
       document.getElementById('unlockPinError').textContent = '';
       renderPinDots();
       document.getElementById('pinLockOverlay').classList.remove('hidden');
@@ -1881,9 +1736,7 @@
           if (pinBuffer.length < 6) {
             pinBuffer += k;
             renderPinDots();
-            if (pinBuffer.length >= 4) {
-              await checkPinMatch(false);
-            }
+            if (pinBuffer.length >= 4) await checkPinMatch(false);
           }
         });
         pad.appendChild(btn);
@@ -2021,11 +1874,10 @@
       }
 
       const nowTs = Date.now();
-      let targetTx = null;
       if (editId) {
         const idx = transactions.findIndex(t => t.id === editId);
         if (idx !== -1) {
-          targetTx = {
+          transactions[idx] = {
             id: editId,
             date: dateVal,
             main_category: mainCat,
@@ -2034,21 +1886,19 @@
             note: noteVal,
             updated_at: nowTs
           };
-          transactions[idx] = targetTx;
           showToast('✅ อัปเดตรายการเรียบร้อย');
         }
       } else {
         const compactDate = dateVal.replace(/-/g, '');
-        targetTx = {
-          id: `tx_${compactDate}_${nowTs}`,
+        transactions.push({
+          id: `tx_${compactDate}_${nowTs}_${Math.floor(Math.random() * 1000)}`,
           date: dateVal,
           main_category: mainCat,
           sub_category: subCat,
           amount_satang: satang,
           note: noteVal,
           updated_at: nowTs
-        };
-        transactions.push(targetTx);
+        });
         showToast(`✅ บันทึก ${subCat} (${formatTHB(satang)}) แล้ว`);
       }
 
@@ -2057,8 +1907,9 @@
       dashSelectedMonth = dailyPeriod.monthIndex;
 
       saveTransactions();
-      if (targetTx) {
-        bgSyncUpsert(targetTx);
+      refreshGsSyncUI();
+      if (settings.gsWebAppUrl && activeSecretKey) {
+        syncWithGoogleSheets(true);
       }
       resetEntryForm();
       switchTab('daily');
@@ -2230,12 +2081,7 @@
       for (let m = 0; m < 12; m++) {
         const mTxs = getTransactionsInPeriod(dashYear, m, mode);
         const sum = summarizeTransactions(mTxs);
-        monthlyData.push({
-          monthIndex: m,
-          label: SHORT_MONTHS[m],
-          txs: mTxs,
-          ...sum
-        });
+        monthlyData.push({ monthIndex: m, label: SHORT_MONTHS[m], txs: mTxs, ...sum });
         maxBar = Math.max(maxBar, sum.income, sum.savings, sum.fixed, sum.variable);
       }
 
@@ -2413,12 +2259,7 @@
     }
 
     function exportJsonBackup() {
-      /* ล้าง Secret Key ออกจากไฟล์ Backup JSON เพื่อความปลอดภัยสูงสุด */
-      const safeSettings = {
-        ...settings,
-        gsSecretKey: '',
-        gsSecretEnc: null
-      };
+      const safeSettings = { ...settings, gsSecretKey: '', gsSecretEnc: null };
       const payload = {
         schema_version: '1.0.0',
         settings: safeSettings,
@@ -2469,16 +2310,10 @@
             return;
           }
           const incomingTheme = parsed.settings.theme || parsed.settings.theme_mode;
-          const restoredTheme = (incomingTheme === 'DAY' || incomingTheme === 'NIGHT')
-            ? incomingTheme
-            : getInitialTimeBasedTheme();
+          const restoredTheme = (incomingTheme === 'DAY' || incomingTheme === 'NIGHT') ? incomingTheme : getInitialTimeBasedTheme();
           const incomingCycle = parsed.settings.cycleMode || parsed.settings.cycle_mode;
-          const restoredCycle = (incomingCycle === 'CUSTOM' || incomingCycle === 'CALENDAR')
-            ? incomingCycle
-            : 'CUSTOM';
-          const restoredPin = parsed.settings.pinHash !== undefined
-            ? parsed.settings.pinHash
-            : (parsed.settings.pin_hash || null);
+          const restoredCycle = (incomingCycle === 'CUSTOM' || incomingCycle === 'CALENDAR') ? incomingCycle : 'CUSTOM';
+          const restoredPin = parsed.settings.pinHash !== undefined ? parsed.settings.pinHash : (parsed.settings.pin_hash || null);
 
           const currentGsUrl = settings.gsWebAppUrl;
           const currentGsKey = settings.gsSecretKey;
@@ -2553,11 +2388,7 @@
       ];
 
       samples.forEach((s, idx) => {
-        transactions.push({
-          id: `tx_demo_${nowTs}_${idx}`,
-          ...s,
-          updated_at: nowTs
-        });
+        transactions.push({ id: `tx_demo_${nowTs}_${idx}`, ...s, updated_at: nowTs });
       });
 
       dailyPeriod = resolvePeriodForDate(now, settings.cycleMode);
@@ -2565,6 +2396,7 @@
       dashSelectedMonth = dailyPeriod.monthIndex;
 
       saveTransactions();
+      refreshGsSyncUI();
       document.getElementById('dataModal').classList.add('hidden');
       switchTab('daily');
       showToast('🧪 โหลดข้อมูลตัวอย่าง 13 รายการเรียบร้อย');
@@ -2594,9 +2426,7 @@
       selectMainCategory('Variable_Expense');
 
       document.getElementById('btnThemeToggle').addEventListener('click', toggleTheme);
-      document.getElementById('btnHeaderCloudSync').addEventListener('click', () => {
-        syncWithGoogleSheets(false);
-      });
+      document.getElementById('btnHeaderCloudSync').addEventListener('click', () => syncWithGoogleSheets(false));
       document.getElementById('btnOpenDataModal').addEventListener('click', () => {
         refreshGsSyncUI();
         document.getElementById('dataModal').classList.remove('hidden');
@@ -2722,11 +2552,18 @@
         if (!pendingDeleteId) return;
         const deletedId = pendingDeleteId;
         transactions = transactions.filter(t => t.id !== deletedId);
+        if (!settings.pendingDeletedIds.includes(deletedId)) {
+          settings.pendingDeletedIds.push(deletedId);
+        }
         if (document.getElementById('txId').value === deletedId) resetEntryForm();
         pendingDeleteId = null;
         document.getElementById('confirmModal').classList.add('hidden');
         saveTransactions();
-        bgSyncDelete(deletedId);
+        saveSettings();
+        refreshGsSyncUI();
+        if (settings.gsWebAppUrl && activeSecretKey) {
+          syncWithGoogleSheets(true);
+        }
         renderDailyTab();
         showToast('🗑️ ลบรายการเรียบร้อยแล้ว');
       });
@@ -2781,9 +2618,7 @@
       document.getElementById('btnDisablePin').addEventListener('click', () => {
         settings.pinHash = null;
         activePinPlain = '';
-        if (activeSecretKey) {
-          settings.gsSecretKey = activeSecretKey;
-        }
+        if (activeSecretKey) settings.gsSecretKey = activeSecretKey;
         settings.gsSecretEnc = null;
         isUnlocked = true;
         saveSettings();
