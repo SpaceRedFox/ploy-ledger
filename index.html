@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PLOY'S LEDGER" />
-  <title>PLOY'S LEDGER // 16-Bit Retro Edition v1.0.6</title>
+  <title>PLOY'S LEDGER // 16-Bit Retro Edition v1.0.7</title>
 
   <!-- Typography: JetBrains Mono (16px Base for iOS Anti-Zoom & High Legibility) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,7 +16,7 @@
 
   <style>
     /* ============================================================================
-       MASTER SPECIFICATION LOCK (SRS v1.0.6 - IMMUTABLE CORE RULES)
+       MASTER SPECIFICATION LOCK (SRS v1.0.7 - IMMUTABLE CORE RULES)
        ============================================================================
        1. EXACT TAXONOMY LOCK (4 Main Categories, 25 Exact Sub-Categories):
           - Income (5): ["Salary", "Bonus", "Dividend", "Interest", "Others"]
@@ -27,11 +27,11 @@
           - Only 2 explicit modes: "DAY" (16-Bit Pastel) and "NIGHT" (16-Bit Modern Black, zero purple).
           - Initial default on first visit (when no saved theme_mode exists): 06:00-17:59 = "DAY", 18:00-05:59 = "NIGHT".
           - Header button toggles directly between "☀️ Day" and "🌙 Night" in 1 tap.
-       3. DATA SCHEMA, DUAL PAY-CYCLE ENGINE & OFFLINE-SAFE GOOGLE SHEETS SYNC:
+       3. DATA SCHEMA, DUAL PAY-CYCLE ENGINE & CORS-SAFE GOOGLE SHEETS SYNC:
           - LocalStorage keys: `pixel_ledger_txs_v1` & `pixel_ledger_cfg_v1` (`schema_version: "1.0.0"`).
           - Integer satang (`amount_satang = Math.round(thb * 100)`), ISO date `YYYY-MM-DD`, UI date `22 Nov 2026`.
           - 26TH PAY CYCLE (Sat/Sun adjusted backward to Friday, counts toward next month) & CALENDAR (1-31).
-          - Offline-safe Google Apps Script Cloud Sync (timestamp conflict check & pending deletion queue).
+          - Google Sheets Columns: id | date | main_category | sub_category | amount_satang | amount_thb | note | updated_at.
        4. NET BALANCE CONDITIONAL TEXT COLOR RULES (LOCKED):
           - Net Balance > 5,000.00 THB (> 500000 satang)        -> Day: Black (#000000) / Night: Light Grey (#9BA6B4)
           - Net Balance < 0.00 THB (< 0 satang)                -> Red text
@@ -39,7 +39,6 @@
        ============================================================================ */
 
     :root, [data-theme="light"] {
-      /* Day Mode: Warm Cream & Crisp Pastel 16-Bit Retro */
       --bg-base: #F7F4EB;
       --bg-grid: rgba(30, 41, 59, 0.06);
       --bg-panel: #FFFDF8;
@@ -54,7 +53,6 @@
       --text-muted: #475569;
       --text-dim: #64748B;
 
-      /* Category Palette (Day) */
       --cat-income: #0D9488;
       --cat-income-bg: #CCFBF1;
       --cat-savings: #0284C7;
@@ -69,18 +67,15 @@
       --accent-sky: #0284C7;
       --accent-sky-text: #FFFFFF;
 
-      /* Net Balance Conditional Text Colors */
       --net-black: #000000;
       --net-red: #DC2626;
       --net-orange: #EA580C;
 
       --row-current-bg: rgba(13, 148, 136, 0.12);
       --row-selected-bg: rgba(234, 179, 8, 0.24);
-      --select-arrow-color: %2318202C;
     }
 
     [data-theme="dark"] {
-      /* Night Mode: Modern Obsidian & Slate 16-Bit Retro (Zero Purple) */
       --bg-base: #0D1117;
       --bg-grid: rgba(148, 163, 184, 0.05);
       --bg-panel: #161B22;
@@ -95,7 +90,6 @@
       --text-muted: #9BA6B4;
       --text-dim: #6E7681;
 
-      /* Category Palette (Night - High-contrast Pastel-Neon on Obsidian) */
       --cat-income: #34D399;
       --cat-income-bg: rgba(52, 211, 153, 0.15);
       --cat-savings: #38BDF8;
@@ -110,17 +104,14 @@
       --accent-sky: #38BDF8;
       --accent-sky-text: #090D13;
 
-      /* Net Balance Conditional Text Colors */
       --net-black: #9BA6B4;
       --net-red: #FB7185;
       --net-orange: #FB923C;
 
       --row-current-bg: rgba(52, 211, 153, 0.13);
       --row-selected-bg: rgba(251, 191, 36, 0.20);
-      --select-arrow-color: %23FBBF24;
     }
 
-    /* Strict 0px Pixelate Geometry */
     * {
       box-sizing: border-box;
       border-radius: 0px !important;
@@ -143,15 +134,9 @@
       overflow-x: hidden;
     }
 
-    .tabular {
-      font-variant-numeric: tabular-nums;
-    }
+    .tabular { font-variant-numeric: tabular-nums; }
+    .hidden { display: none !important; }
 
-    .hidden {
-      display: none !important;
-    }
-
-    /* 16-Bit RPG Window Container */
     .pixel-box {
       background: var(--bg-panel);
       border: 3px solid var(--border-outer);
@@ -168,7 +153,6 @@
       box-shadow: inset 2px 2px 0px var(--highlight);
     }
 
-    /* Corner Rivets */
     .pixel-rivets::before,
     .pixel-rivets::after {
       content: "";
@@ -182,7 +166,6 @@
     .pixel-rivets::before { left: 6px; }
     .pixel-rivets::after { right: 6px; }
 
-    /* Tactile 16-Bit Buttons (Minimum 44x44px Touch Target) */
     .pixel-btn {
       display: inline-flex;
       align-items: center;
@@ -238,7 +221,6 @@
       color: #FFFFFF;
     }
 
-    /* Form Controls (16px font to prevent iOS Safari Auto-Zoom, >= 48px height, 16-Bit Square Select) */
     .pixel-label {
       display: block;
       font-size: 13px;
@@ -266,7 +248,6 @@
       appearance: none;
     }
 
-    /* Custom 16-Bit Pixel Dropdown Arrow for iOS/Safari & Desktop */
     .pixel-select {
       padding-right: 40px;
       cursor: pointer;
@@ -984,7 +965,7 @@
         </div>
         <div>
           <h1 class="brand-title">PLOY'S LEDGER</h1>
-          <div class="brand-sub">16-BIT RETRO • SRS v1.0.6</div>
+          <div class="brand-sub">16-BIT RETRO • SRS v1.0.7</div>
         </div>
       </div>
 
@@ -1367,7 +1348,7 @@
     function sanitizeTransaction(tx) {
       if (!tx || typeof tx !== 'object') return null;
       const id = String(tx.id || '').trim();
-      const date = String(tx.date || '').trim();
+      const date = String(tx.date || '').trim().slice(0, 10);
       const main_category = String(tx.main_category || '').trim();
       const sub_category = String(tx.sub_category || '').trim();
       const amount_satang = Math.round(Number(tx.amount_satang));
@@ -1457,17 +1438,19 @@
       else statusEl.style.color = 'var(--text-muted)';
     }
 
-    async function gsPostAction(bodyObj) {
+    /* ใช้ GET Request เพื่อหลีกเลี่ยงปัญหา CORS Redirect ของ Google Apps Script บนเบราว์เซอร์มือถือ */
+    async function gsCallAction(queryParams) {
       if (!isGsConfigured()) return { status: 'skipped' };
-      const url = settings.gsWebAppUrl.trim();
-      const payload = {
+      const baseUrl = settings.gsWebAppUrl.trim();
+      const sep = baseUrl.includes('?') ? '&' : '?';
+      const searchParams = new URLSearchParams({
         secret: settings.gsSecretKey.trim(),
-        ...bodyObj
-      };
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
+        _t: String(Date.now()),
+        ...queryParams
+      });
+      const res = await fetch(`${baseUrl}${sep}${searchParams.toString()}`, {
+        method: 'GET',
+        redirect: 'follow'
       });
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
@@ -1481,7 +1464,7 @@
 
     function bgSyncUpsert(tx) {
       if (!isGsConfigured()) return;
-      gsPostAction({ action: 'upsert', tx })
+      gsCallAction({ action: 'upsert', payload: JSON.stringify(tx) })
         .then(() => {
           const nowStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
           setGsSyncStatus(`ซิงก์รายการล่าสุดสำเร็จ (${nowStr})`, 'ok');
@@ -1497,7 +1480,7 @@
         settings.pendingDeletedIds.push(txId);
         saveSettings();
       }
-      gsPostAction({ action: 'delete', id: txId })
+      gsCallAction({ action: 'delete', id: txId })
         .then(() => {
           settings.pendingDeletedIds = settings.pendingDeletedIds.filter(id => id !== txId);
           saveSettings();
@@ -1528,31 +1511,18 @@
       if (!silent) showToast('🔄 กำลังซิงก์ข้อมูลกับ Google Sheets...');
 
       try {
-        // 1. Flush any pending offline deletions first so deleted items don't resurrect
         if (settings.pendingDeletedIds.length > 0) {
           const toDelete = [...settings.pendingDeletedIds];
           for (let i = 0; i < toDelete.length; i++) {
-            await gsPostAction({ action: 'delete', id: toDelete[i] });
+            await gsCallAction({ action: 'delete', id: toDelete[i] });
             settings.pendingDeletedIds = settings.pendingDeletedIds.filter(id => id !== toDelete[i]);
             saveSettings();
           }
         }
 
-        // 2. Fetch remote transactions from Google Sheets
-        const baseUrl = settings.gsWebAppUrl.trim();
-        const sep = baseUrl.includes('?') ? '&' : '?';
-        const getUrl = `${baseUrl}${sep}secret=${encodeURIComponent(settings.gsSecretKey.trim())}`;
-
-        const res = await fetch(getUrl, { method: 'GET' });
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        const data = await res.json();
-        if (data.status === 'error') {
-          throw new Error(data.message || 'Unauthorized: Invalid Secret Key');
-        }
+        const data = await gsCallAction({ action: 'list' });
         if (data.status !== 'ok' || !Array.isArray(data.transactions)) {
-          throw new Error('รูปแบบข้อมูลจาก Google Sheets ไม่ถูกต้อง');
+          throw new Error('รูปแบบข้อมูลจาก Google Sheets ไม่ถูกต้อง (ตรวจสอบโค้ด Apps Script)');
         }
 
         const remoteTxs = data.transactions.map(sanitizeTransaction).filter(Boolean);
@@ -1561,7 +1531,6 @@
         const mergedMap = new Map();
         const pushToCloudList = [];
 
-        // 3. Timestamp-aware merge: keep whichever side was modified more recently
         remoteMap.forEach((rTx, id) => {
           const lTx = localMap.get(id);
           if (!lTx) {
@@ -1588,16 +1557,15 @@
         transactions = Array.from(mergedMap.values());
         saveTransactions();
 
-        // 4. Push newer local edits/additions back to Google Sheets
         for (let i = 0; i < pushToCloudList.length; i++) {
-          await gsPostAction({ action: 'upsert', tx: pushToCloudList[i] });
+          await gsCallAction({ action: 'upsert', payload: JSON.stringify(pushToCloudList[i]) });
         }
 
         if (activeTab === 'daily') renderDailyTab();
         if (activeTab === 'dashboard') renderDashboardTab();
 
         const nowStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const pushNote = pushToCloudList.length > 0 ? ` (อัปเดตขึ้น Cloud ${pushToCloudList.length} รายการ)` : '';
+        const pushNote = pushToCloudList.length > 0 ? ` (ส่งขึ้น Cloud ${pushToCloudList.length} รายการ)` : '';
         setGsSyncStatus(`ซิงก์สำเร็จ เวลา ${nowStr} • รวม ${transactions.length} รายการ${pushNote}`, 'ok');
         if (!silent) {
           showToast(`☁️ ซิงก์ Google Sheets สำเร็จ (${transactions.length} รายการ)`);
