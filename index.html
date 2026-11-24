@@ -2487,15 +2487,19 @@
 
     function exportCsv() {
       const rows = buildTableRows();
-      const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\r\n');
-      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('
+');
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
       downloadBlob(blob, `ploys_ledger_${toISODate(new Date())}.csv`);
       showToast('⬇️ ดาวน์โหลดไฟล์ CSV เรียบร้อย');
     }
 
     function copyTsvForSheets() {
       const rows = buildTableRows();
-      const tsv = rows.map(r => r.map(c => String(c).replace(/\t|\r|\n/g, ' ')).join('\t')).join('\n');
+      const tsv = rows.map(r => r.map(c => String(c).replace(/	|
+|
+/g, ' ')).join('	')).join('
+');
       const ta = document.createElement('textarea');
       ta.value = tsv;
       ta.style.position = 'fixed';
