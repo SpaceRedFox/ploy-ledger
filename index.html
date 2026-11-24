@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0D1117" id="metaThemeColor" />
-  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PLOY'S LEDGER" />
@@ -17,7 +16,7 @@
 
   <style>
     /* ============================================================================
-       MASTER SPECIFICATION LOCK (SRS v1.0.4 + GOOGLE SHEETS SYNC v1.0.5)
+       MASTER SPECIFICATION LOCK (SRS v1.0.5 - IMMUTABLE CORE RULES)
        ============================================================================
        1. EXACT TAXONOMY LOCK (4 Main Categories, 25 Exact Sub-Categories):
           - Income (5): ["Salary", "Bonus", "Dividend", "Interest", "Others"]
@@ -28,21 +27,15 @@
           - Only 2 explicit modes: "DAY" (16-Bit Pastel) and "NIGHT" (16-Bit Modern Black, zero purple).
           - Initial default on first visit (when no saved theme_mode exists): 06:00-17:59 = "DAY", 18:00-05:59 = "NIGHT".
           - Header button toggles directly between "☀️ Day" and "🌙 Night" in 1 tap.
-       3. DATA SCHEMA & DUAL PAY-CYCLE ENGINE:
+       3. DATA SCHEMA, DUAL PAY-CYCLE ENGINE & GOOGLE SHEETS SYNC:
           - LocalStorage keys: `pixel_ledger_txs_v1` & `pixel_ledger_cfg_v1` (`schema_version: "1.0.0"`).
           - Integer satang (`amount_satang = Math.round(thb * 100)`), ISO date `YYYY-MM-DD`, UI date `22 Nov 2026`.
           - 26TH PAY CYCLE (Sat/Sun adjusted backward to Friday, counts toward next month) & CALENDAR (1-31).
-          - 3 Tabs:
-            * Tab 1: "➕ บันทึกรายการ" (Default) -> Step 1: Date (with Today shortcut), Step 2: Main Category, Step 3: Sub-Category, Step 4: Amount + Quick-Add, Step 5: Note.
-            * Tab 2: "📅 Daily" -> Pay-Cycle toggle, KPIs, 4-category stacked bar, filter pills & history.
-            * Tab 3: "📊 Dashboard" -> Annual KPIs, 12-month bar chart, 12-month table with auto CURRENT highlight & click drill-down.
-       4. NET BALANCE CONDITIONAL TEXT COLOR RULES:
-          - Net Balance > 5,000.00 THB (> 500000 satang)        -> Black text (Day) / Grey text (Night)
+          - Optional Google Apps Script Cloud Sync (`gsWebAppUrl` & `gsSecretKey`).
+       4. NET BALANCE CONDITIONAL TEXT COLOR RULES (LOCKED):
+          - Net Balance > 5,000.00 THB (> 500000 satang)        -> Day: Black (#000000) / Night: Light Grey (#9BA6B4)
           - Net Balance < 0.00 THB (< 0 satang)                -> Red text
           - Net Balance >= 0.00 THB and <= 5,000.00 THB        -> Orange text
-       5. PERSONAL CLOUD SYNC (GOOGLE APPS SCRIPT + GOOGLE SHEETS):
-          - User configures Web App URL (`/exec`) and `API_SECRET_KEY` inside UI (`pixel_ledger_cfg_v1`).
-          - Two-way sync on load/manual trigger + automatic background upsert/delete on changes.
        ============================================================================ */
 
     :root, [data-theme="light"] {
@@ -116,7 +109,7 @@
       --accent-sky: #38BDF8;
       --accent-sky-text: #090D13;
 
-      /* Net Balance Conditional Text Colors (Adjusted to Grey for Night Mode) */
+      /* Net Balance Conditional Text Colors */
       --net-black: #9BA6B4;
       --net-red: #FB7185;
       --net-orange: #FB923C;
@@ -273,7 +266,6 @@
       box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.22), 0 0 0 2px var(--accent-gold);
     }
 
-    /* App Container */
     .app-shell {
       max-width: 1040px;
       margin: 0 auto;
@@ -281,12 +273,9 @@
     }
 
     @media (min-width: 768px) {
-      .app-shell {
-        padding: 18px 18px 36px;
-      }
+      .app-shell { padding: 18px 18px 36px; }
     }
 
-    /* Top Header HUD */
     .top-header {
       padding: 12px 14px;
       margin-bottom: 12px;
@@ -336,7 +325,6 @@
       gap: 8px;
     }
 
-    /* Desktop Top Navigation (3 Tabs) */
     .desktop-tabs {
       display: none;
       grid-template-columns: repeat(3, 1fr);
@@ -345,9 +333,7 @@
     }
 
     @media (min-width: 768px) {
-      .desktop-tabs {
-        display: grid;
-      }
+      .desktop-tabs { display: grid; }
     }
 
     .desktop-tabs .pixel-btn.active {
@@ -355,7 +341,6 @@
       color: var(--accent-gold-text);
     }
 
-    /* Mobile Thumb-Zone Bottom Dock (3 Tabs) */
     .mobile-dock {
       position: fixed;
       bottom: 0;
@@ -372,9 +357,7 @@
     }
 
     @media (min-width: 768px) {
-      .mobile-dock {
-        display: none;
-      }
+      .mobile-dock { display: none; }
     }
 
     .dock-btn {
@@ -400,7 +383,6 @@
       box-shadow: inset 2px 2px 0px rgba(255, 255, 255, 0.45);
     }
 
-    /* 4 Main Category Selector Cards (Tab 1 Entry) */
     .cat-cards-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -409,9 +391,7 @@
     }
 
     @media (min-width: 640px) {
-      .cat-cards-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
+      .cat-cards-grid { grid-template-columns: repeat(4, 1fr); }
     }
 
     .cat-card-btn {
@@ -431,42 +411,15 @@
       text-align: center;
     }
 
-    .cat-card-btn .cat-en {
-      font-size: 13px;
-      font-weight: 800;
-    }
+    .cat-card-btn .cat-en { font-size: 13px; font-weight: 800; }
+    .cat-card-btn .cat-th { font-size: 12px; font-weight: 600; color: var(--text-muted); }
 
-    .cat-card-btn .cat-th {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
+    .cat-card-btn.selected[data-cat="Income"] { background: var(--cat-income-bg); border-color: var(--cat-income); color: var(--cat-income); }
+    .cat-card-btn.selected[data-cat="Savings"] { background: var(--cat-savings-bg); border-color: var(--cat-savings); color: var(--cat-savings); }
+    .cat-card-btn.selected[data-cat="Fixed_Expense"] { background: var(--cat-fixed-bg); border-color: var(--cat-fixed); color: var(--cat-fixed); }
+    .cat-card-btn.selected[data-cat="Variable_Expense"] { background: var(--cat-variable-bg); border-color: var(--cat-variable); color: var(--cat-variable); }
+    .cat-card-btn.selected .cat-th { color: inherit; }
 
-    .cat-card-btn.selected[data-cat="Income"] {
-      background: var(--cat-income-bg);
-      border-color: var(--cat-income);
-      color: var(--cat-income);
-    }
-    .cat-card-btn.selected[data-cat="Savings"] {
-      background: var(--cat-savings-bg);
-      border-color: var(--cat-savings);
-      color: var(--cat-savings);
-    }
-    .cat-card-btn.selected[data-cat="Fixed_Expense"] {
-      background: var(--cat-fixed-bg);
-      border-color: var(--cat-fixed);
-      color: var(--cat-fixed);
-    }
-    .cat-card-btn.selected[data-cat="Variable_Expense"] {
-      background: var(--cat-variable-bg);
-      border-color: var(--cat-variable);
-      color: var(--cat-variable);
-    }
-    .cat-card-btn.selected .cat-th {
-      color: inherit;
-    }
-
-    /* Quick-Add Amount Pills */
     .quick-add-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -480,7 +433,6 @@
       min-height: 44px;
     }
 
-    /* Dual Pay-Cycle Control Bar */
     .cycle-bar {
       padding: 12px;
       margin-bottom: 12px;
@@ -517,19 +469,9 @@
       min-width: 185px;
     }
 
-    .cycle-title {
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--accent-gold);
-    }
+    .cycle-title { font-size: 15px; font-weight: 800; color: var(--accent-gold); }
+    .cycle-dates { font-size: 12px; font-weight: 700; color: var(--text-muted); }
 
-    .cycle-dates {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
-
-    /* KPI Summary Grids (4 Cards for Daily, 5 Cards for Dashboard) */
     .kpi-grid-4 {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -538,9 +480,7 @@
     }
 
     @media (min-width: 768px) {
-      .kpi-grid-4 {
-        grid-template-columns: repeat(4, 1fr);
-      }
+      .kpi-grid-4 { grid-template-columns: repeat(4, 1fr); }
     }
 
     .kpi-grid-5 {
@@ -551,9 +491,7 @@
     }
 
     @media (min-width: 768px) {
-      .kpi-grid-5 {
-        grid-template-columns: repeat(5, 1fr);
-      }
+      .kpi-grid-5 { grid-template-columns: repeat(5, 1fr); }
     }
 
     .kpi-card {
@@ -563,38 +501,20 @@
       gap: 4px;
     }
 
-    .kpi-card-wide {
-      grid-column: span 2;
-    }
-
+    .kpi-card-wide { grid-column: span 2; }
     @media (min-width: 768px) {
-      .kpi-card-wide {
-        grid-column: span 1;
-      }
+      .kpi-card-wide { grid-column: span 1; }
     }
 
-    .kpi-label {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--text-muted);
-    }
+    .kpi-label { font-size: 12px; font-weight: 800; color: var(--text-muted); }
+    .kpi-value { font-size: 18px; font-weight: 800; word-break: break-word; }
 
-    .kpi-value {
-      font-size: 18px;
-      font-weight: 800;
-      word-break: break-word;
-    }
-
-    /* Category Text & Badges */
     .c-income { color: var(--cat-income); }
     .c-savings { color: var(--cat-savings); }
     .c-fixed { color: var(--cat-fixed); }
     .c-variable { color: var(--cat-variable); }
 
-    /* Net Balance Conditional Text Color Only (No Card Box Changes) */
-    .net-bal-black {
-      color: var(--net-black) !important;
-    }
+    .net-bal-black { color: var(--net-black) !important; }
     .net-bal-red { color: var(--net-red) !important; }
     .net-bal-orange { color: var(--net-orange) !important; }
 
@@ -612,7 +532,6 @@
     .badge-Fixed_Expense { background: var(--cat-fixed-bg); color: var(--cat-fixed); border-color: var(--cat-fixed); }
     .badge-Variable_Expense { background: var(--cat-variable-bg); color: var(--cat-variable); border-color: var(--cat-variable); }
 
-    /* Proportional Stacked Bar & Progress Bars */
     .stacked-bar-track {
       display: flex;
       width: 100%;
@@ -653,7 +572,6 @@
       );
     }
 
-    /* Filter Pills Row */
     .filter-pills-row {
       display: flex;
       flex-wrap: wrap;
@@ -679,7 +597,6 @@
       box-shadow: 2px 2px 0px var(--shadow-hard);
     }
 
-    /* Transaction History List */
     .tx-item {
       padding: 12px;
       border-bottom: 2px dashed var(--border-inner);
@@ -689,28 +606,10 @@
       gap: 10px;
     }
 
-    .tx-item:last-child {
-      border-bottom: none;
-    }
-
-    .tx-meta {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .tx-subcat {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--text-main);
-      word-break: break-word;
-    }
-
-    .tx-note {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 3px;
-      word-break: break-word;
-    }
+    .tx-item:last-child { border-bottom: none; }
+    .tx-meta { min-width: 0; flex: 1; }
+    .tx-subcat { font-size: 16px; font-weight: 800; color: var(--text-main); word-break: break-word; }
+    .tx-note { font-size: 13px; color: var(--text-muted); margin-top: 3px; word-break: break-word; }
 
     .tx-right {
       display: flex;
@@ -720,10 +619,7 @@
       flex-shrink: 0;
     }
 
-    .tx-actions {
-      display: flex;
-      gap: 6px;
-    }
+    .tx-actions { display: flex; gap: 6px; }
 
     .icon-action-btn {
       min-width: 44px;
@@ -745,7 +641,6 @@
       box-shadow: 1px 1px 0px var(--shadow-hard);
     }
 
-    /* Dashboard 12-Month Chart & Interactive Table */
     .annual-chart-scroll {
       overflow-x: auto;
       padding-bottom: 6px;
@@ -826,18 +721,9 @@
       z-index: 2;
     }
 
-    table.pixel-table tbody tr.month-row {
-      cursor: pointer;
-    }
-
-    table.pixel-table tbody tr.month-row:hover td {
-      background: var(--bg-panel-alt);
-    }
-
-    table.pixel-table tbody tr.is-current td {
-      background: var(--row-current-bg) !important;
-    }
-
+    table.pixel-table tbody tr.month-row { cursor: pointer; }
+    table.pixel-table tbody tr.month-row:hover td { background: var(--bg-panel-alt); }
+    table.pixel-table tbody tr.is-current td { background: var(--row-current-bg) !important; }
     table.pixel-table tbody tr.is-selected td {
       background: var(--row-selected-bg) !important;
       border-top: 2px solid var(--accent-gold);
@@ -856,7 +742,6 @@
       vertical-align: middle;
     }
 
-    /* Symmetrical 2x2 Drill-Down Grid (1 col on narrow mobile < 520px, 2x2 on tablet/desktop) */
     .drilldown-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -864,12 +749,9 @@
     }
 
     @media (min-width: 520px) {
-      .drilldown-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .drilldown-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    /* Modals & PIN Lock Overlay */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -922,7 +804,6 @@
       font-weight: 800;
     }
 
-    /* Toast Banner */
     .pixel-toast {
       position: fixed;
       top: 14px;
@@ -942,9 +823,7 @@
 </head>
 <body>
 
-  <!-- ========================================================================
-       PIN LOCK SCREEN OVERLAY (SHA-256)
-       ======================================================================== -->
+  <!-- PIN LOCK SCREEN OVERLAY -->
   <div id="pinLockOverlay" class="modal-overlay hidden" style="z-index: 1500;">
     <div class="pixel-box pixel-rivets modal-card" style="text-align: center;">
       <div style="font-size: 32px; margin-bottom: 6px;">🔒</div>
@@ -957,9 +836,7 @@
     </div>
   </div>
 
-  <!-- ========================================================================
-       DELETE CONFIRMATION MODAL
-       ======================================================================== -->
+  <!-- DELETE CONFIRMATION MODAL -->
   <div id="confirmModal" class="modal-overlay hidden">
     <div class="pixel-box pixel-rivets modal-card">
       <h3 style="margin: 0 0 8px; font-size: 17px; font-weight: 800; color: var(--cat-variable);">⚠️ ยืนยันการลบรายการ</h3>
@@ -971,9 +848,7 @@
     </div>
   </div>
 
-  <!-- ========================================================================
-       CLOUD SYNC, SECURITY & DATA PORTABILITY MODAL
-       ======================================================================== -->
+  <!-- CLOUD SYNC, SECURITY & DATA PORTABILITY MODAL -->
   <div id="dataModal" class="modal-overlay hidden">
     <div class="pixel-box pixel-rivets modal-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
@@ -981,7 +856,7 @@
         <button type="button" class="pixel-btn" id="btnCloseDataModal" style="min-width: 44px; padding: 6px 10px;">✕</button>
       </div>
 
-      <!-- Google Sheets Cloud Sync (Apps Script) -->
+      <!-- Google Sheets Cloud Sync -->
       <div class="pixel-subbox" style="padding: 12px; margin-bottom: 12px; border-color: var(--accent-sky);">
         <div class="pixel-label" style="color: var(--accent-sky);">☁️ ซิงก์ GOOGLE SHEETS (APPS SCRIPT)</div>
         <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -1039,7 +914,7 @@
         </div>
       </div>
 
-      <!-- PIN Lock (SHA-256) -->
+      <!-- PIN Lock -->
       <div class="pixel-subbox" style="padding: 12px;">
         <div class="pixel-label" style="color: var(--accent-gold);">🔐 ระบบล็อกรหัสผ่าน PIN (SHA-256)</div>
         <div id="pinStatusText" style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text-muted);">
@@ -1056,21 +931,16 @@
     </div>
   </div>
 
-  <!-- ========================================================================
-       TOAST NOTIFICATION
-       ======================================================================== -->
+  <!-- TOAST NOTIFICATION -->
   <div id="toastBanner" class="pixel-toast hidden"></div>
 
-  <!-- ========================================================================
-       MAIN APPLICATION SHELL
-       ======================================================================== -->
+  <!-- MAIN APPLICATION SHELL -->
   <div class="app-shell">
 
     <!-- Top Header HUD -->
     <header class="pixel-box pixel-rivets top-header">
       <div class="brand-group">
         <div class="pixel-emblem" aria-hidden="true">
-          <!-- Classic 16-Bit Pigtails Girl Emblem -->
           <svg width="32" height="32" viewBox="0 0 16 16" shape-rendering="crispEdges">
             <rect x="1" y="4" width="2" height="6" fill="#4A2E1B"/>
             <rect x="13" y="4" width="2" height="6" fill="#4A2E1B"/>
@@ -1104,16 +974,14 @@
       </div>
     </header>
 
-    <!-- Desktop Top Navigation (3 Tabs) -->
+    <!-- Desktop Top Navigation -->
     <nav class="desktop-tabs" id="desktopNav">
       <button type="button" class="pixel-btn active" data-tab="entry">➕ บันทึกรายการ</button>
       <button type="button" class="pixel-btn" data-tab="daily">📅 Daily</button>
       <button type="button" class="pixel-btn" data-tab="dashboard">📊 Dashboard</button>
     </nav>
 
-    <!-- ======================================================================
-         TAB 1: ➕ บันทึกรายการ (DEFAULT ON LOAD - FULL WIDTH MATCHING TOP CARD)
-         ====================================================================== -->
+    <!-- TAB 1: ENTRY FORM -->
     <main id="tabEntry">
       <div class="pixel-box pixel-rivets" style="padding: 16px; width: 100%;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
@@ -1127,7 +995,6 @@
           <input type="hidden" id="txId" value="" />
           <input type="hidden" id="txMainCat" value="Variable_Expense" />
 
-          <!-- STEP 1 (FIRST FIELD): Date Picker + Today Quick Reset + English Short Date Preview -->
           <div style="margin-bottom: 16px;">
             <label class="pixel-label" for="txDate">1. วันที่ทำรายการ (TRANSACTION DATE)</label>
             <div style="display: flex; gap: 8px; align-items: stretch;">
@@ -1137,7 +1004,6 @@
             <div id="txDatePreview" style="font-size: 13px; font-weight: 700; color: var(--accent-gold); margin-top: 5px;"></div>
           </div>
 
-          <!-- STEP 2: 4 Main Category Cards -->
           <div class="pixel-label">2. เลือกหมวดหมู่หลัก (MAIN CATEGORY)</div>
           <div class="cat-cards-grid" id="mainCatCards">
             <button type="button" class="cat-card-btn" data-cat="Income">
@@ -1158,13 +1024,11 @@
             </button>
           </div>
 
-          <!-- STEP 3: Dynamic Sub-Category Dropdown -->
           <div style="margin-bottom: 14px;">
             <label class="pixel-label" for="txSubCat">3. หมวดหมู่ย่อย (SUB-CATEGORY)</label>
             <select id="txSubCat" class="pixel-select" required></select>
           </div>
 
-          <!-- STEP 4: Hero Amount Input + Quick-Add Buttons -->
           <div style="margin-bottom: 14px;">
             <label class="pixel-label" for="txAmount">4. จำนวนเงิน (THB)</label>
             <input
@@ -1187,13 +1051,11 @@
             </div>
           </div>
 
-          <!-- STEP 5: Optional Note -->
           <div style="margin-bottom: 18px;">
             <label class="pixel-label" for="txNote">5. บันทึกช่วยจำ (NOTE - ไม่บังคับ)</label>
             <input type="text" id="txNote" class="pixel-input" maxlength="140" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)..." />
           </div>
 
-          <!-- Submit / Cancel Edit -->
           <div style="display: flex; gap: 10px;">
             <button type="submit" class="pixel-btn pixel-btn-gold" id="btnSubmitTx" style="flex: 1; min-height: 54px; font-size: 16px;">
               💾 บันทึกรายการ
@@ -1206,11 +1068,8 @@
       </div>
     </main>
 
-    <!-- ======================================================================
-         TAB 2: 📅 Daily (PAY-CYCLE KPIs, STACKED BAR, FILTER PILLS & HISTORY)
-         ====================================================================== -->
+    <!-- TAB 2: DAILY -->
     <section id="tabDaily" class="hidden">
-      <!-- Dual Pay-Cycle Controller -->
       <div class="pixel-box cycle-bar">
         <div>
           <div class="pixel-label" style="margin-bottom: 5px;">โหมดรอบบัญชี (PAY-CYCLE)</div>
@@ -1231,7 +1090,6 @@
         </div>
       </div>
 
-      <!-- 4 KPI Cards (Income, Savings, Expenses [Fixed + Variable], Net Cashflow) -->
       <div class="kpi-grid-4">
         <div class="pixel-box kpi-card">
           <div class="kpi-label">INCOME</div>
@@ -1251,7 +1109,6 @@
         </div>
       </div>
 
-      <!-- 4-Category Proportional Stacked Bar & Legend -->
       <div class="pixel-box" style="padding: 14px; margin-bottom: 12px;">
         <div style="font-size: 14px; font-weight: 800; color: var(--accent-gold); margin-bottom: 8px;">
           📊 สัดส่วนกระแสเงินสด 4 หมวดหมู่หลักในรอบนี้
@@ -1260,7 +1117,6 @@
         <div id="dailyStackedLegend" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin-top: 10px;"></div>
       </div>
 
-      <!-- Chronological Transaction History with Filter Pills -->
       <div class="pixel-box" style="padding: 14px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
           <h2 style="margin: 0; font-size: 16px; font-weight: 800;">
@@ -1280,11 +1136,8 @@
       </div>
     </section>
 
-    <!-- ======================================================================
-         TAB 3: 📊 Dashboard (ANNUAL & MONTHLY TRENDS + INTERACTIVE DRILL-DOWN)
-         ====================================================================== -->
+    <!-- TAB 3: DASHBOARD -->
     <section id="tabDashboard" class="hidden">
-      <!-- Top Controls: Year Selector & Pay-Cycle vs Calendar Toggle -->
       <div class="pixel-box cycle-bar">
         <div>
           <div class="pixel-label" style="margin-bottom: 5px;">เกณฑ์สรุปข้อมูลรายเดือน</div>
@@ -1304,7 +1157,6 @@
         </div>
       </div>
 
-      <!-- Annual KPI Summary (5 Cards) -->
       <div class="kpi-grid-5">
         <div class="pixel-box kpi-card">
           <div class="kpi-label">TOTAL INCOME</div>
@@ -1328,7 +1180,6 @@
         </div>
       </div>
 
-      <!-- 12-Month Bar Chart -->
       <div class="pixel-box" style="padding: 14px; margin-bottom: 12px;">
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 8px;">
           <span style="font-size: 15px; font-weight: 800; color: var(--accent-gold);">📈 กราฟเปรียบเทียบ 12 เดือน (คลิกแท่งเดือนเพื่อดูรายละเอียด)</span>
@@ -1344,7 +1195,6 @@
         </div>
       </div>
 
-      <!-- Interactive 12-Month Breakdown Table -->
       <div class="pixel-box" style="padding: 14px; margin-bottom: 12px;">
         <div style="font-size: 15px; font-weight: 800; margin-bottom: 8px;">
           📋 ตารางสรุปรายเดือน (คลิกแถวเดือนที่ต้องการเจาะลึก)
@@ -1366,7 +1216,6 @@
         </div>
       </div>
 
-      <!-- Selected Month Sub-Category Drill-Down Panel -->
       <div class="pixel-box pixel-rivets" style="padding: 14px;">
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px;">
           <h3 id="drilldownTitle" style="margin: 0; font-size: 16px; font-weight: 800; color: var(--accent-gold);">
@@ -1380,9 +1229,7 @@
 
   </div>
 
-  <!-- ========================================================================
-       MOBILE BOTTOM DOCK (3 TABS - THUMB ZONE)
-       ======================================================================== -->
+  <!-- MOBILE BOTTOM DOCK -->
   <nav class="mobile-dock" id="mobileNav">
     <button type="button" class="dock-btn active" data-tab="entry">
       <span style="font-size: 18px;">➕</span>
@@ -1399,9 +1246,6 @@
   </nav>
 
   <script>
-    /* ==========================================================================
-       1. LOCKED SCHEMA & TAXONOMY CONSTANTS (SRS v1.0.4 - 4 MAIN, 25 EXACT SUB)
-       ========================================================================== */
     const TX_STORAGE_KEY = 'pixel_ledger_txs_v1';
     const CFG_STORAGE_KEY = 'pixel_ledger_cfg_v1';
 
@@ -1444,9 +1288,6 @@
     const MAIN_CATEGORIES = Object.keys(TAXONOMY);
     const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-    /* ==========================================================================
-       2. STATE INITIALIZATION & STORAGE PERSISTENCE
-       ========================================================================== */
     function getInitialTimeBasedTheme() {
       const h = new Date().getHours();
       return (h >= 6 && h < 18) ? 'DAY' : 'NIGHT';
@@ -1456,10 +1297,10 @@
       return {
         schema_version: '1.0.0',
         currency: 'THB',
-        cycleMode: 'CUSTOM', // 'CUSTOM' (26th Pay Cycle) | 'CALENDAR' (1-31)
+        cycleMode: 'CUSTOM',
         pay_cycle_day: 26,
         adjust_weekend: true,
-        theme: getInitialTimeBasedTheme(), // Strictly 'DAY' or 'NIGHT'
+        theme: getInitialTimeBasedTheme(),
         pinHash: null,
         gsWebAppUrl: '',
         gsSecretKey: ''
@@ -1472,7 +1313,6 @@
         if (!raw) return defaultSettings();
         const parsed = JSON.parse(raw);
 
-        // Migrate any legacy property names smoothly
         const legacyTheme = parsed.theme || parsed.theme_mode;
         const normalizedTheme = (legacyTheme === 'DAY' || legacyTheme === 'NIGHT')
           ? legacyTheme
@@ -1548,9 +1388,6 @@
       }
     }
 
-    /* ==========================================================================
-       2B. GOOGLE SHEETS CLOUD SYNC ENGINE (APPS SCRIPT WEB APP + SECRET KEY)
-       ========================================================================== */
     let isGsSyncing = false;
 
     function isGsConfigured() {
@@ -1678,14 +1515,10 @@
           throw new Error('รูปแบบข้อมูลจาก Google Sheets ไม่ถูกต้อง');
         }
 
-        // Clean & map remote transactions
         const remoteTxs = data.transactions.map(sanitizeTransaction).filter(Boolean);
         const remoteMap = new Map(remoteTxs.map(t => [t.id, t]));
-
-        // Identify local-only transactions that are not yet on Google Sheets
         const localOnlyTxs = transactions.filter(t => !remoteMap.has(t.id));
 
-        // Merge: Remote is authoritative for shared IDs, plus keep local-only IDs
         const mergedMap = new Map();
         remoteTxs.forEach(t => mergedMap.set(t.id, t));
         localOnlyTxs.forEach(t => mergedMap.set(t.id, t));
@@ -1693,7 +1526,6 @@
         transactions = Array.from(mergedMap.values());
         saveTransactions();
 
-        // Push local-only transactions up to Google Sheets
         for (let i = 0; i < localOnlyTxs.length; i++) {
           await gsPostAction({ action: 'upsert', tx: localOnlyTxs[i] });
         }
@@ -1722,9 +1554,6 @@
       }
     }
 
-    /* ==========================================================================
-       3. PRECISION SATANG, SHORT ENGLISH DATE & NET BALANCE COLOR HELPERS
-       ========================================================================== */
     function toSatang(val) {
       const num = parseFloat(val);
       if (isNaN(num) || num <= 0) return 0;
@@ -1739,12 +1568,6 @@
       return `${isNeg ? '-' : ''}฿${baht.toLocaleString('en-US')}.${st}`;
     }
 
-    /**
-     * NET BALANCE CONDITIONAL TEXT COLOR RULES:
-     * 1. > 5,000.00 THB (> 500000 satang)        -> Black (Day) / Grey (Night) (.net-bal-black)
-     * 2. < 0.00 THB (< 0 satang)                -> Red (.net-bal-red)
-     * 3. >= 0.00 THB and <= 5,000.00 THB        -> Orange (.net-bal-orange)
-     */
     function getNetBalanceColorClass(netSatang) {
       if (netSatang > 500000) return 'net-bal-black';
       if (netSatang < 0) return 'net-bal-red';
@@ -1785,9 +1608,6 @@
       return new Date(y, m - 1, d, 12, 0, 0);
     }
 
-    /* ==========================================================================
-       4. DUAL PAY-CYCLE ENGINE (26TH PAY CYCLE + WEEKEND ADJUSTMENT & CALENDAR)
-       ========================================================================== */
     function getCustomCycleStart(targetYear, targetMonthIndex) {
       let startYear = targetYear;
       let startMonth = targetMonthIndex - 1;
@@ -1797,9 +1617,9 @@
       }
       const payday = new Date(startYear, startMonth, settings.pay_cycle_day || 26, 12, 0, 0);
       if (settings.adjust_weekend) {
-        const dow = payday.getDay(); // 0 = Sun, 6 = Sat
-        if (dow === 6) payday.setDate(payday.getDate() - 1); // Saturday -> Friday
-        else if (dow === 0) payday.setDate(payday.getDate() - 2); // Sunday -> Friday
+        const dow = payday.getDay();
+        if (dow === 6) payday.setDate(payday.getDate() - 1);
+        else if (dow === 0) payday.setDate(payday.getDate() - 2);
       }
       return payday;
     }
@@ -1882,9 +1702,6 @@
       return { income, savings, fixed, variable, expenses, net };
     }
 
-    /* ==========================================================================
-       5. STRICT 2-MODE THEME ENGINE (DAY / NIGHT) & SECURITY PIN (SHA-256)
-       ========================================================================== */
     function applyTheme() {
       const isDay = settings.theme === 'DAY';
       const effectiveAttr = isDay ? 'light' : 'dark';
@@ -2000,9 +1817,6 @@
       }
     }
 
-    /* ==========================================================================
-       6. NAVIGATION & VIEW CONTROLLERS (3 TABS)
-       ========================================================================== */
     let activeTab = 'entry';
     let dailyPeriod = resolvePeriodForDate(new Date(), settings.cycleMode);
     let dailyCategoryFilter = 'ALL';
@@ -2042,9 +1856,6 @@
         .replace(/"/g, '&quot;');
     }
 
-    /* ==========================================================================
-       7. TAB 1: ENTRY FORM LOGIC (STEP 1: DATE FIRST)
-       ========================================================================== */
     function selectMainCategory(cat, selectedSub = null) {
       document.getElementById('txMainCat').value = cat;
       document.querySelectorAll('#mainCatCards .cat-card-btn').forEach(btn => {
@@ -2168,9 +1979,6 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    /* ==========================================================================
-       8. TAB 2: DAILY SUMMARY & HISTORY RENDERER
-       ========================================================================== */
     let pendingDeleteId = null;
 
     function renderDailyTab() {
@@ -2193,7 +2001,6 @@
       netEl.textContent = formatTHB(totals.net);
       applyNetBalanceTextColor(netEl, totals.net);
 
-      // Proportional Stacked Bar for 4 Categories
       const totalVolume = totals.income + totals.savings + totals.fixed + totals.variable;
       const segments = [
         { label: 'Income', val: totals.income, color: 'var(--cat-income)' },
@@ -2232,12 +2039,10 @@
         stackedLegend.appendChild(item);
       });
 
-      // Update Filter Pills Active State
       document.querySelectorAll('#dailyFilterPills .filter-pill-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.filter === dailyCategoryFilter);
       });
 
-      // Filtered Transaction List
       const filtered = dailyCategoryFilter === 'ALL' ? txs : txs.filter(t => t.main_category === dailyCategoryFilter);
       document.getElementById('dailyTxCount').textContent = filtered.length;
 
@@ -2303,9 +2108,6 @@
       });
     }
 
-    /* ==========================================================================
-       9. TAB 3: DASHBOARD (ANNUAL & MONTHLY TRENDS + AUTO CURRENT & CLICK DRILL-DOWN)
-       ========================================================================== */
     function renderDashboardTab() {
       const mode = settings.cycleMode;
       document.getElementById('btnDashModeCustom').classList.toggle('pixel-btn-gold', mode === 'CUSTOM');
@@ -2350,7 +2152,6 @@
       annNetEl.textContent = formatTHB(annual.net);
       applyNetBalanceTextColor(annNetEl, annual.net);
 
-      // 12-Month Bar Chart
       const barsGrid = document.getElementById('dashBarsGrid');
       barsGrid.innerHTML = '';
       monthlyData.forEach(md => {
@@ -2380,7 +2181,6 @@
         barsGrid.appendChild(col);
       });
 
-      // Interactive 12-Month Table
       const tbody = document.getElementById('dashTableBody');
       tbody.innerHTML = '';
       monthlyData.forEach(md => {
@@ -2407,7 +2207,6 @@
         tbody.appendChild(tr);
       });
 
-      // Selected Month Sub-Category Drill-Down
       renderMonthDrilldown(monthlyData[dashSelectedMonth]);
     }
 
@@ -2463,9 +2262,6 @@
       });
     }
 
-    /* ==========================================================================
-       10. EXPORT CSV (UTF-8 BOM), COPY TSV, JSON BACKUP & STRICT SCHEMA VALIDATION
-       ========================================================================== */
     function buildTableRows() {
       const headers = ['ID', 'Date_Display', 'Date_ISO', 'Main_Category', 'Sub_Category', 'Amount_THB', 'Amount_Satang', 'Note'];
       const sorted = [...transactions].sort((a, b) => b.date.localeCompare(a.date));
@@ -2487,19 +2283,15 @@
 
     function exportCsv() {
       const rows = buildTableRows();
-      const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('
-');
-      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+      const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
       downloadBlob(blob, `ploys_ledger_${toISODate(new Date())}.csv`);
       showToast('⬇️ ดาวน์โหลดไฟล์ CSV เรียบร้อย');
     }
 
     function copyTsvForSheets() {
       const rows = buildTableRows();
-      const tsv = rows.map(r => r.map(c => String(c).replace(/	|
-|
-/g, ' ')).join('	')).join('
-');
+      const tsv = rows.map(r => r.map(c => String(c).replace(/\t|\r|\n/g, ' ')).join('\t')).join('\n');
       const ta = document.createElement('textarea');
       ta.value = tsv;
       ta.style.position = 'fixed';
@@ -2516,7 +2308,6 @@
     }
 
     function exportJsonBackup() {
-      // Export clean settings without exposing gsSecretKey unnecessarily
       const safeSettings = { ...settings };
       const payload = {
         schema_version: '1.0.0',
@@ -2668,26 +2459,20 @@
       }
     }
 
-    /* ==========================================================================
-       11. BOOTSTRAP & EVENT WIRING
-       ========================================================================== */
     document.addEventListener('DOMContentLoaded', () => {
       applyTheme();
       initPinPad();
       refreshPinUI();
       refreshGsSyncUI();
 
-      // Auto-sync on load if unlocked and Google Sheets is configured
       if (isUnlocked && isGsConfigured()) {
         syncWithGoogleSheets(true);
       }
 
-      // Default Entry Form State (Tab 1 - Date First)
       document.getElementById('txDate').value = toISODate(new Date());
       updateEntryDatePreview();
       selectMainCategory('Variable_Expense');
 
-      // Header Controls
       document.getElementById('btnThemeToggle').addEventListener('click', toggleTheme);
       document.getElementById('btnHeaderCloudSync').addEventListener('click', () => {
         syncWithGoogleSheets(false);
@@ -2701,7 +2486,6 @@
       });
       document.getElementById('btnQuickLock').addEventListener('click', openPinOverlay);
 
-      // Google Sheets Cloud Sync Modal Controls
       document.getElementById('btnSaveAndTestGsSync').addEventListener('click', async () => {
         const urlVal = document.getElementById('gsWebAppUrlInput').value.trim();
         const keyVal = document.getElementById('gsSecretKeyInput').value.trim();
@@ -2738,7 +2522,6 @@
         await syncWithGoogleSheets(false);
       });
 
-      // 3-Tab Navigation (Desktop & Mobile)
       document.querySelectorAll('#desktopNav .pixel-btn').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
       });
@@ -2746,7 +2529,6 @@
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
       });
 
-      // Tab 1: Entry Form Events
       document.getElementById('txDate').addEventListener('change', updateEntryDatePreview);
       document.getElementById('btnSetToday').addEventListener('click', () => {
         document.getElementById('txDate').value = toISODate(new Date());
@@ -2768,7 +2550,6 @@
       document.getElementById('txForm').addEventListener('submit', handleEntrySubmit);
       document.getElementById('btnCancelEdit').addEventListener('click', resetEntryForm);
 
-      // Tab 2: Daily Pay-Cycle & Filter Pills Events
       document.getElementById('btnDailyModeCustom').addEventListener('click', () => {
         settings.cycleMode = 'CUSTOM';
         dailyPeriod = resolvePeriodForDate(new Date(), 'CUSTOM');
@@ -2802,7 +2583,6 @@
         });
       });
 
-      // Delete Confirmation Modal
       document.getElementById('btnConfirmCancel').addEventListener('click', () => {
         pendingDeleteId = null;
         document.getElementById('confirmModal').classList.add('hidden');
@@ -2820,7 +2600,6 @@
         showToast('🗑️ ลบรายการเรียบร้อยแล้ว');
       });
 
-      // Tab 3: Dashboard Events
       document.getElementById('btnDashModeCustom').addEventListener('click', () => {
         settings.cycleMode = 'CUSTOM';
         saveSettings();
@@ -2840,7 +2619,6 @@
         renderDashboardTab();
       });
 
-      // Data Modal & PIN Events
       document.getElementById('btnExportCsv').addEventListener('click', exportCsv);
       document.getElementById('btnCopyTsv').addEventListener('click', copyTsvForSheets);
       document.getElementById('btnExportJson').addEventListener('click', exportJsonBackup);
