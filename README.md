@@ -2,7 +2,7 @@
 
 A single-file, offline-first personal income and expense tracker built with a **Classic 16-Bit Retro Pixel** aesthetic. Designed specifically around real-world salary cycles, strict category taxonomy, and secure two-way cloud synchronization with Google Sheets.
 
-🔗 **Live App:** [https://YOUR-USERNAME.github.io/YOUR-REPO-NAME/](https://YOUR-USERNAME.github.io/YOUR-REPO-NAME/)
+🔗 **Live App:** [https://spaceredfox.github.io/ploy-ledger/](https://spaceredfox.github.io/ploy-ledger/)
 
 ---
 
